@@ -39,29 +39,86 @@
 
     <div class="cfg-content">
 
+      <!-- TIPO DO EVENTO -->
+      <div class="cfg-card">
+        <div class="cfg-card-header">
+          <span class="cfg-card-title playfair">🎀 Tipo do evento</span>
+        </div>
+        <div class="cfg-card-body">
+          <div class="type-selector">
+            <button class="type-btn"
+              [class.active]="eventType() === 'revelacao'"
+              (click)="setEventType('revelacao')">
+              <span class="type-icon">🎊</span>
+              <span class="type-label">Chá Revelação</span>
+              <span class="type-desc">Dois nomes, convidados escolhem</span>
+            </button>
+            <button class="type-btn"
+              [class.active]="eventType() === 'bebe'"
+              (click)="setEventType('bebe')">
+              <span class="type-icon">🍼</span>
+              <span class="type-label">Chá de Bebê</span>
+              <span class="type-desc">Um nome, tema por sexo</span>
+            </button>
+          </div>
+
+          @if (eventType() === 'bebe') {
+            <div class="sex-selector">
+              <label class="label-small" style="margin-bottom: 10px; display: block;">Sexo do bebê:</label>
+              <div class="sex-btns">
+                <button class="sex-btn menino"
+                  [class.active]="babySex() === 'menino'"
+                  (click)="setBabySex('menino')">
+                  👦 Menino
+                </button>
+                <button class="sex-btn menina"
+                  [class.active]="babySex() === 'menina'"
+                  (click)="setBabySex('menina')">
+                  👧 Menina
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
       <!-- NAMES SECTION -->
       <div class="cfg-card">
         <div class="cfg-card-header">
-          <span class="cfg-card-title playfair">👶 Nome dos bebês</span>
+          <span class="cfg-card-title playfair">
+            {{ eventType() === 'bebe' ? '👶 Nome do bebê' : '👶 Nome dos bebês' }}
+          </span>
         </div>
         <div class="cfg-card-body">
-          <div class="names-grid">
+          @if (eventType() === 'revelacao') {
+            <div class="names-grid">
+              <div class="field-group">
+                <label class="label-small">Nome 1</label>
+                <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Laura" maxlength="30"/>
+              </div>
+              <div class="names-sep">ou</div>
+              <div class="field-group">
+                <label class="label-small">Nome 2</label>
+                <input class="text-input" [(ngModel)]="name2" placeholder="Ex: Benicio" maxlength="30"/>
+              </div>
+            </div>
+            @if (name1 && name2) {
+              <div class="slug-preview">
+                <span>🔗 Prévia:</span>
+                <strong>{{ name1 }} ou {{ name2 }}?</strong>
+              </div>
+            }
+          } @else {
             <div class="field-group">
-              <label class="label-small">Nome 1</label>
-              <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Laura" maxlength="30"/>
+              <label class="label-small">Nome do bebê</label>
+              <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Miguel" maxlength="30"/>
             </div>
-            <div class="names-sep">ou</div>
-            <div class="field-group">
-              <label class="label-small">Nome 2</label>
-              <input class="text-input" [(ngModel)]="name2" placeholder="Ex: Benicio" maxlength="30"/>
-            </div>
-          </div>
-
-          @if (name1 && name2) {
-            <div class="slug-preview">
-              <span>🔗 Prévia:</span>
-              <strong>{{ name1 }} ou {{ name2 }}?</strong>
-            </div>
+            @if (name1) {
+              <div class="slug-preview" [class.preview-menino]="babySex() === 'menino'" [class.preview-menina]="babySex() === 'menina'">
+                <span>🔗 Prévia:</span>
+                <strong>Chá de Bebê · {{ name1 }}</strong>
+              </div>
+            }
           }
         </div>
       </div>

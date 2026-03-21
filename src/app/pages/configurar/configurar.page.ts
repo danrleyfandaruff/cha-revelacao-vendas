@@ -44,6 +44,9 @@ export interface DraftItem {
   isCustom?: boolean;
 }
 
+export type EventType = 'revelacao' | 'bebe';
+export type BabySex   = 'menino' | 'menina';
+
 @Component({
   selector: 'app-configurar',
   templateUrl: 'configurar.page.html',
@@ -64,8 +67,20 @@ export class ConfigurarPage implements OnInit {
   eventSlug = computed(() => this.event()?.slug ?? '');
   eventLink = computed(() => {
     const slug = this.eventSlug();
-    return slug ? `${window.location.origin}/cha?e=${slug}` : '';
+    if (!slug) return '';
+    const type = this.eventType();
+    const sex  = this.babySex();
+    let url = `${window.location.origin}/cha?e=${slug}`;
+    if (type === 'bebe') {
+      url += `&t=bebe`;
+      if (sex) url += `&s=${sex}`;
+    }
+    return url;
   });
+
+  // Tipo do evento e sexo
+  eventType = signal<EventType>('revelacao');
+  babySex   = signal<BabySex | null>(null);
 
   // Baby names
   name1 = '';
@@ -105,12 +120,18 @@ export class ConfigurarPage implements OnInit {
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
 
+    // Carrega metadados salvos localmente (tipo e sexo)
+    this.loadMeta();
+
     const ev = await this.supa.getMyEvent(this.userId);
     this.event.set(ev);
 
     if (ev) {
       this.name1 = ev.baby_name_1;
-      this.name2 = ev.baby_name_2;
+      // Se for revelação, name2 vem do banco; se for bebê, ignora
+      if (this.eventType() === 'revelacao') {
+        this.name2 = ev.baby_name_2;
+      }
       // Load existing items
       const items = await this.supa.getItems(ev.id);
       if (items.length) {
@@ -174,19 +195,59 @@ export class ConfigurarPage implements OnInit {
     return arr.filter(i => i.checked).length;
   }
 
+  setEventType(t: EventType) {
+    this.eventType.set(t);
+    if (t === 'revelacao') this.babySex.set(null);
+    this.saveMeta();
+  }
+
+  setBabySex(s: BabySex) {
+    this.babySex.set(s);
+    this.saveMeta();
+  }
+
+  private metaKey() { return `event_meta_${this.userId}`; }
+
+  private saveMeta() {
+    localStorage.setItem(this.metaKey(), JSON.stringify({
+      eventType: this.eventType(),
+      babySex:   this.babySex(),
+    }));
+  }
+
+  private loadMeta() {
+    if (!this.userId) return;
+    try {
+      const raw = localStorage.getItem(this.metaKey());
+      if (raw) {
+        const meta = JSON.parse(raw);
+        if (meta.eventType) this.eventType.set(meta.eventType);
+        if (meta.babySex)   this.babySex.set(meta.babySex);
+      }
+    } catch { /* ignora */ }
+  }
+
   async save() {
-    if (!this.name1 || !this.name2) { this.showToast('Digite os nomes dos bebês.'); return; }
+    const isBebe = this.eventType() === 'bebe';
+    if (!this.name1) { this.showToast('Digite o nome do bebê.'); return; }
+    if (!isBebe && !this.name2) { this.showToast('Digite os dois nomes para revelação.'); return; }
+    if (isBebe && !this.babySex()) { this.showToast('Selecione o sexo do bebê.'); return; }
     this.saving.set(true);
 
-    const slug = this.supa.slugify(`${this.name1}-ou-${this.name2}`, this.userId);
+    const n2   = isBebe ? this.name1 : this.name2;
+    const slug = this.supa.slugify(
+      isBebe ? this.name1 : `${this.name1}-ou-${this.name2}`,
+      this.userId
+    );
     const ev = await this.supa.upsertEvent({
       user_id:     this.userId,
       slug,
       baby_name_1: this.name1,
-      baby_name_2: this.name2,
+      baby_name_2: n2,
       paid:        this.event()?.paid ?? false,
       expires_at:  this.event()?.expires_at ?? null,
     });
+    this.saveMeta();
     this.event.set(ev);
 
     if (ev) {

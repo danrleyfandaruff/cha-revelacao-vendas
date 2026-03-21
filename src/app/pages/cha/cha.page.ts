@@ -29,6 +29,15 @@ interface SavedResponse {
   imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast],
 })
 export class ChaPage implements OnInit {
+  // Tipo do evento (lido da URL: ?t=bebe&s=menino)
+  eventType = signal<'revelacao' | 'bebe'>('revelacao');
+  babySex   = signal<'menino' | 'menina' | null>(null);
+  themeClass = computed(() => {
+    if (this.eventType() !== 'bebe') return '';
+    return this.babySex() === 'menino' ? 'theme-menino'
+         : this.babySex() === 'menina' ? 'theme-menina' : '';
+  });
+
   // State flags
   state = signal<'loading' | 'notfound' | 'expired' | 'ready' | 'done'>('loading');
 
@@ -72,6 +81,12 @@ export class ChaPage implements OnInit {
   async ngOnInit() {
     const slug = this.route.snapshot.queryParamMap.get('e');
     if (!slug) { this.state.set('notfound'); return; }
+
+    // Lê tipo e sexo da URL
+    const t = this.route.snapshot.queryParamMap.get('t');
+    const s = this.route.snapshot.queryParamMap.get('s');
+    if (t === 'bebe') this.eventType.set('bebe');
+    if (s === 'menino' || s === 'menina') this.babySex.set(s);
 
     const ev = await this.supa.getEventBySlug(slug);
     if (!ev) { this.state.set('notfound'); return; }
@@ -195,12 +210,16 @@ export class ChaPage implements OnInit {
 
   qtyLabel(item: EventItem): string {
     if (item.quantity_available <= 0) return 'Esgotado';
-    if (item.quantity_total === 1)    return '';
+    if (item.quantity_available === 1) return 'Último item!';
     return `${item.quantity_available} de ${item.quantity_total} disponíveis`;
   }
 
   isLow(item: EventItem): boolean {
     return item.quantity_available > 0 && item.quantity_available <= 3;
+  }
+
+  isLast(item: EventItem): boolean {
+    return item.quantity_available === 1;
   }
 
   expiresLabel(): string {

@@ -20,7 +20,8 @@ import { SupabaseService } from '../../services/supabase.service';
 })
 export class PagarPage implements OnInit {
   // ⚠️ Substitua pela URL real do Stripe Payment Link:
-  private STRIPE_LINK = 'https://buy.stripe.com/test_28E8wPdaWcLwedtaJrbjW00';
+  // private STRIPE_LINK = 'https://buy.stripe.com/test_28E8wPdaWcLwedtaJrbjW00';
+  private STRIPE_LINK = 'https://buy.stripe.com/5kQ14nfiKdivftlecS6kg02';
 
   userId   = '';
   success  = signal(false);

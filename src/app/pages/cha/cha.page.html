@@ -34,7 +34,11 @@
         <h2 class="playfair">Obrigado, {{ doneName }}!</h2>
         <p style="margin-top:8px;color:var(--brand-brown-light);font-size:.9rem;line-height:1.6">
           Suas reservas foram confirmadas com sucesso.<br>
-          Até o chá de <strong>{{ event()?.baby_name_1 }}</strong> ou <strong>{{ event()?.baby_name_2 }}</strong>! 🍼
+          @if (eventType() === 'bebe') {
+            Até o chá de <strong>{{ event()?.baby_name_1 }}</strong>! 🍼
+          } @else {
+            Até o chá de <strong>{{ event()?.baby_name_1 }}</strong> ou <strong>{{ event()?.baby_name_2 }}</strong>! 🍼
+          }
         </p>
       </div>
     </div>
@@ -44,10 +48,24 @@
   @if (state() === 'ready') {
 
     <!-- HEADER -->
-    <div class="cha-header">
-      <span class="cha-header-emoji">🍼</span>
-      <h1 class="playfair">Chá Revelação</h1>
-      <div class="cha-subtitle">{{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?</div>
+    <div class="cha-header" [class]="themeClass()">
+      <span class="cha-header-emoji">
+        @if (eventType() === 'bebe') {
+          {{ babySex() === 'menino' ? '👦' : babySex() === 'menina' ? '👧' : '🍼' }}
+        } @else {
+          🍼
+        }
+      </span>
+      <h1 class="playfair">
+        {{ eventType() === 'bebe' ? 'Chá de Bebê' : 'Chá Revelação' }}
+      </h1>
+      <div class="cha-subtitle">
+        @if (eventType() === 'bebe') {
+          {{ event()?.baby_name_1 }}
+        } @else {
+          {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
+        }
+      </div>
       @if (expiresLabel()) {
         <div class="cha-expires">{{ expiresLabel() }}</div>
       }
@@ -61,7 +79,9 @@
         <div class="already-card-top">
           <div class="already-confetti">🎉</div>
           <h3 class="already-card-title playfair">Olá, {{ previousResponse()!.name }}!</h3>
-          <p class="already-card-desc">Você já participou deste chá revelação.</p>
+          <p class="already-card-desc">
+            {{ eventType() === 'bebe' ? 'Você já participou deste chá de bebê.' : 'Você já participou deste chá revelação.' }}
+          </p>
         </div>
 
         <div class="already-card-body">
@@ -129,7 +149,7 @@
               <div class="card-emoji">{{ item.emoji }}</div>
               <div class="card-name">{{ item.name }}</div>
               @if (qtyLabel(item)) {
-                <div class="card-qty" [class.low]="isLow(item)">{{ qtyLabel(item) }}</div>
+                <div class="card-qty" [class.low]="isLow(item)" [class.last]="isLast(item)">{{ qtyLabel(item) }}</div>
               }
               @if (item.quantity_available <= 0 && !inCart(item.id)) {
                 <ion-button expand="block" fill="solid" color="medium" disabled>Esgotado</ion-button>
@@ -158,7 +178,7 @@
               <div class="card-emoji">{{ item.emoji }}</div>
               <div class="card-name">{{ item.name }}</div>
               @if (qtyLabel(item)) {
-                <div class="card-qty" [class.low]="isLow(item)">{{ qtyLabel(item) }}</div>
+                <div class="card-qty" [class.low]="isLow(item)" [class.last]="isLast(item)">{{ qtyLabel(item) }}</div>
               }
               @if (item.quantity_available <= 0 && !inCart(item.id)) {
                 <ion-button expand="block" fill="solid" color="medium" disabled>Esgotado</ion-button>
