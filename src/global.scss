@@ -1,0 +1,165 @@
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+// ── Global helpers ────────────────────────────────────────────────────────────
+
+.playfair {
+  font-family: 'Playfair Display', serif !important;
+}
+
+.text-brown-light {
+  color: var(--brand-brown-light) !important;
+}
+
+.text-gold {
+  color: var(--brand-gold) !important;
+}
+
+.text-green {
+  color: var(--brand-green) !important;
+}
+
+.label-small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-brown-light);
+}
+
+// ── Progress bar item-card ────────────────────────────────────────────────────
+.prog-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+
+  .prog-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--brand-beige);
+    border-radius: 3px;
+    overflow: hidden;
+
+    .prog-fill {
+      height: 100%;
+      background: var(--brand-gold);
+      border-radius: 3px;
+      transition: width 0.4s;
+
+      &.full {
+        background: var(--brand-green);
+      }
+    }
+  }
+
+  .prog-label {
+    font-size: 0.72rem;
+    color: var(--brand-brown-light);
+    white-space: nowrap;
+  }
+}
+
+// ── Gift card ─────────────────────────────────────────────────────────────────
+.gift-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 2px solid var(--brand-beige);
+  padding: 18px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover:not(.esgotado):not(.chosen) {
+    border-color: var(--brand-gold);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &.chosen {
+    border-color: var(--brand-green);
+    background: #f4faf4;
+  }
+
+  &.esgotado {
+    opacity: 0.55;
+    filter: grayscale(0.4);
+    cursor: default;
+  }
+
+  .card-emoji {
+    font-size: 2rem;
+  }
+
+  .card-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--brand-brown);
+  }
+
+  .card-qty {
+    font-size: 0.75rem;
+    color: var(--brand-brown-light);
+
+    &.low {
+      color: #c97a3c;
+      font-weight: 700;
+    }
+  }
+
+  ion-button {
+    width: 100%;
+    margin: 4px 0 0;
+    --padding-top: 9px;
+    --padding-bottom: 9px;
+    font-size: 0.8rem;
+  }
+}
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
+.stat-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--brand-beige);
+  padding: 16px 12px;
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--brand-brown);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--brand-brown-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--brand-brown-light);
+  font-size: 0.88rem;
+  font-style: italic;
+}

@@ -1,0 +1,89 @@
+<ion-content>
+  <div class="login-wrap">
+
+    <div class="login-logo">
+      <span>🍼</span>
+      <h1 class="playfair">Chá Revelação</h1>
+      <p>Plataforma de listas de presentes</p>
+    </div>
+
+    <!-- ── AGUARDANDO CONFIRMAÇÃO ── -->
+    @if (awaitingConfirmation()) {
+      <div class="login-card confirm-card">
+        <div class="confirm-emoji">📧</div>
+        <h2 class="playfair">Confirme seu e-mail</h2>
+        <p>
+          Um link de confirmação foi enviado para<br>
+          <strong>{{ email }}</strong>
+        </p>
+        <div class="confirm-steps">
+          <div class="cstep">
+            <span class="cstep-num">1</span>
+            Abra o e-mail e clique no link de confirmação
+          </div>
+          <div class="cstep">
+            <span class="cstep-num">2</span>
+            Volte aqui e clique em "Já confirmei"
+          </div>
+        </div>
+        <ion-button expand="block" (click)="setTab('entrar')">
+          ✓ Já confirmei — Entrar
+        </ion-button>
+        <ion-button expand="block" fill="clear" color="medium" (click)="awaitingConfirmation.set(false)">
+          Usar outro e-mail
+        </ion-button>
+      </div>
+    }
+
+    <!-- ── FORMULÁRIO ── -->
+    @if (!awaitingConfirmation()) {
+      <div class="login-card">
+
+        <!-- Tabs -->
+        <div class="login-tabs">
+          <button class="ltab" [class.active]="tab() === 'entrar'" (click)="setTab('entrar')">
+            Entrar
+          </button>
+          <button class="ltab" [class.active]="tab() === 'cadastrar'" (click)="setTab('cadastrar')">
+            Criar conta
+          </button>
+        </div>
+
+        <!-- Form -->
+        <div class="login-form">
+          <div class="field-group">
+            <label class="label-small">E-mail</label>
+            <input class="text-input" type="email" [(ngModel)]="email"
+              placeholder="seu@email.com" autocomplete="email"/>
+          </div>
+          <div class="field-group">
+            <label class="label-small">Senha</label>
+            <input class="text-input" type="password" [(ngModel)]="password"
+              placeholder="••••••••" (keydown.enter)="submit()"/>
+            @if (tab() === 'cadastrar') {
+              <span class="field-hint">Mínimo 6 caracteres</span>
+            }
+          </div>
+
+          <ion-button expand="block" (click)="submit()" [disabled]="loading()">
+            @if (loading()) {
+              <ion-spinner name="dots"></ion-spinner>
+            } @else {
+              {{ tab() === 'entrar' ? 'Entrar' : 'Criar conta' }}
+            }
+          </ion-button>
+
+          <div class="divider"><span>ou</span></div>
+
+          <ion-button expand="block" fill="outline" (click)="googleLogin()">
+            <span class="google-g">G</span> Continuar com Google
+          </ion-button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+
+</ion-content>

@@ -1,0 +1,144 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>📊 Resultados</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="loadAll()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading() && allRes().length === 0) {
+    <div style="text-align:center;padding:60px 20px">
+      <ion-spinner color="primary"></ion-spinner>
+      <p style="margin-top:10px;color:var(--brand-brown-light)">Carregando…</p>
+    </div>
+  } @else {
+
+    <!-- Event subtitle -->
+    <div class="res-sub">
+      {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
+    </div>
+
+    <!-- Event link -->
+    @if (eventLink()) {
+      <div class="link-bar">
+        <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
+        <ion-button size="small" (click)="copyLink()">
+          <ion-icon name="copy-outline" slot="start"></ion-icon>
+          Copiar
+        </ion-button>
+      </div>
+    }
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--brand-gold)">{{ statPessoas() }}</div>
+        <div class="stat-label">Pessoas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ statFraldas() }}</div>
+        <div class="stat-label">Fraldas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ statMimos() }}</div>
+        <div class="stat-label">Mimos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--brand-green)">{{ statTotal() }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="res-content">
+
+      <!-- FRALDAS -->
+      <div class="res-section">
+        <div class="res-section-title">🧷 Fraldas</div>
+        @if (fraldasProgress().length === 0) {
+          <div class="empty-state">Nenhum item cadastrado.</div>
+        } @else {
+          @for (prog of fraldasProgress(); track prog.item.id) {
+            <div class="res-row">
+              <div class="res-row-info">
+                <div class="res-item-name">{{ prog.item.emoji }} {{ prog.item.name }}</div>
+                <div class="res-guests">{{ prog.guests }}</div>
+              </div>
+              <div class="prog-wrap" style="min-width:100px">
+                <div class="prog-bar">
+                  <div class="prog-fill" [class.full]="prog.item.quantity_available === 0"
+                    [style.width.%]="pct(prog)"></div>
+                </div>
+                <div class="prog-label">{{ prog.reserved }}/{{ prog.item.quantity_total }}</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- MIMOS -->
+      <div class="res-section">
+        <div class="res-section-title">🎁 Mimos</div>
+        @if (mimosProgress().length === 0) {
+          <div class="empty-state">Nenhum item cadastrado.</div>
+        } @else {
+          @for (prog of mimosProgress(); track prog.item.id) {
+            <div class="res-row">
+              <div class="res-row-info">
+                <div class="res-item-name">{{ prog.item.emoji }} {{ prog.item.name }}</div>
+                <div class="res-guests">{{ prog.guests }}</div>
+              </div>
+              <div class="prog-wrap" style="min-width:100px">
+                <div class="prog-bar">
+                  <div class="prog-fill" [class.full]="prog.item.quantity_available === 0"
+                    [style.width.%]="pct(prog)"></div>
+                </div>
+                <div class="prog-label">{{ prog.reserved }}/{{ prog.item.quantity_total }}</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- POR PESSOA -->
+      <div class="res-section">
+        <div class="res-section-title">👥 Por pessoa</div>
+        @if (people().length === 0) {
+          <div class="empty-state">Nenhuma reserva ainda. 🎀</div>
+        } @else {
+          @for (person of people(); track person.name) {
+            <div class="res-row person-row">
+              <div class="res-row-info">
+                <div class="res-item-name">{{ person.name }}</div>
+                <div class="res-guests">{{ person.items.join(' · ') }}</div>
+              </div>
+              <div class="res-date">{{ person.lastDate }}</div>
+            </div>
+          }
+        }
+      </div>
+
+    </div>
+
+    @if (updatedAt) {
+      <div class="updated-label">Atualizado às {{ updatedAt }}</div>
+    }
+  }
+
+  <ion-toast
+    [isOpen]="toastOpen()"
+    [message]="toastMsg()"
+    [duration]="2500"
+    position="top"
+    (didDismiss)="toastOpen.set(false)"
+  ></ion-toast>
+</ion-content>

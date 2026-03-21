@@ -1,0 +1,130 @@
+// ── Ionic default overrides ──────────────────────────────────────────────────
+:root {
+  // Brand palette
+  --brand-cream:       #faf7f2;
+  --brand-beige:       #e8ddd0;
+  --brand-beige-dark:  #d4c4b0;
+  --brand-gold:        #c9a84c;
+  --brand-gold-light:  #e8d5a3;
+  --brand-brown:       #4a3728;
+  --brand-brown-light: #8a6a5a;
+  --brand-green:       #4a7a4a;
+  --brand-red:         #a05050;
+
+  // Map to Ionic color system
+  --ion-color-primary:          var(--brand-gold);
+  --ion-color-primary-rgb:      201, 168, 76;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade:    #b09340;
+  --ion-color-primary-tint:     #d4b565;
+
+  --ion-color-secondary:          var(--brand-brown);
+  --ion-color-secondary-rgb:      74, 55, 40;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade:    #3a2c20;
+  --ion-color-secondary-tint:     #5c4536;
+
+  --ion-color-tertiary:          var(--brand-brown-light);
+  --ion-color-tertiary-rgb:      138, 106, 90;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-shade:    #7a5f51;
+  --ion-color-tertiary-tint:     #997a6c;
+
+  --ion-color-success:          var(--brand-green);
+  --ion-color-success-rgb:      74, 122, 74;
+  --ion-color-success-contrast: #ffffff;
+
+  --ion-color-danger:           var(--brand-red);
+  --ion-color-danger-rgb:       160, 80, 80;
+  --ion-color-danger-contrast:  #ffffff;
+
+  --ion-background-color:       var(--brand-cream);
+  --ion-background-color-rgb:   250, 247, 242;
+
+  --ion-text-color:             var(--brand-brown);
+  --ion-text-color-rgb:         74, 55, 40;
+
+  --ion-card-background:        #ffffff;
+  --ion-item-background:        #ffffff;
+  --ion-toolbar-background:     #ffffff;
+
+  --ion-font-family: 'Lato', sans-serif;
+
+  // Border radius
+  --border-radius-card: 14px;
+}
+
+// Gold bar on toolbars
+ion-header ion-toolbar:first-of-type {
+  --background: #ffffff;
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light), var(--brand-gold)) 1;
+}
+
+ion-toolbar {
+  --background: #ffffff;
+  --color: var(--brand-brown);
+}
+
+ion-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.15rem !important;
+  color: var(--brand-brown);
+}
+
+ion-back-button {
+  --color: var(--brand-brown-light);
+}
+
+ion-card {
+  border-radius: var(--border-radius-card) !important;
+  box-shadow: 0 4px 24px rgba(74, 55, 40, 0.1) !important;
+  border: 1px solid var(--brand-beige);
+}
+
+ion-button {
+  --border-radius: 10px;
+  font-weight: 700;
+  font-family: 'Lato', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+ion-input,
+ion-textarea {
+  --background: var(--brand-cream);
+  --border-color: var(--brand-beige);
+  --border-radius: 10px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  border: 2px solid var(--brand-beige);
+  border-radius: 10px;
+
+  &.has-focus {
+    border-color: var(--brand-gold);
+  }
+}
+
+ion-segment {
+  --background: transparent;
+  border: 2px solid var(--brand-beige);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+ion-segment-button {
+  --color:          var(--brand-brown-light);
+  --color-checked:  #ffffff;
+  --background-checked: var(--brand-brown);
+  --indicator-color: transparent;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+ion-badge {
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}

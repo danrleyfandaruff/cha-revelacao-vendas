@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Ativar evento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="pay-wrap">
+
+    <!-- SUCCESS STATE -->
+    @if (success()) {
+      <div class="success-card">
+        <div class="big-emoji">🎉</div>
+        <h2 class="playfair">Evento ativado!</h2>
+        <p>Seu chá revelação está pronto.<br>Compartilhe o link com seus convidados!</p>
+        <ion-button expand="block" (click)="goConfig()">Ver meu evento →</ion-button>
+      </div>
+    }
+
+    <!-- PAYMENT STATE -->
+    @if (!success()) {
+      <div class="logo-area">
+        <span class="logo-emoji">🍼</span>
+        <h1 class="playfair">Chá Revelação</h1>
+        <p>Plataforma de listas de presentes</p>
+      </div>
+
+      <div class="pay-card">
+        <div class="pay-card-top"></div>
+
+        <div class="pay-card-body">
+          <h2 class="playfair">Ativar meu evento</h2>
+          <p>Acesso completo por 30 dias após a ativação</p>
+
+          <div class="price-box">
+            <div class="price-val"><sup>R$</sup>29</div>
+            <div class="price-period">pagamento único · 30 dias de acesso</div>
+            <div class="price-pill">🎉 Sem mensalidade</div>
+          </div>
+
+          <ul class="feature-list">
+            @for (f of features; track f) {
+              <li>
+                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                {{ f }}
+              </li>
+            }
+          </ul>
+
+          <ion-button expand="block" (click)="goToStripe()">
+            Pagar R$29 e ativar agora
+          </ion-button>
+
+          <p class="note">Pagamento seguro via Stripe. Após a confirmação, seu evento é ativado automaticamente.</p>
+        </div>
+      </div>
+    }
+
+  </div>
+</ion-content>

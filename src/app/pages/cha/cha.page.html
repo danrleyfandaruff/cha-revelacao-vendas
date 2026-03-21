@@ -1,0 +1,224 @@
+<ion-content>
+
+  <!-- LOADING -->
+  @if (state() === 'loading') {
+    <div class="center-state">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Carregando o chá…</p>
+    </div>
+  }
+
+  <!-- NOT FOUND -->
+  @if (state() === 'notfound') {
+    <div class="center-state">
+      <div class="state-emoji">🔍</div>
+      <h2 class="playfair">Evento não encontrado</h2>
+      <p>O link que você acessou não é válido. Verifique com quem te enviou o convite.</p>
+    </div>
+  }
+
+  <!-- EXPIRED -->
+  @if (state() === 'expired') {
+    <div class="center-state">
+      <div class="state-emoji">🕐</div>
+      <h2 class="playfair">Evento encerrado</h2>
+      <p>O período de reservas deste chá revelação já encerrou. Obrigado pela participação!</p>
+    </div>
+  }
+
+  <!-- DONE -->
+  @if (state() === 'done') {
+    <div class="center-state done">
+      <div class="state-emoji">🎉</div>
+      <div class="done-card">
+        <h2 class="playfair">Obrigado, {{ doneName }}!</h2>
+        <p style="margin-top:8px;color:var(--brand-brown-light);font-size:.9rem;line-height:1.6">
+          Suas reservas foram confirmadas com sucesso.<br>
+          Até o chá de <strong>{{ event()?.baby_name_1 }}</strong> ou <strong>{{ event()?.baby_name_2 }}</strong>! 🍼
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- READY -->
+  @if (state() === 'ready') {
+
+    <!-- HEADER -->
+    <div class="cha-header">
+      <span class="cha-header-emoji">🍼</span>
+      <h1 class="playfair">Chá Revelação</h1>
+      <div class="cha-subtitle">{{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?</div>
+      @if (expiresLabel()) {
+        <div class="cha-expires">{{ expiresLabel() }}</div>
+      }
+    </div>
+
+    <!-- CARD: JÁ RESPONDEU -->
+    @if (showPreviousBanner() && previousResponse()) {
+      <div class="already-card">
+        <button class="already-card-close" (click)="dismissPreviousBanner()">✕</button>
+
+        <div class="already-card-top">
+          <div class="already-confetti">🎉</div>
+          <h3 class="already-card-title playfair">Olá, {{ previousResponse()!.name }}!</h3>
+          <p class="already-card-desc">Você já participou deste chá revelação.</p>
+        </div>
+
+        <div class="already-card-body">
+          <div class="already-label">Suas escolhas:</div>
+          <div class="already-chips">
+            @for (item of previousResponse()!.items; track item.id) {
+              <div class="already-chip">
+                <span class="chip-emoji">{{ item.emoji }}</span>
+                <span class="chip-name">{{ item.name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="already-card-footer">
+          <p class="already-footer-hint">Quer mudar sua escolha? Fique à vontade 😊</p>
+          <button class="already-again-btn" (click)="chooseAgain()">
+            Escolher novamente
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP TABS -->
+    <div class="step-tabs">
+      <button class="stab"
+        [class.active]="step() === 'fraldas'"
+        [class.done]="fraldasInCart().length > 0 && step() !== 'fraldas'"
+        (click)="goStep('fraldas')">
+        <span class="stab-dot">{{ fraldasInCart().length > 0 && step() !== 'fraldas' ? '✓' : '1' }}</span>
+        🧷 Fraldas
+      </button>
+      <button class="stab"
+        [class.active]="step() === 'mimos'"
+        [class.locked]="fraldasInCart().length === 0"
+        (click)="goStep('mimos')">
+        <span class="stab-dot">2</span>
+        🎁 Presentes
+      </button>
+    </div>
+
+    <div class="cha-body">
+
+      <!-- CART SUMMARY (step 2) -->
+      @if (step() === 'mimos' && fraldasInCart().length > 0) {
+        <div class="cart-summary">
+          <span class="label-small">Fralda escolhida:</span>
+          <div class="cs-fralda">
+            {{ fraldasInCart()[0].emoji }} {{ fraldasInCart()[0].name }}
+          </div>
+        </div>
+      }
+
+      <!-- FRALDAS GRID -->
+      @if (step() === 'fraldas') {
+        <div class="grid-title">
+          🧷 Fraldas
+          <span class="grid-count">{{ fraldas().length }} opções</span>
+        </div>
+        <div class="gift-grid">
+          @for (item of fraldas(); track item.id) {
+            <div class="gift-card"
+              [class.chosen]="inCart(item.id)"
+              [class.esgotado]="item.quantity_available <= 0 && !inCart(item.id)">
+              <div class="card-emoji">{{ item.emoji }}</div>
+              <div class="card-name">{{ item.name }}</div>
+              @if (qtyLabel(item)) {
+                <div class="card-qty" [class.low]="isLow(item)">{{ qtyLabel(item) }}</div>
+              }
+              @if (item.quantity_available <= 0 && !inCart(item.id)) {
+                <ion-button expand="block" fill="solid" color="medium" disabled>Esgotado</ion-button>
+              } @else if (inCart(item.id)) {
+                <ion-button expand="block" color="success">✓ Escolhido</ion-button>
+                <button class="btn-remove-small" (click)="removeFromCart(item.id)">Remover</button>
+              } @else {
+                <ion-button expand="block" (click)="addToCart(item)">Quero presentear!</ion-button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- MIMOS GRID -->
+      @if (step() === 'mimos') {
+        <div class="grid-title">
+          🎁 Presentes
+          <span class="grid-count">{{ mimosInCart().length }} escolhido{{ mimosInCart().length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="gift-grid">
+          @for (item of mimos(); track item.id) {
+            <div class="gift-card"
+              [class.chosen]="inCart(item.id)"
+              [class.esgotado]="item.quantity_available <= 0 && !inCart(item.id)">
+              <div class="card-emoji">{{ item.emoji }}</div>
+              <div class="card-name">{{ item.name }}</div>
+              @if (qtyLabel(item)) {
+                <div class="card-qty" [class.low]="isLow(item)">{{ qtyLabel(item) }}</div>
+              }
+              @if (item.quantity_available <= 0 && !inCart(item.id)) {
+                <ion-button expand="block" fill="solid" color="medium" disabled>Esgotado</ion-button>
+              } @else if (inCart(item.id)) {
+                <ion-button expand="block" color="success">✓ Escolhido</ion-button>
+                <button class="btn-remove-small" (click)="removeFromCart(item.id)">Remover</button>
+              } @else {
+                <ion-button expand="block" (click)="addToCart(item)">Quero presentear!</ion-button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+
+    <!-- FINALIZAR BAR -->
+    <div class="finalizar-bar">
+      <div class="bar-info">
+        @if (fraldasInCart().length === 0) {
+          Escolha uma <strong>fralda</strong> para começar 🧷
+        } @else if (mimosInCart().length === 0) {
+          Agora escolha os <strong>presentes</strong> 🎁
+        } @else {
+          <strong>{{ cartTotal() }} iten{{ cartTotal() !== 1 ? 's' : '' }}</strong> no carrinho ✨
+        }
+      </div>
+      <ion-button [disabled]="!canFinalizar()" (click)="openModal()">
+        Finalizar
+      </ion-button>
+    </div>
+
+    <!-- MODAL (bottom sheet) -->
+    @if (showModal()) {
+      <div class="modal-overlay" (click)="$event.target === $event.currentTarget && closeModal()">
+        <div class="modal-box">
+          <div class="modal-handle"></div>
+          <h2 class="playfair">✨ Quase lá!</h2>
+          <p>Digite seu nome para confirmar as reservas</p>
+          <input class="modal-input" type="text" [(ngModel)]="guestName"
+            placeholder="Seu nome completo"
+            maxlength="60"
+            (keydown.enter)="confirmFinalizar()"/>
+          <ion-button expand="block" [disabled]="!guestName.trim() || submitting()" (click)="confirmFinalizar()">
+            @if (submitting()) { <ion-spinner name="dots"></ion-spinner> }
+            @else { Confirmar reserva 🎉 }
+          </ion-button>
+          <ion-button expand="block" fill="clear" color="medium" (click)="closeModal()">Voltar</ion-button>
+        </div>
+      </div>
+    }
+
+  }
+
+  <ion-toast
+    [isOpen]="toastOpen()"
+    [message]="toastMsg()"
+    [duration]="2800"
+    position="top"
+    (didDismiss)="toastOpen.set(false)"
+  ></ion-toast>
+
+</ion-content>

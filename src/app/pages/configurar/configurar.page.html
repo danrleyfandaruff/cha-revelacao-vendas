@@ -1,0 +1,212 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>🍼 Configurar evento</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="logout()" title="Sair">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading()) {
+    <div class="loading-state">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Carregando…</p>
+    </div>
+  } @else {
+
+    <!-- STEP INDICATOR — mostra o passo atual -->
+    @if (!isPaid()) {
+      <div class="steps-bar">
+        <div class="step" [class.done]="!!event()">
+          <div class="step-num">{{ event() ? '✓' : '1' }}</div>
+          <span>Configurar</span>
+        </div>
+        <div class="step-line" [class.done]="!!event()"></div>
+        <div class="step" [class.active]="!!event() && !isPaid()">
+          <div class="step-num">2</div>
+          <span>Ativar</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <span>Compartilhar</span>
+        </div>
+      </div>
+    }
+
+    <div class="cfg-content">
+
+      <!-- NAMES SECTION -->
+      <div class="cfg-card">
+        <div class="cfg-card-header">
+          <span class="cfg-card-title playfair">👶 Nome dos bebês</span>
+        </div>
+        <div class="cfg-card-body">
+          <div class="names-grid">
+            <div class="field-group">
+              <label class="label-small">Nome 1</label>
+              <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Laura" maxlength="30"/>
+            </div>
+            <div class="names-sep">ou</div>
+            <div class="field-group">
+              <label class="label-small">Nome 2</label>
+              <input class="text-input" [(ngModel)]="name2" placeholder="Ex: Benicio" maxlength="30"/>
+            </div>
+          </div>
+
+          @if (name1 && name2) {
+            <div class="slug-preview">
+              <span>🔗 Prévia:</span>
+              <strong>{{ name1 }} ou {{ name2 }}?</strong>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- LINK + RESPOSTAS (only if paid + event exists) -->
+      @if (isPaid() && eventLink()) {
+        <div class="cfg-card link-card">
+          <div class="link-card-inner">
+            <div class="link-label">🔗 Link do evento:</div>
+            <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
+            <ion-button size="small" (click)="copyLink()">
+              <ion-icon name="copy-outline" slot="start"></ion-icon>
+              Copiar
+            </ion-button>
+          </div>
+        </div>
+
+        <div class="respostas-card" (click)="goResultados()">
+          <div class="respostas-left">
+            <div class="respostas-icon">📊</div>
+            <div>
+              <div class="respostas-title">Acompanhar respostas</div>
+              <div class="respostas-sub">Veja em tempo real o que os convidados escolheram</div>
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
+        </div>
+      }
+
+      <!-- ITEMS SECTION -->
+      <div class="cfg-card">
+        <div class="cfg-card-header">
+          <span class="cfg-card-title playfair">🎁 Lista de itens</span>
+        </div>
+        <div class="cfg-card-body">
+
+          <!-- Segment -->
+          <ion-segment [value]="activeTab()" (ionChange)="setTab($any($event.detail.value))">
+            <ion-segment-button value="fraldas">
+              <ion-label>🧷 Fraldas <ion-badge>{{ totalChecked('fraldas') }}</ion-badge></ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="presentes">
+              <ion-label>🎁 Mimos <ion-badge>{{ totalChecked('presentes') }}</ion-badge></ion-label>
+            </ion-segment-button>
+          </ion-segment>
+
+          <!-- Items list -->
+          <div class="items-list">
+            @for (item of currentItems(); track item.name + item.category) {
+              <div class="item-row" [class.unchecked]="!item.checked">
+                <div class="item-check" (click)="toggleItem(item)">
+                  <div class="checkbox" [class.on]="item.checked">
+                    @if (item.checked) { ✓ }
+                  </div>
+                </div>
+                <div class="item-emoji">{{ item.emoji }}</div>
+                <div class="item-info">
+                  <span class="item-name">{{ item.name }}</span>
+                </div>
+                <div class="item-qty">
+                  <button class="qty-btn" (click)="item.qty = Math.max(1, item.qty - 1)">−</button>
+                  <span class="qty-val">{{ item.qty }}</span>
+                  <button class="qty-btn" (click)="item.qty = item.qty + 1">+</button>
+                </div>
+                @if (item.isCustom) {
+                  <ion-button fill="clear" size="small" color="danger" (click)="removeItem(item)">
+                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Add custom item -->
+          <div class="add-item-form">
+            <p class="label-small" style="margin-bottom:10px">Adicionar item personalizado:</p>
+            <div class="add-row">
+              <input class="text-input emoji-input" [(ngModel)]="newEmoji" placeholder="🎁" maxlength="2"/>
+              <input class="text-input flex-1" [(ngModel)]="newName" placeholder="Nome do item" maxlength="50"/>
+              <div class="qty-ctrl">
+                <button class="qty-btn" (click)="newQty = Math.max(1, newQty - 1)">−</button>
+                <span class="qty-val">{{ newQty }}</span>
+                <button class="qty-btn" (click)="newQty = newQty + 1">+</button>
+              </div>
+              <ion-button size="small" (click)="addCustomItem()">
+                <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ACTIVATION SHEET — aparece após salvar -->
+  @if (showActivationSheet()) {
+    <div class="sheet-backdrop" (click)="showActivationSheet.set(false)"></div>
+    <div class="activation-sheet">
+      <div class="sheet-handle"></div>
+
+      <div class="sheet-check">✓</div>
+      <h2 class="playfair sheet-title">Lista salva!</h2>
+      <p class="sheet-sub">Último passo: ative para compartilhar o link com seus convidados.</p>
+
+      <div class="sheet-price-box">
+        <div class="sheet-price-val"><sup>R$</sup>29</div>
+        <div class="sheet-price-info">pagamento único · 30 dias de acesso</div>
+      </div>
+
+      <ul class="sheet-features">
+        <li>✅ Link exclusivo do seu chá revelação</li>
+        <li>✅ Resultados em tempo real</li>
+        <li>✅ Sem mensalidade — pague uma vez</li>
+        <li>✅ Pagamento seguro via Stripe</li>
+      </ul>
+
+      <ion-button expand="block" color="warning" (click)="goPagar(); showActivationSheet.set(false)">
+        Ativar agora por R$29 →
+      </ion-button>
+
+      <button class="sheet-dismiss" (click)="showActivationSheet.set(false)">
+        Agora não, continuar editando
+      </button>
+    </div>
+  }
+
+  <!-- SAVE BAR -->
+  <div class="save-bar">
+    <span class="bar-info">
+      {{ totalChecked('fraldas') + totalChecked('presentes') }} itens selecionados
+    </span>
+    <ion-button (click)="save()" >
+      @if (saving()) { <ion-spinner name="dots"></ion-spinner> }
+      @else { Salvar e gerar link }
+    </ion-button>
+  </div>
+
+</ion-content>
+
+<!--<ion-toast-->
+<!--        [isOpen]="toastOpen()"-->
+<!--        [message]="toastMsg() || ''"-->
+<!--        [duration]="3000"-->
+<!--        position="top"-->
+<!--        (didDismiss)="onToastDismiss()"-->
+<!--&gt;</ion-toast>-->

@@ -1,0 +1,126 @@
+<ion-content>
+  <!-- NAV -->
+  <div class="lp-nav">
+    <div class="lp-logo">🍼 Chá Revelação</div>
+    <div class="lp-nav-actions">
+      <ion-button fill="outline" size="small" (click)="goLogin()">Entrar</ion-button>
+      <ion-button size="small" (click)="goLogin()">Criar conta</ion-button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="lp-hero">
+    <div class="hero-emoji">🍼✨</div>
+    <h1 class="playfair">A lista de presentes do seu <span class="text-gold">chá revelação</span></h1>
+    <p>Crie uma lista online de fraldas e mimos para o seu bebê. Compartilhe o link com os convidados e veja as reservas em tempo real.</p>
+    <ion-button expand="block" class="btn-hero" (click)="goLogin()">
+      Criar minha lista grátis &nbsp;→
+    </ion-button>
+  </div>
+
+  <!-- DEMO CARDS -->
+  <div class="lp-demo-wrap">
+    <div class="demo-grid">
+      <div class="demo-card chosen">
+        <div class="de">🧷</div>
+        <div class="dn">Huggies M</div>
+        <div class="dq">18 disponíveis</div>
+        <div class="db chosen">✓ Escolhido</div>
+      </div>
+      <div class="demo-card">
+        <div class="de">🧷</div>
+        <div class="dn">Huggies G</div>
+        <div class="dq">20 disponíveis</div>
+        <div class="db add">Quero presentear!</div>
+      </div>
+      <div class="demo-card">
+        <div class="de">🌡️</div>
+        <div class="dn">Termômetro</div>
+        <div class="dq">1 disponível</div>
+        <div class="db add">Quero presentear!</div>
+      </div>
+      <div class="demo-card">
+        <div class="de">🧴</div>
+        <div class="dn">Shampoo</div>
+        <div class="dq">3 de 10 disp.</div>
+        <div class="db add">Quero presentear!</div>
+      </div>
+      <div class="demo-card chosen">
+        <div class="de">🧸</div>
+        <div class="dn">Cueiro</div>
+        <div class="dq">2 de 3 disp.</div>
+        <div class="db chosen">✓ Escolhido</div>
+      </div>
+      <div class="demo-card esgotado">
+        <div class="de">🛁</div>
+        <div class="dn">Term. banheira</div>
+        <div class="dq">Esgotado</div>
+        <div class="db out">Esgotado</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="lp-section">
+    <h2 class="playfair lp-section-title">Como funciona</h2>
+    <p class="lp-section-sub">Em 3 passos simples você tem tudo pronto</p>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h3>Crie sua conta</h3>
+        <p>Cadastre-se gratuitamente com seu e-mail.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h3>Monte a lista</h3>
+        <p>Adicione fraldas e mimos com sugestões prontas.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h3>Compartilhe</h3>
+        <p>Ative o evento e envie o link para os convidados.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="lp-features-wrap">
+    <div class="lp-section">
+      <h2 class="playfair lp-section-title">Tudo que você precisa</h2>
+      <p class="lp-section-sub">Sem planilha, sem grupo de WhatsApp bagunçado</p>
+      <div class="features-grid">
+        @for (f of features; track f.title) {
+          <div class="feature-item">
+            <span class="fi-icon">{{ f.icon }}</span>
+            <div>
+              <h4>{{ f.title }}</h4>
+              <p>{{ f.desc }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICE -->
+  <div class="lp-price-wrap">
+    <div class="lp-section" style="max-width:440px">
+      <h2 class="playfair lp-section-title">Preço único</h2>
+      <p class="lp-section-sub">Sem mensalidade. Sem surpresa.</p>
+      <div class="price-card">
+        <div class="price-val"><sup>R$</sup>29</div>
+        <div class="price-period">pagamento único · 30 dias de acesso ativo</div>
+        <div class="price-pill">🎉 Sem mensalidade</div>
+      </div>
+      <ion-button expand="block" (click)="goLogin()" style="margin-top:20px">
+        Começar agora
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="lp-footer">
+    <p>🍼 Chá Revelação · Feito com amor para mamães e papais</p>
+    <p><span class="text-gold" style="cursor:pointer" (click)="goLogin()">Entrar</span> · <span class="text-gold" style="cursor:pointer" (click)="goLogin()">Criar conta</span></p>
+  </div>
+</ion-content>
