@@ -132,6 +132,27 @@ ion-content {
   &.menina.active { border-color: #f48fb1; background: #fce4ec; color: #c2185b; }
 }
 
+// Datetime field
+.datetime-field {
+  margin-top: 8px;
+}
+
+.datetime-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--brand-brown-light);
+  margin-bottom: 4px;
+}
+
+.datetime-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: block;
+  &::-webkit-datetime-edit       { padding: 0; }
+  &::-webkit-calendar-picker-indicator { opacity: 0.5; flex-shrink: 0; }
+}
+
 // Nomes compactos
 .compact-names {
   margin-bottom: 0;

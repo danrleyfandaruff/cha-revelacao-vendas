@@ -82,8 +82,12 @@
             <input class="text-input" style="margin-top:10px" [ngModel]="eventAddress()"
               (ngModelChange)="eventAddress.set($event); saveMeta()"
               placeholder="📍 Endereço do evento" maxlength="120"/>
-            <input class="text-input" style="margin-top:8px" type="datetime-local" [ngModel]="eventDatetime()"
-              (ngModelChange)="eventDatetime.set($event); saveMeta()"/>
+
+            <div class="datetime-field">
+              <label class="datetime-label">📅 Data e horário do evento</label>
+              <input class="text-input datetime-input" type="datetime-local" [ngModel]="eventDatetime()"
+                (ngModelChange)="eventDatetime.set($event); saveMeta()"/>
+            </div>
 
           </div>
         }
