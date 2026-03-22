@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
   IonButtons, IonSpinner, IonToast, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { refreshOutline, arrowBackOutline, copyOutline } from 'ionicons/icons';
-import { SupabaseService, ChaEvent, EventItem, EventReservation } from '../../services/supabase.service';
+import { SupabaseService, ChaEvent, EventItem, EventReservation, EventConfirmation } from '../../services/supabase.service';
 
 export interface PersonSummary {
   name: string;
@@ -26,15 +27,19 @@ export interface ItemProgress {
   styleUrls: ['resultados.page.scss'],
   standalone: true,
   imports: [
+    DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
     IonButtons, IonSpinner, IonToast, IonIcon,
   ],
 })
 export class ResultadosPage implements OnInit, OnDestroy {
   event       = signal<ChaEvent | null>(null);
-  allItems    = signal<EventItem[]>([]);
-  allRes      = signal<EventReservation[]>([]);
-  loading     = signal(true);
+  allItems         = signal<EventItem[]>([]);
+  allRes           = signal<EventReservation[]>([]);
+  allConfirmations = signal<EventConfirmation[]>([]);
+  loading          = signal(true);
+
+  statConfirmados = computed(() => this.allConfirmations().length);
   toastMsg    = signal('');
   toastOpen   = signal(false);
   updatedAt   = '';
@@ -124,12 +129,14 @@ export class ResultadosPage implements OnInit, OnDestroy {
     this.loading.set(true);
     const ev = this.event();
     if (!ev) return;
-    const [items, res] = await Promise.all([
+    const [items, res, confirmations] = await Promise.all([
       this.supa.getItems(ev.id),
       this.supa.getReservationsByEvent(ev.id),
+      this.supa.getConfirmations(ev.id),
     ]);
     this.allItems.set(items);
     this.allRes.set(res);
+    this.allConfirmations.set(confirmations);
     this.updatedAt = new Date().toLocaleTimeString('pt-BR');
     this.loading.set(false);
   }

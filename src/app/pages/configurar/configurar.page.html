@@ -82,6 +82,26 @@
         </div>
       </div>
 
+      <!-- DETALHES DO EVENTO -->
+      <div class="cfg-card">
+        <div class="cfg-card-header">
+          <span class="cfg-card-title playfair">📍 Detalhes do evento</span>
+        </div>
+        <div class="cfg-card-body">
+          <div class="field-group">
+            <label class="label-small">Endereço</label>
+            <input class="text-input" [ngModel]="eventAddress()"
+              (ngModelChange)="eventAddress.set($event); saveMeta()"
+              placeholder="Ex: Rua das Flores, 123 – Jardim Primavera" maxlength="120"/>
+          </div>
+          <div class="field-group" style="margin-top: 12px">
+            <label class="label-small">Data e horário</label>
+            <input class="text-input" type="datetime-local" [ngModel]="eventDatetime()"
+              (ngModelChange)="eventDatetime.set($event); saveMeta()"/>
+          </div>
+        </div>
+      </div>
+
       <!-- NAMES SECTION -->
       <div class="cfg-card">
         <div class="cfg-card-header">

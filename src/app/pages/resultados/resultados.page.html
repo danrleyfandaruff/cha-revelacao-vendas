@@ -41,8 +41,12 @@
     <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-num" style="color:#4caf50">{{ statConfirmados() }}</div>
+        <div class="stat-label">Confirmados</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-num" style="color:var(--brand-gold)">{{ statPessoas() }}</div>
-        <div class="stat-label">Pessoas</div>
+        <div class="stat-label">Presentes</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ statFraldas() }}</div>
@@ -103,6 +107,27 @@
                     [style.width.%]="pct(prog)"></div>
                 </div>
                 <div class="prog-label">{{ prog.reserved }}/{{ prog.item.quantity_total }}</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- CONFIRMAÇÕES DE PRESENÇA -->
+      <div class="res-section">
+        <div class="res-section-title">✅ Confirmações de presença
+          <span class="res-section-count">{{ statConfirmados() }}</span>
+        </div>
+        @if (allConfirmations().length === 0) {
+          <div class="empty-state">Nenhuma confirmação ainda. 🎀</div>
+        } @else {
+          @for (c of allConfirmations(); track c.id) {
+            <div class="res-row person-row">
+              <div class="res-row-info">
+                <div class="res-item-name">{{ c.guest_name }}</div>
+              </div>
+              <div class="res-date">
+                {{ c.confirmed_at | date:'dd/MM HH:mm' }}
               </div>
             </div>
           }

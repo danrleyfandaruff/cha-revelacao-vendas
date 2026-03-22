@@ -2,6 +2,120 @@ ion-content {
   --background: var(--brand-cream);
 }
 
+// ── Confirmação de presença ────────────────────────────────────────────────────
+.confirm-presence {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 24px 20px;
+
+  .cp-card {
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid var(--brand-beige);
+    box-shadow: 0 8px 32px rgba(74,55,40,.1);
+    padding: 36px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    animation: fade-up 0.4s ease;
+  }
+
+  .cp-emoji {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+
+  .cp-title {
+    font-size: 1.8rem;
+    color: var(--brand-brown);
+    margin-bottom: 6px;
+  }
+
+  .cp-subtitle {
+    color: var(--brand-brown-light);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+
+  .cp-details {
+    background: var(--brand-cream);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+
+    .cp-detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--brand-brown);
+      line-height: 1.5;
+
+      .cp-detail-icon { font-size: 1.1rem; flex-shrink: 0; }
+    }
+  }
+
+  .cp-name-field {
+    text-align: left;
+    margin-bottom: 16px;
+
+    .cp-name-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--brand-brown-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .cp-name-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--brand-beige);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: 'Lato', sans-serif;
+      color: var(--brand-brown);
+      background: #fafafa;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      outline: none;
+
+      &:focus { border-color: var(--brand-gold); background: #fff; }
+      &::placeholder { color: #bbb; }
+    }
+  }
+
+  .cp-hint {
+    font-size: 0.8rem;
+    color: var(--brand-brown-light);
+    background: #fffbf0;
+    border: 1px dashed var(--brand-gold-light);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .cp-btn {
+    --border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 // ── Center states ─────────────────────────────────────────────────────────────
 .center-state {
   display: flex;
@@ -64,6 +178,27 @@ ion-content {
     font-size: 1.1rem;
     margin-top: 6px;
     font-style: italic;
+  }
+
+  .cha-event-details {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+
+    .cha-detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--brand-brown-light);
+      line-height: 1.4;
+      max-width: 280px;
+      text-align: left;
+
+      span:first-child { flex-shrink: 0; }
+    }
   }
 
   .cha-expires {

@@ -38,6 +38,13 @@ export interface EventReservation {
   event_items?: EventItem;
 }
 
+export interface EventConfirmation {
+  id: string;
+  event_id: string;
+  guest_name: string;
+  confirmed_at: string;
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -144,6 +151,24 @@ export class SupabaseService {
       .eq('event_items.event_id', eventId)
       .order('created_at', { ascending: false });
     return (data as unknown as EventReservation[]) ?? [];
+  }
+
+  // ── Confirmations ─────────────────────────────────────────────────────────
+
+  async saveConfirmation(eventId: string, guestName: string): Promise<void> {
+    await this.supabase.from('event_confirmations').insert({
+      event_id: eventId,
+      guest_name: guestName,
+    });
+  }
+
+  async getConfirmations(eventId: string): Promise<EventConfirmation[]> {
+    const { data } = await this.supabase
+      .from('event_confirmations')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('confirmed_at', { ascending: false });
+    return data ?? [];
   }
 
   // ── RPC ───────────────────────────────────────────────────────────────────

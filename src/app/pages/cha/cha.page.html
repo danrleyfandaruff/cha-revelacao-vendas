@@ -66,10 +66,81 @@
           {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
         }
       </div>
+
+      @if (formattedDatetime() || eventAddress()) {
+        <div class="cha-event-details">
+          @if (formattedDatetime()) {
+            <div class="cha-detail-item">
+              <span>📅</span>
+              <span>{{ formattedDatetime() }}</span>
+            </div>
+          }
+          @if (eventAddress()) {
+            <div class="cha-detail-item">
+              <span>📍</span>
+              <span>{{ eventAddress() }}</span>
+            </div>
+          }
+        </div>
+      }
+
       @if (expiresLabel()) {
         <div class="cha-expires">{{ expiresLabel() }}</div>
       }
     </div>
+
+    <!-- TELA DE CONFIRMAÇÃO DE PRESENÇA -->
+    @if (!confirmed()) {
+      <div class="confirm-presence">
+        <div class="cp-card">
+          <div class="cp-emoji">🎉</div>
+          <h2 class="playfair cp-title">Você foi convidado!</h2>
+          <p class="cp-subtitle">
+            {{ eventType() === 'bebe' ? 'Chá de Bebê de' : 'Chá Revelação de' }}
+            <strong>{{ event()?.baby_name_1 }}{{ eventType() === 'revelacao' ? ' ou ' + event()?.baby_name_2 : '' }}</strong>
+          </p>
+
+          @if (formattedDatetime() || eventAddress()) {
+            <div class="cp-details">
+              @if (formattedDatetime()) {
+                <div class="cp-detail-item">
+                  <span class="cp-detail-icon">📅</span>
+                  <span>{{ formattedDatetime() }}</span>
+                </div>
+              }
+              @if (eventAddress()) {
+                <div class="cp-detail-item">
+                  <span class="cp-detail-icon">📍</span>
+                  <span>{{ eventAddress() }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="cp-name-field">
+            <label class="cp-name-label">Seu nome</label>
+            <input class="cp-name-input" type="text" [(ngModel)]="confirmingName"
+              placeholder="Como posso te chamar?"
+              maxlength="60"
+              (keydown.enter)="confirmPresence()"/>
+          </div>
+
+          <div class="cp-hint">
+            Após confirmar, você poderá escolher um presente para o bebê 🎁
+          </div>
+
+          <ion-button expand="block" class="cp-btn"
+            [disabled]="confirmSubmitting() || !confirmingName.trim()"
+            (click)="confirmPresence()">
+            @if (confirmSubmitting()) {
+              <ion-spinner name="dots"></ion-spinner>
+            } @else {
+              Confirmar presença 🎉
+            }
+          </ion-button>
+        </div>
+      </div>
+    }
 
     <!-- CARD: JÁ RESPONDEU -->
     @if (showPreviousBanner() && previousResponse()) {
@@ -96,14 +167,11 @@
           </div>
         </div>
 
-        <div class="already-card-footer">
-          <p class="already-footer-hint">Quer mudar sua escolha? Fique à vontade 😊</p>
-          <button class="already-again-btn" (click)="chooseAgain()">
-            Escolher novamente
-          </button>
-        </div>
       </div>
     }
+
+    <!-- LISTA (só aparece após confirmar presença) -->
+    @if (confirmed()) {
 
     <!-- STEP TABS -->
     <div class="step-tabs">
@@ -195,7 +263,10 @@
 
     </div>
 
+    } <!-- fim @if confirmed() -->
+
     <!-- FINALIZAR BAR -->
+    @if (confirmed()) {
     <div class="finalizar-bar">
       <div class="bar-info">
         @if (fraldasInCart().length === 0) {
@@ -210,6 +281,7 @@
         Finalizar
       </ion-button>
     </div>
+    } <!-- fim @if confirmed() finalizar bar -->
 
     <!-- MODAL (bottom sheet) -->
     @if (showModal()) {

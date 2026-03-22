@@ -68,19 +68,28 @@ export class ConfigurarPage implements OnInit {
   eventLink = computed(() => {
     const slug = this.eventSlug();
     if (!slug) return '';
-    const type = this.eventType();
-    const sex  = this.babySex();
+    const type    = this.eventType();
+    const sex     = this.babySex();
+    const address = this.eventAddress();
+    const dt      = this.eventDatetime();
     let url = `${window.location.origin}/cha?e=${slug}`;
     if (type === 'bebe') {
       url += `&t=bebe`;
       if (sex) url += `&s=${sex}`;
     }
+    if (address) url += `&a=${encodeURIComponent(address)}`;
+    if (dt)      url += `&d=${encodeURIComponent(dt)}`;
     return url;
   });
 
   // Tipo do evento e sexo
   eventType = signal<EventType>('revelacao');
   babySex   = signal<BabySex | null>(null);
+
+  // Detalhes do evento
+  eventAddress  = signal('');
+  eventDatetime = signal('');
+
 
   // Baby names
   name1 = '';
@@ -220,10 +229,12 @@ export class ConfigurarPage implements OnInit {
 
   private metaKey() { return `event_meta_${this.userId}`; }
 
-  private saveMeta() {
+  saveMeta() {
     localStorage.setItem(this.metaKey(), JSON.stringify({
-      eventType: this.eventType(),
-      babySex:   this.babySex(),
+      eventType:    this.eventType(),
+      babySex:      this.babySex(),
+      eventAddress: this.eventAddress(),
+      eventDatetime: this.eventDatetime(),
     }));
   }
 
@@ -233,8 +244,10 @@ export class ConfigurarPage implements OnInit {
       const raw = localStorage.getItem(this.metaKey());
       if (raw) {
         const meta = JSON.parse(raw);
-        if (meta.eventType) this.eventType.set(meta.eventType);
-        if (meta.babySex)   this.babySex.set(meta.babySex);
+        if (meta.eventType)     this.eventType.set(meta.eventType);
+        if (meta.babySex)       this.babySex.set(meta.babySex);
+        if (meta.eventAddress)  this.eventAddress.set(meta.eventAddress);
+        if (meta.eventDatetime) this.eventDatetime.set(meta.eventDatetime);
       }
     } catch { /* ignora */ }
   }

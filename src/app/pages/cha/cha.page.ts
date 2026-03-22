@@ -21,6 +21,13 @@ interface SavedResponse {
   timestamp: number;
 }
 
+interface SavedConfirmation {
+  guestName: string;
+  address: string;
+  link: string;
+  confirmedAt: number;
+}
+
 @Component({
   selector: 'app-cha',
   templateUrl: 'cha.page.html',
@@ -29,13 +36,25 @@ interface SavedResponse {
   imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast],
 })
 export class ChaPage implements OnInit {
-  // Tipo do evento (lido da URL: ?t=bebe&s=menino)
-  eventType = signal<'revelacao' | 'bebe'>('revelacao');
-  babySex   = signal<'menino' | 'menina' | null>(null);
+  // Tipo do evento (lido da URL: ?t=bebe&s=menino&a=...&d=...)
+  eventType     = signal<'revelacao' | 'bebe'>('revelacao');
+  babySex       = signal<'menino' | 'menina' | null>(null);
+  eventAddress  = signal('');
+  eventDatetime = signal('');
+  confirmed     = signal(false);
+
   themeClass = computed(() => {
     if (this.eventType() !== 'bebe') return '';
     return this.babySex() === 'menino' ? 'theme-menino'
          : this.babySex() === 'menina' ? 'theme-menina' : '';
+  });
+
+  formattedDatetime = computed(() => {
+    const dt = this.eventDatetime();
+    if (!dt) return '';
+    const d = new Date(dt);
+    return d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+      + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   });
 
   // State flags
@@ -46,6 +65,8 @@ export class ChaPage implements OnInit {
   cart     = signal<CartItem[]>([]);
   step     = signal<Step>('fraldas');
   guestName = '';
+  confirmingName = '';
+  confirmSubmitting = signal(false);
   submitting = signal(false);
   showModal  = signal(false);
   toastMsg   = signal('');
@@ -56,6 +77,7 @@ export class ChaPage implements OnInit {
   previousResponse = signal<SavedResponse | null>(null);
   showPreviousBanner = signal(false);
   private storageKey = '';
+  private confirmKey = '';     // chave de confirmação de presença, amarrada ao slug
 
   // Computed
   fraldas  = computed(() => this.sorted(this.allItems().filter(i => i.category === 'fraldas')));
@@ -88,6 +110,11 @@ export class ChaPage implements OnInit {
     if (t === 'bebe') this.eventType.set('bebe');
     if (s === 'menino' || s === 'menina') this.babySex.set(s);
 
+    const a = this.route.snapshot.queryParamMap.get('a');
+    const d = this.route.snapshot.queryParamMap.get('d');
+    if (a) this.eventAddress.set(a);
+    if (d) this.eventDatetime.set(d);
+
     const ev = await this.supa.getEventBySlug(slug);
     if (!ev) { this.state.set('notfound'); return; }
     if (ev.expires_at && new Date(ev.expires_at) < new Date()) {
@@ -95,15 +122,34 @@ export class ChaPage implements OnInit {
     }
 
     this.event.set(ev);
+
+    // Detecção automática de tipo: se os dois nomes são iguais, é chá de bebê
+    if (ev.baby_name_1 === ev.baby_name_2) {
+      this.eventType.set('bebe');
+    }
     const items = await this.supa.getItems(ev.id);
     this.allItems.set(items);
 
-    // Verifica se o convidado já respondeu antes
+    // Chaves de localStorage amarradas ao slug do evento
     this.storageKey = `cha_done_${slug}`;
-    const saved = localStorage.getItem(this.storageKey);
-    if (saved) {
+    this.confirmKey = `cha_confirmed_${slug}`;
+
+    // Verifica se o convidado já confirmou presença neste evento
+    const savedConfirm = localStorage.getItem(this.confirmKey);
+    if (savedConfirm) {
       try {
-        const parsed: SavedResponse = JSON.parse(saved);
+        const parsed: SavedConfirmation = JSON.parse(savedConfirm);
+        this.confirmingName = parsed.guestName;
+        this.guestName      = parsed.guestName;
+        this.confirmed.set(true);   // pula tela de confirmação
+      } catch { /* ignora JSON inválido */ }
+    }
+
+    // Verifica se o convidado já escolheu presentes antes
+    const savedDone = localStorage.getItem(this.storageKey);
+    if (savedDone) {
+      try {
+        const parsed: SavedResponse = JSON.parse(savedDone);
         this.previousResponse.set(parsed);
         this.showPreviousBanner.set(true);
       } catch { /* ignora JSON inválido */ }
@@ -137,6 +183,34 @@ export class ChaPage implements OnInit {
       this.cart.update(arr => [...arr, cartItem]);
       this.showToast(`${item.emoji} ${item.name} adicionado!`);
     }
+  }
+
+  async confirmPresence() {
+    if (!this.confirmingName.trim()) {
+      this.showToast('Digite seu nome para confirmar! 😊');
+      return;
+    }
+    this.confirmSubmitting.set(true);
+    const ev = this.event();
+    if (ev) {
+      await this.supa.saveConfirmation(ev.id, this.confirmingName.trim());
+    }
+    // Pré-preenche o nome no modal de presentes
+    this.guestName = this.confirmingName.trim();
+
+    // Persiste a confirmação no dispositivo do convidado, amarrada ao slug
+    if (this.confirmKey) {
+      const confirmation: SavedConfirmation = {
+        guestName:   this.confirmingName.trim(),
+        address:     this.eventAddress(),
+        link:        window.location.href,
+        confirmedAt: Date.now(),
+      };
+      localStorage.setItem(this.confirmKey, JSON.stringify(confirmation));
+    }
+
+    this.confirmed.set(true);
+    this.confirmSubmitting.set(false);
   }
 
   removeFromCart(id: string) {
