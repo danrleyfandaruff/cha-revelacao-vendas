@@ -57,10 +57,10 @@ export class PagarPage implements OnInit {
   }
 
   goToStripe() {
-    const returnUrl = encodeURIComponent(
-      `${window.location.origin}/pagar?status=success`
-    );
-    window.location.href = `${this.STRIPE_LINK}?client_reference_id=${this.userId}&success_url=${returnUrl}`;
+    // Stripe Payment Links não aceitam success_url por parâmetro —
+    // a URL de retorno deve ser configurada no Dashboard do Stripe.
+    // Passamos apenas o client_reference_id para identificar o usuário.
+    window.location.href = `${this.STRIPE_LINK}?client_reference_id=${this.userId}`;
   }
 
   private async activate() {
