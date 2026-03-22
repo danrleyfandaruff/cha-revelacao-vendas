@@ -125,7 +125,10 @@
 
       <!-- LINK + RESPOSTAS (only if paid + event exists) -->
       @if (isPaid() && eventLink()) {
-        <div class="cfg-card link-card">
+        <div #linkCard class="cfg-card link-card" [class.link-highlight]="highlightLink()">
+          @if (highlightLink()) {
+            <div class="link-highlight-banner">👆 Copie e compartilhe este link com seus convidados!</div>
+          }
           <div class="link-card-inner">
             <div class="link-label">🔗 Link do evento:</div>
             <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
@@ -212,6 +215,28 @@
         </div>
       </div>
 
+    </div>
+  }
+
+  <!-- MODAL DE SUCESSO — aparece após retorno do Stripe -->
+  @if (showSuccessModal()) {
+    <div class="sheet-backdrop" (click)="showSuccessModal.set(false)"></div>
+    <div class="activation-sheet success-modal">
+      <div class="sheet-handle"></div>
+
+      <div class="success-confetti">🎉</div>
+      <h2 class="playfair sheet-title">Pagamento confirmado!</h2>
+      <p class="sheet-sub">Seu evento está ativo e o link já pode ser compartilhado com os convidados.</p>
+
+      <div class="success-features">
+        <div class="sf-item">✅ Link exclusivo gerado</div>
+        <div class="sf-item">✅ Reservas abertas por 30 dias</div>
+        <div class="sf-item">✅ Resultados em tempo real</div>
+      </div>
+
+      <ion-button expand="block" (click)="verMeuLink()">
+        Ver meu link →
+      </ion-button>
     </div>
   }
 

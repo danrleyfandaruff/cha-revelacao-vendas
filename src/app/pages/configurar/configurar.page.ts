@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -109,6 +109,10 @@ export class ConfigurarPage implements OnInit {
   toastMsg  = signal('');
   toastOpen = signal(false);
   showActivationSheet = signal(false);
+  showSuccessModal = signal(false);
+  highlightLink = signal(false);
+
+  @ViewChild('linkCard', { read: ElementRef }) linkCardRef?: ElementRef;
 
   constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController) {
     addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline });
@@ -122,6 +126,14 @@ export class ConfigurarPage implements OnInit {
 
     // Carrega metadados salvos localmente (tipo e sexo)
     this.loadMeta();
+
+    // Detecta retorno do Stripe e mostra modal de boas-vindas
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'success') {
+      window.history.replaceState({}, '', '/configurar');
+      // Pequeno delay para garantir que o evento já foi ativado pelo webhook
+      setTimeout(() => this.showSuccessModal.set(true), 800);
+    }
 
     const ev = await this.supa.getMyEvent(this.userId);
     this.event.set(ev);
@@ -273,6 +285,15 @@ export class ConfigurarPage implements OnInit {
       }
     }
     this.saving.set(false);
+  }
+
+  verMeuLink() {
+    this.showSuccessModal.set(false);
+    setTimeout(() => {
+      this.linkCardRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.highlightLink.set(true);
+      setTimeout(() => this.highlightLink.set(false), 3000);
+    }, 300);
   }
 
   copyLink() {

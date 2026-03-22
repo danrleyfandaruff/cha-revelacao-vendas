@@ -22,9 +22,6 @@ export class LoginPage {
   password = '';
   loading  = signal(false);
 
-  // Estado após cadastro: aguardando confirmação de e-mail
-  awaitingConfirmation = signal(false);
-
   constructor(
     private supa: SupabaseService,
     private router: Router,
@@ -37,7 +34,6 @@ export class LoginPage {
 
   setTab(t: Tab) {
     this.tab.set(t);
-    this.awaitingConfirmation.set(false);
   }
 
   async submit() {
@@ -50,12 +46,7 @@ export class LoginPage {
     if (this.tab() === 'entrar') {
       const { error } = await this.supa.signInWithEmail(this.email, this.password);
       if (error) {
-        // E-mail não confirmado → mostra tela de aviso em vez de toast
-        if (error.message.includes('Email not confirmed') || error.code === 'email_not_confirmed') {
-          this.awaitingConfirmation.set(true);
-        } else {
-          this.showToast(this.friendlyError(error.message, error.code), 'danger');
-        }
+        this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
         this.router.navigate(['/configurar'], { replaceUrl: true });
       }
@@ -64,12 +55,8 @@ export class LoginPage {
       const { data, error } = await this.supa.signUpWithEmail(this.email, this.password);
       if (error) {
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
-      } else if (data.session) {
-        // Confirmação de e-mail desabilitada → já entra direto
-        this.router.navigate(['/configurar'], { replaceUrl: true });
       } else {
-        // Confirmação de e-mail habilitada → mostra aviso
-        this.awaitingConfirmation.set(true);
+        this.router.navigate(['/configurar'], { replaceUrl: true });
       }
     }
 

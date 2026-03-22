@@ -184,7 +184,37 @@ ion-content {
 }
 
 // Link card
-.link-card { background: #f5f0ea; }
+.link-card {
+  background: #f5f0ea;
+  transition: box-shadow 0.3s, border-color 0.3s;
+
+  &.link-highlight {
+    border-color: var(--brand-gold);
+    box-shadow: 0 0 0 3px rgba(196,152,57,.25);
+    animation: pulse-border 1s ease-in-out 3;
+  }
+}
+
+.link-highlight-banner {
+  background: var(--brand-gold);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 12px 12px 0 0;
+  animation: slide-down 0.3s ease;
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(196,152,57,.25); }
+  50%       { box-shadow: 0 0 0 7px rgba(196,152,57,.45); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .link-card-inner {
   padding: 14px 18px;
   display: flex;
@@ -528,6 +558,39 @@ ion-content {
   cursor: pointer;
   text-decoration: underline;
   font-family: 'Lato', sans-serif;
+}
+
+// ── Modal de sucesso pós-pagamento ────────────────────────────────────────────
+.success-modal {
+  text-align: center;
+
+  .success-confetti {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    animation: pop 0.4s ease;
+  }
+
+  .success-features {
+    background: #f5fbf0;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .sf-item {
+      font-size: 0.9rem;
+      color: var(--brand-brown);
+      font-weight: 500;
+    }
+  }
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1);   opacity: 1; }
 }
 
 // Save bar
