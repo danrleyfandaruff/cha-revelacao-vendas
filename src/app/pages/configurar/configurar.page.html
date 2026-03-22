@@ -39,108 +39,54 @@
 
     <div class="cfg-content">
 
-      <!-- TIPO DO EVENTO -->
-      <div class="cfg-card">
-        <div class="cfg-card-header">
-          <span class="cfg-card-title playfair">🎀 Tipo do evento</span>
-        </div>
-        <div class="cfg-card-body">
-          <div class="type-selector">
-            <button class="type-btn"
-              [class.active]="eventType() === 'revelacao'"
-              (click)="setEventType('revelacao')">
-              <span class="type-icon">🎊</span>
-              <span class="type-label">Chá Revelação</span>
-              <span class="type-desc">Dois nomes, convidados escolhem</span>
-            </button>
-            <button class="type-btn"
-              [class.active]="eventType() === 'bebe'"
-              (click)="setEventType('bebe')">
-              <span class="type-icon">🍼</span>
-              <span class="type-label">Chá de Bebê</span>
-              <span class="type-desc">Um nome, tema por sexo</span>
-            </button>
-          </div>
+      <!-- CONFIGURAÇÕES (recolhível) -->
+      <div class="cfg-card cfg-card-collapsible">
+        <button class="cfg-collapse-header" (click)="configOpen.set(!configOpen())">
+          <span class="cfg-card-title playfair">🎀 Configurações</span>
+          <span class="cfg-collapse-icon" [class.open]="configOpen()">▾</span>
+        </button>
 
-          @if (eventType() === 'bebe') {
-            <div class="sex-selector">
-              <label class="label-small" style="margin-bottom: 10px; display: block;">Sexo do bebê:</label>
-              <div class="sex-btns">
-                <button class="sex-btn menino"
-                  [class.active]="babySex() === 'menino'"
-                  (click)="setBabySex('menino')">
-                  👦 Menino
-                </button>
-                <button class="sex-btn menina"
-                  [class.active]="babySex() === 'menina'"
-                  (click)="setBabySex('menina')">
-                  👧 Menina
-                </button>
-              </div>
+        @if (!configOpen() && configSummary()) {
+          <div class="cfg-summary-line">{{ configSummary() }}</div>
+        }
+
+        @if (configOpen()) {
+          <div class="cfg-card-body cfg-body-compact">
+
+            <!-- Tipo -->
+            <div class="compact-row">
+              <button class="chip-btn" [class.active]="eventType() === 'revelacao'" (click)="setEventType('revelacao')">🎊 Chá Revelação</button>
+              <button class="chip-btn" [class.active]="eventType() === 'bebe'" (click)="setEventType('bebe')">🍼 Chá de Bebê</button>
             </div>
-          }
-        </div>
-      </div>
 
-      <!-- DETALHES DO EVENTO -->
-      <div class="cfg-card">
-        <div class="cfg-card-header">
-          <span class="cfg-card-title playfair">📍 Detalhes do evento</span>
-        </div>
-        <div class="cfg-card-body">
-          <div class="field-group">
-            <label class="label-small">Endereço</label>
-            <input class="text-input" [ngModel]="eventAddress()"
+            <!-- Sexo (só se bebê) -->
+            @if (eventType() === 'bebe') {
+              <div class="compact-row">
+                <button class="chip-btn menino" [class.active]="babySex() === 'menino'" (click)="setBabySex('menino')">👦 Menino</button>
+                <button class="chip-btn menina" [class.active]="babySex() === 'menina'" (click)="setBabySex('menina')">👧 Menina</button>
+              </div>
+            }
+
+            <!-- Nomes -->
+            @if (eventType() === 'revelacao') {
+              <div class="names-grid compact-names">
+                <input class="text-input" [(ngModel)]="name1" placeholder="Nome 1" maxlength="30"/>
+                <div class="names-sep">ou</div>
+                <input class="text-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
+              </div>
+            } @else {
+              <input class="text-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
+            }
+
+            <!-- Endereço + Data -->
+            <input class="text-input" style="margin-top:10px" [ngModel]="eventAddress()"
               (ngModelChange)="eventAddress.set($event); saveMeta()"
-              placeholder="Ex: Rua das Flores, 123 – Jardim Primavera" maxlength="120"/>
-          </div>
-          <div class="field-group" style="margin-top: 12px">
-            <label class="label-small">Data e horário</label>
-            <input class="text-input" type="datetime-local" [ngModel]="eventDatetime()"
+              placeholder="📍 Endereço do evento" maxlength="120"/>
+            <input class="text-input" style="margin-top:8px" type="datetime-local" [ngModel]="eventDatetime()"
               (ngModelChange)="eventDatetime.set($event); saveMeta()"/>
-          </div>
-        </div>
-      </div>
 
-      <!-- NAMES SECTION -->
-      <div class="cfg-card">
-        <div class="cfg-card-header">
-          <span class="cfg-card-title playfair">
-            {{ eventType() === 'bebe' ? '👶 Nome do bebê' : '👶 Nome dos bebês' }}
-          </span>
-        </div>
-        <div class="cfg-card-body">
-          @if (eventType() === 'revelacao') {
-            <div class="names-grid">
-              <div class="field-group">
-                <label class="label-small">Nome 1</label>
-                <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Laura" maxlength="30"/>
-              </div>
-              <div class="names-sep">ou</div>
-              <div class="field-group">
-                <label class="label-small">Nome 2</label>
-                <input class="text-input" [(ngModel)]="name2" placeholder="Ex: Benicio" maxlength="30"/>
-              </div>
-            </div>
-            @if (name1 && name2) {
-              <div class="slug-preview">
-                <span>🔗 Prévia:</span>
-                <strong>{{ name1 }} ou {{ name2 }}?</strong>
-              </div>
-            }
-          } @else {
-            <div class="field-group">
-              <label class="label-small">Nome do bebê</label>
-              <input class="text-input" [(ngModel)]="name1" placeholder="Ex: Miguel" maxlength="30"/>
-            </div>
-            @if (name1) {
-              <div class="slug-preview" [class.preview-menino]="babySex() === 'menino'" [class.preview-menina]="babySex() === 'menina'">
-                <span>🔗 Prévia:</span>
-                <strong>Chá de Bebê · {{ name1 }}</strong>
-              </div>
-            }
-          }
-        </div>
+          </div>
+        }
       </div>
 
       <!-- LINK + RESPOSTAS (only if paid + event exists) -->
@@ -150,12 +96,14 @@
             <div class="link-highlight-banner">👆 Copie e compartilhe este link com seus convidados!</div>
           }
           <div class="link-card-inner">
-            <div class="link-label">🔗 Link do evento:</div>
+            <div class="link-top-row">
+              <div class="link-label">🔗 Link do evento</div>
+              <ion-button size="small" (click)="copyLink()">
+                <ion-icon name="copy-outline" slot="start"></ion-icon>
+                Copiar
+              </ion-button>
+            </div>
             <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
-            <ion-button size="small" (click)="copyLink()">
-              <ion-icon name="copy-outline" slot="start"></ion-icon>
-              Copiar
-            </ion-button>
           </div>
         </div>
 

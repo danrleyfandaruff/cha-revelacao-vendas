@@ -113,8 +113,36 @@ export class ConfigurarPage implements OnInit {
   protected readonly Math = Math;
 
   // UI
-  loading  = signal(false);
-  saving   = signal(false);
+  loading    = signal(false);
+  saving     = signal(false);
+  configOpen = signal(true);   // se já tem evento salvo, começa fechado (ajustado no ngOnInit)
+
+  configSummary = computed(() => {
+    const type = this.eventType();
+    const sex  = this.babySex();
+    const n1   = this.name1;
+    const n2   = this.name2;
+    const dt   = this.eventDatetime();
+    const addr = this.eventAddress();
+
+    const parts: string[] = [];
+    if (type === 'bebe') {
+      parts.push('🍼 Chá de Bebê');
+      if (sex === 'menino') parts.push('👦 Menino');
+      else if (sex === 'menina') parts.push('👧 Menina');
+      if (n1) parts.push(n1);
+    } else {
+      parts.push('🎊 Chá Revelação');
+      if (n1 && n2) parts.push(`${n1} ou ${n2}`);
+      else if (n1) parts.push(n1);
+    }
+    if (dt) {
+      const d = new Date(dt);
+      parts.push(`📅 ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
+    }
+    if (addr) parts.push(`📍 ${addr.length > 30 ? addr.slice(0, 30) + '…' : addr}`);
+    return parts.join('  ·  ');
+  });
   toastMsg  = signal('');
   toastOpen = signal(false);
   showActivationSheet = signal(false);
@@ -148,6 +176,7 @@ export class ConfigurarPage implements OnInit {
     this.event.set(ev);
 
     if (ev) {
+      this.configOpen.set(false);   // já configurado — começa compacto
       this.name1 = ev.baby_name_1;
       // Se for revelação, name2 vem do banco; se for bebê, ignora
       if (this.eventType() === 'revelacao') {

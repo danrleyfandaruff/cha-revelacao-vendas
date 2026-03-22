@@ -38,29 +38,104 @@ ion-content {
 .cfg-content {
   max-width: 700px;
   margin: 0 auto;
-  padding: 16px 16px 100px;
+  padding: 10px 12px 100px;
 }
 
 .cfg-card {
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--brand-beige);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   overflow: hidden;
 }
 
 .cfg-card-header {
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--brand-beige);
 }
 
 .cfg-card-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--brand-brown);
 }
 
 .cfg-card-body {
-  padding: 18px;
+  padding: 14px 16px;
+}
+
+// ── Collapsible config card ───────────────────────────────────────────────────
+.cfg-card-collapsible { overflow: visible; }
+
+.cfg-collapse-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cfg-collapse-icon {
+  font-size: 1.1rem;
+  color: var(--brand-brown-light);
+  transition: transform 0.2s;
+  &.open { transform: rotate(180deg); }
+}
+
+.cfg-summary-line {
+  padding: 0 16px 12px;
+  font-size: 0.78rem;
+  color: var(--brand-brown-light);
+  line-height: 1.5;
+  border-top: 1px solid var(--brand-beige);
+  padding-top: 8px;
+}
+
+.cfg-body-compact {
+  padding: 10px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--brand-beige);
+}
+
+// Tipo + sexo chips em linha
+.compact-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chip-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--brand-beige);
+  background: var(--brand-cream);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--brand-brown-light);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+
+  &.active {
+    border-color: var(--brand-gold);
+    background: #fff8ee;
+    color: var(--brand-brown);
+    font-weight: 700;
+  }
+  &.menino.active { border-color: #90caf9; background: #e3f2fd; color: #1565c0; }
+  &.menina.active { border-color: #f48fb1; background: #fce4ec; color: #c2185b; }
+}
+
+// Nomes compactos
+.compact-names {
+  margin-bottom: 0;
+  .text-input { font-size: 0.9rem; padding: 8px 10px; }
 }
 
 // Names
@@ -78,21 +153,24 @@ ion-content {
   font-size: 0.88rem;
 }
 
+// ── Input global (funciona dentro ou fora de .field-group) ───────────────────
+.text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--brand-beige);
+  border-radius: 9px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.95rem;
+  color: var(--brand-brown);
+  background: var(--brand-cream);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  &:focus { border-color: var(--brand-gold); }
+}
+
 .field-group {
   .label-small { display: block; margin-bottom: 4px; }
-  .text-input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid var(--brand-beige);
-    border-radius: 9px;
-    font-family: 'Lato', sans-serif;
-    font-size: 0.95rem;
-    color: var(--brand-brown);
-    background: var(--brand-cream);
-    outline: none;
-    transition: border-color 0.2s;
-    &:focus { border-color: var(--brand-gold); }
-  }
 }
 
 .slug-preview {
@@ -216,18 +294,34 @@ ion-content {
   to   { opacity: 1; transform: translateY(0); }
 }
 .link-card-inner {
-  padding: 14px 18px;
+  padding: 10px 14px;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  .link-label { font-size: 0.78rem; font-weight: 700; color: var(--brand-brown-light); white-space: nowrap; }
+  flex-direction: column;
+  gap: 6px;
+
+  .link-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .link-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--brand-brown-light);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
   .link-url {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: var(--brand-gold);
     text-decoration: none;
-    flex: 1;
-    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
     &:hover { text-decoration: underline; }
   }
 }
