@@ -401,6 +401,62 @@ ion-content {
   flex-shrink: 0;
 }
 
+// ── Tabs de categoria ─────────────────────────────────────────────────────────
+.cfg-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cfg-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--brand-beige);
+  background: var(--brand-cream);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--brand-brown-light);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+
+  &.active {
+    background: var(--brand-brown);
+    border-color: var(--brand-brown);
+    color: #fff;
+    font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(74, 55, 40, 0.25);
+    animation: tab-pop 0.2s ease;
+  }
+}
+
+.cfg-tab-badge {
+  background: rgba(255,255,255,0.25);
+  color: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  min-width: 22px;
+  text-align: center;
+
+  .cfg-tab:not(.active) & {
+    background: var(--brand-beige);
+    color: var(--brand-brown-light);
+  }
+}
+
+@keyframes tab-pop {
+  0%   { transform: translateY(0) scale(0.97); }
+  60%  { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(-1px) scale(1); }
+}
+
 // Items list
 .items-list { margin: 14px 0; }
 
@@ -738,3 +794,158 @@ ion-content {
     color: var(--brand-brown-light);
   }
 }
+
+// ── Tutorial de primeira vez ───────────────────────────────────────────────────
+.tut-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 18, 10, 0.65);
+  z-index: 900;
+  animation: tut-fade-in 0.25s ease;
+}
+
+.tut-spotlight {
+  position: relative;
+  z-index: 910;
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px var(--brand-gold), 0 0 0 8px rgba(196, 152, 57, 0.2);
+  animation: tut-pulse 1.8s ease-in-out infinite;
+}
+
+.tut-card {
+  position: fixed;
+  bottom: 90px;    // fica acima da save bar
+  left: 16px;
+  right: 16px;
+  z-index: 920;
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 12px 40px rgba(30, 18, 10, 0.35);
+  animation: tut-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &.tut-save-bar {
+    bottom: 72px;   // quando o spotlight é a save bar, sobe um pouco mais
+  }
+}
+
+.tut-progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.tut-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-beige);
+  transition: background 0.2s, transform 0.2s;
+
+  &.active {
+    background: var(--brand-gold);
+    transform: scale(1.3);
+  }
+}
+
+.tut-emoji {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.tut-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--brand-brown);
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.tut-desc {
+  font-size: 0.875rem;
+  color: var(--brand-brown-light);
+  text-align: center;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.tut-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tut-skip {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  color: var(--brand-brown-light);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.tut-next {
+  flex: 1;
+  background: var(--brand-brown);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  &:active { transform: scale(0.97); }
+}
+
+@keyframes tut-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tut-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tut-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--brand-gold), 0 0 0 8px rgba(196, 152, 57, 0.2); }
+  50%       { box-shadow: 0 0 0 4px var(--brand-gold), 0 0 0 14px rgba(196, 152, 57, 0.08); }
+}
+
+// Passo de pagamento — card centralizado verticalmente (sem spotlight)
+.tut-payment {
+  bottom: 50%;
+  transform: translateY(50%);
+  animation: tut-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tut-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, var(--brand-brown), #6a4a38);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+}
+
+.tut-price {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+}
+
+.tut-price-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+}
+

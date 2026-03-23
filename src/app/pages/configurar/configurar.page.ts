@@ -3,8 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-  IonButtons, IonSegment, IonSegmentButton, IonLabel,
-  IonSpinner, IonToast, IonBadge, IonIcon,
+  IonButtons, IonSpinner, IonToast, IonBadge, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline } from 'ionicons/icons';
@@ -55,7 +54,7 @@ export type BabySex   = 'menino' | 'menina';
   imports: [
     FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-    IonButtons, IonSegment, IonSegmentButton, IonLabel,
+    IonButtons,
     IonSpinner, IonToast, IonBadge, IonIcon,
   ],
 })
@@ -116,6 +115,66 @@ export class ConfigurarPage implements OnInit {
   loading    = signal(false);
   saving     = signal(false);
   configOpen = signal(true);   // se já tem evento salvo, começa fechado (ajustado no ngOnInit)
+
+  // Tutorial de primeira vez (3 passos)
+  tutorialStep = signal(0);    // 0 = inativo
+
+  readonly TUTORIAL_STEPS = [
+    {
+      emoji: '🎀',
+      title: 'Configure seu evento',
+      desc: 'Escolha o tipo (Revelação ou Bebê), informe o nome, endereço e data do chá.',
+      highlight: 'config',
+    },
+    {
+      emoji: '🎁',
+      title: 'Monte a lista de presentes',
+      desc: 'Selecione as fraldas e os mimos que seus convidados poderão reservar. Ajuste as quantidades à vontade.',
+      highlight: 'items',
+    },
+    {
+      emoji: '💾',
+      title: 'Salve sua lista',
+      desc: 'Toque em "Salvar e gerar link" para guardar tudo. Você pode editar quantas vezes quiser antes de ativar.',
+      highlight: 'save',
+    },
+    {
+      emoji: '🔓',
+      title: 'Ative e compartilhe',
+      desc: 'Com a lista salva, ative seu evento por R$19,90 — pagamento único. Seu link exclusivo fica disponível por 30 dias para os convidados escolherem os presentes.',
+      highlight: 'none',
+    },
+  ];
+
+  tutorialCurrent = computed(() => {
+    const s = this.tutorialStep();
+    return s > 0 ? this.TUTORIAL_STEPS[s - 1] : null;
+  });
+
+  nextTutorialStep() {
+    const next = this.tutorialStep() + 1;
+    if (next > this.TUTORIAL_STEPS.length) {
+      this.dismissTutorial();
+    } else {
+      this.tutorialStep.set(next);
+    }
+  }
+
+  dismissTutorial() {
+    localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
+    this.tutorialStep.set(0);
+  }
+
+  // Fecha sem salvar — reaparece na próxima vez que entrar na tela
+  closeTutorialTemporarily() {
+    this.tutorialStep.set(0);
+  }
+
+  private checkTutorial() {
+    if (!localStorage.getItem(`cfg_tutorial_${this.userId}`)) {
+      this.tutorialStep.set(1);
+    }
+  }
 
   configSummary = computed(() => {
     const type = this.eventType();
@@ -200,6 +259,7 @@ export class ConfigurarPage implements OnInit {
       this.initSuggestions();
     }
     this.loading.set(false);
+    this.checkTutorial();
   }
 
   private initSuggestions() {

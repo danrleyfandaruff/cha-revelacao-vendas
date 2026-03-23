@@ -40,7 +40,8 @@
     <div class="cfg-content">
 
       <!-- CONFIGURAÇÕES (recolhível) -->
-      <div class="cfg-card cfg-card-collapsible">
+      <div class="cfg-card cfg-card-collapsible"
+        [class.tut-spotlight]="tutorialCurrent()?.highlight === 'config'">
         <button class="cfg-collapse-header" (click)="configOpen.set(!configOpen())">
           <span class="cfg-card-title playfair">🎀 Configurações</span>
           <span class="cfg-collapse-icon" [class.open]="configOpen()">▾</span>
@@ -124,21 +125,24 @@
       }
 
       <!-- ITEMS SECTION -->
-      <div class="cfg-card">
+      <div class="cfg-card"
+        [class.tut-spotlight]="tutorialCurrent()?.highlight === 'items'">
         <div class="cfg-card-header">
           <span class="cfg-card-title playfair">🎁 Lista de itens</span>
         </div>
         <div class="cfg-card-body">
 
-          <!-- Segment -->
-          <ion-segment [value]="activeTab()" (ionChange)="setTab($any($event.detail.value))">
-            <ion-segment-button value="fraldas">
-              <ion-label>🧷 Fraldas <ion-badge>{{ totalChecked('fraldas') }}</ion-badge></ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="presentes">
-              <ion-label>🎁 Mimos <ion-badge>{{ totalChecked('presentes') }}</ion-badge></ion-label>
-            </ion-segment-button>
-          </ion-segment>
+          <!-- Tabs -->
+          <div class="cfg-tabs">
+            <button class="cfg-tab" [class.active]="activeTab() === 'fraldas'" (click)="setTab('fraldas')">
+              🧷 Fraldas
+              <span class="cfg-tab-badge">{{ totalChecked('fraldas') }}</span>
+            </button>
+            <button class="cfg-tab" [class.active]="activeTab() === 'presentes'" (click)="setTab('presentes')">
+              🎁 Presentes
+              <span class="cfg-tab-badge">{{ totalChecked('presentes') }}</span>
+            </button>
+          </div>
 
           <!-- Items list -->
           <div class="items-list">
@@ -244,8 +248,39 @@
     </div>
   }
 
+  <!-- TUTORIAL OVERLAY -->
+  @if (tutorialStep() > 0) {
+    <div class="tut-overlay" (click)="closeTutorialTemporarily()"></div>
+    <div class="tut-card"
+      [class.tut-save-bar]="tutorialCurrent()?.highlight === 'save'"
+      [class.tut-payment]="tutorialCurrent()?.highlight === 'none'">
+      <div class="tut-progress">
+        @for (s of TUTORIAL_STEPS; track $index) {
+          <div class="tut-dot" [class.active]="tutorialStep() === $index + 1"></div>
+        }
+      </div>
+      <div class="tut-emoji">{{ tutorialCurrent()?.emoji }}</div>
+      <div class="tut-title">{{ tutorialCurrent()?.title }}</div>
+      <div class="tut-desc">{{ tutorialCurrent()?.desc }}</div>
+
+      @if (tutorialCurrent()?.highlight === 'none') {
+        <div class="tut-price-box">
+          <span class="tut-price">R$19,90</span>
+          <span class="tut-price-label">pagamento único · 30 dias de acesso</span>
+        </div>
+      }
+
+      <div class="tut-actions">
+        <button class="tut-skip" (click)="dismissTutorial()">Pular</button>
+        <button class="tut-next" (click)="nextTutorialStep()">
+          {{ tutorialStep() === TUTORIAL_STEPS.length ? 'Vamos lá! 🎉' : 'Próximo →' }}
+        </button>
+      </div>
+    </div>
+  }
+
   <!-- SAVE BAR -->
-  <div class="save-bar">
+  <div class="save-bar" [class.tut-spotlight]="tutorialCurrent()?.highlight === 'save'">
     <span class="bar-info">
       {{ totalChecked('fraldas') + totalChecked('presentes') }} itens selecionados
     </span>
