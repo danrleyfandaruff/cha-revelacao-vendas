@@ -1,36 +1,37 @@
 import { Injectable } from '@angular/core';
+import { track } from '@vercel/analytics';
+
+type TrackProps = Record<string, string | number | boolean | null | undefined>;
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
 
-  private track(name: string, props?: Record<string, unknown>): void {
+  private send(name: string, props?: TrackProps): void {
     try {
-      const va = (window as unknown as Record<string, unknown>)['va'] as
-        ((event: string, data: Record<string, unknown>) => void) | undefined;
-      if (va) va('event', { name, ...props });
-    } catch (_e) { /* ignora se o script ainda não carregou */ }
+      track(name, props);
+    } catch (_e) { /* ignora em dev local */ }
   }
 
   // ── Landing ──────────────────────────────────────────────────────────────────
-  landingView(): void              { this.track('landing_view'); }
+  landingView(): void              { this.send('landing_view'); }
 
   // ── Login / Cadastro ─────────────────────────────────────────────────────────
-  loginSuccess(): void             { this.track('login_success'); }
-  signupSuccess(): void            { this.track('signup_success'); }
+  loginSuccess(): void             { this.send('login_success'); }
+  signupSuccess(): void            { this.send('signup_success'); }
 
   // ── Configurar ───────────────────────────────────────────────────────────────
-  configSaved(type: string): void  { this.track('config_saved', { type }); }
-  tutorialCompleted(): void        { this.track('tutorial_completed'); }
-  tutorialSkipped(step: number): void { this.track('tutorial_skipped', { step }); }
+  configSaved(type: string): void  { this.send('config_saved', { type }); }
+  tutorialCompleted(): void        { this.send('tutorial_completed'); }
+  tutorialSkipped(step: number): void { this.send('tutorial_skipped', { step }); }
 
   // ── Resultados ───────────────────────────────────────────────────────────────
-  resultadosView(): void           { this.track('resultados_view'); }
+  resultadosView(): void           { this.send('resultados_view'); }
 
   // ── Pagar ────────────────────────────────────────────────────────────────────
-  goToStripe(): void               { this.track('go_to_stripe'); }
+  goToStripe(): void               { this.send('go_to_stripe'); }
 
   // ── Chá (convidado) ──────────────────────────────────────────────────────────
-  guestConfirmedPresence(): void   { this.track('guest_confirmed_presence'); }
-  guestAddedToCart(category: string): void { this.track('guest_add_to_cart', { category }); }
-  guestFinalized(): void           { this.track('guest_finalized'); }
+  guestConfirmedPresence(): void   { this.send('guest_confirmed_presence'); }
+  guestAddedToCart(category: string): void { this.send('guest_add_to_cart', { category }); }
+  guestFinalized(): void           { this.send('guest_finalized'); }
 }
