@@ -12,6 +12,7 @@ import { AnalyticsService } from '../../services/analytics.service';
 
 export interface PersonSummary {
   name: string;
+  confirmed: boolean;
   items: string[];
   lastDate: string;
 }
@@ -89,19 +90,46 @@ export class ResultadosPage implements OnInit, OnDestroy {
       }))
   );
 
-  // People
-  people = computed((): PersonSummary[] => {
+  // Pessoas que reservaram ao menos 1 item
+  peopleWithItems = computed((): PersonSummary[] => {
     const names = [...new Set(this.allRes().map(r => r.guest_name))];
     return names.map(name => {
-      const itens = this.allRes().filter(r => r.guest_name === name);
+      const reservations = this.allRes().filter(r => r.guest_name === name);
+      const items = reservations.map(r => {
+        const it = this.allItems().find(i => i.id === r.item_id);
+        return it ? `${it.emoji} ${it.name}` : '?';
+      });
+      const last = new Date(reservations[reservations.length - 1].created_at);
       return {
         name,
-        items: itens.map(r => {
-          const it = this.allItems().find(i => i.id === r.item_id);
-          return it ? `${it.emoji} ${it.name}` : '?';
-        }),
-        lastDate: new Date(itens[itens.length - 1].created_at)
-          .toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        confirmed: !!this.allConfirmations().find(c => c.guest_name === name),
+        items,
+        lastDate: last.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+      };
+    });
+  });
+
+  // People — união de confirmados + com reservas (mantido para compatibilidade)
+  people = computed((): PersonSummary[] => {
+    const confirmedNames = new Set(this.allConfirmations().map(c => c.guest_name));
+    const reservedNames  = new Set(this.allRes().map(r => r.guest_name));
+    const allNames = [...new Set([...confirmedNames, ...reservedNames])];
+
+    return allNames.map(name => {
+      const confirmation = this.allConfirmations().find(c => c.guest_name === name);
+      const reservations = this.allRes().filter(r => r.guest_name === name);
+      const items = reservations.map(r => {
+        const it = this.allItems().find(i => i.id === r.item_id);
+        return it ? `${it.emoji} ${it.name}` : '?';
+      });
+      const dateRef = confirmation
+        ? new Date(confirmation.confirmed_at)
+        : new Date(reservations[reservations.length - 1]?.created_at);
+      return {
+        name,
+        confirmed: !!confirmation,
+        items,
+        lastDate: dateRef.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
       };
     });
   });

@@ -107,6 +107,16 @@ ion-content {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &.no-items {
+    font-style: italic;
+    opacity: 0.55;
+  }
+}
+
+.person-badge {
+  font-size: 0.8rem;
+  margin-right: 2px;
 }
 
 .res-date {

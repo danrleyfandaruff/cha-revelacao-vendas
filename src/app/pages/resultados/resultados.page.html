@@ -115,8 +115,8 @@
 
       <!-- CONFIRMAÇÕES DE PRESENÇA -->
       <div class="res-section">
-        <div class="res-section-title">✅ Confirmações de presença
-          <span class="res-section-count">{{ statConfirmados() }}</span>
+        <div class="res-section-title">✅ Confirmaram presença
+          <span class="res-section-count">{{ allConfirmations().length }}</span>
         </div>
         @if (allConfirmations().length === 0) {
           <div class="empty-state">Nenhuma confirmação ainda. 🎀</div>
@@ -126,21 +126,21 @@
               <div class="res-row-info">
                 <div class="res-item-name">{{ c.guest_name }}</div>
               </div>
-              <div class="res-date">
-                {{ c.confirmed_at | date:'dd/MM HH:mm' }}
-              </div>
+              <div class="res-date">{{ c.confirmed_at | date:'dd/MM HH:mm' }}</div>
             </div>
           }
         }
       </div>
 
-      <!-- POR PESSOA -->
+      <!-- PRESENTES ESCOLHIDOS -->
       <div class="res-section">
-        <div class="res-section-title">👥 Por pessoa</div>
-        @if (people().length === 0) {
-          <div class="empty-state">Nenhuma reserva ainda. 🎀</div>
+        <div class="res-section-title">🎁 Escolheram presente
+          <span class="res-section-count" style="background:var(--brand-gold)">{{ peopleWithItems().length }}</span>
+        </div>
+        @if (peopleWithItems().length === 0) {
+          <div class="empty-state">Ninguém escolheu presente ainda. 🎀</div>
         } @else {
-          @for (person of people(); track person.name) {
+          @for (person of peopleWithItems(); track person.name) {
             <div class="res-row person-row">
               <div class="res-row-info">
                 <div class="res-item-name">{{ person.name }}</div>
