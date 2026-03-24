@@ -8,6 +8,7 @@ import {
 import { addIcons } from 'ionicons';
 import { refreshOutline, arrowBackOutline, copyOutline } from 'ionicons/icons';
 import { SupabaseService, ChaEvent, EventItem, EventReservation, EventConfirmation } from '../../services/supabase.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 export interface PersonSummary {
   name: string;
@@ -105,11 +106,12 @@ export class ResultadosPage implements OnInit, OnDestroy {
     });
   });
 
-  constructor(private supa: SupabaseService, private router: Router) {
+  constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService) {
     addIcons({ refreshOutline, arrowBackOutline, copyOutline });
   }
 
   async ngOnInit() {
+    this.analytics.resultadosView();
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
 

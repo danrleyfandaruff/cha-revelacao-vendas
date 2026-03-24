@@ -23,6 +23,9 @@ export class AnalyticsService {
   tutorialCompleted(): void        { this.track('tutorial_completed'); }
   tutorialSkipped(step: number): void { this.track('tutorial_skipped', { step }); }
 
+  // ── Resultados ───────────────────────────────────────────────────────────────
+  resultadosView(): void           { this.track('resultados_view'); }
+
   // ── Pagar ────────────────────────────────────────────────────────────────────
   goToStripe(): void               { this.track('go_to_stripe'); }
 

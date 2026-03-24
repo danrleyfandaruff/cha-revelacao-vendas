@@ -6,6 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 type Tab = 'entrar' | 'cadastrar';
 
@@ -26,6 +27,7 @@ export class LoginPage {
     private supa: SupabaseService,
     private router: Router,
     private toastCtrl: ToastController,
+    private analytics: AnalyticsService,
   ) {
     this.supa.getSession().then(s => {
       if (s) this.router.navigate(['/configurar'], { replaceUrl: true });
@@ -48,6 +50,7 @@ export class LoginPage {
       if (error) {
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
+        this.analytics.loginSuccess();
         this.router.navigate(['/configurar'], { replaceUrl: true });
       }
 
@@ -56,6 +59,7 @@ export class LoginPage {
       if (error) {
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
+        this.analytics.signupSuccess();
         this.router.navigate(['/configurar'], { replaceUrl: true });
       }
     }
