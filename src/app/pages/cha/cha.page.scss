@@ -2,6 +2,30 @@ ion-content {
   --background: var(--brand-cream);
 }
 
+// ── Banner de preview ──────────────────────────────────────────────────────────
+.preview-banner {
+  background: #2a1a0e;
+  color: #fff;
+  padding: 10px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  border-bottom: 2px solid var(--brand-gold);
+
+  .preview-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .preview-banner-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong { color: var(--brand-gold); font-size: 0.85rem; }
+    span   { opacity: 0.8; }
+  }
+}
+
 // ── Confirmação de presença ────────────────────────────────────────────────────
 .confirm-presence {
   display: flex;

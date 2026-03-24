@@ -115,6 +115,16 @@ export class SupabaseService {
     return data;
   }
 
+  // Igual ao anterior, mas sem filtro de paid — usado no modo preview
+  async getEventBySlugPreview(slug: string): Promise<ChaEvent | null> {
+    const { data } = await this.supabase
+      .from('events')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    return data;
+  }
+
   async upsertEvent(payload: Partial<ChaEvent>): Promise<ChaEvent | null> {
     const { data } = await this.supabase
       .from('events')

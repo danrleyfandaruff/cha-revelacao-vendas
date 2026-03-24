@@ -1,5 +1,16 @@
 <ion-content>
 
+  <!-- BANNER DE PREVIEW -->
+  @if (isPreview()) {
+    <div class="preview-banner">
+      <div class="preview-banner-icon">👁️</div>
+      <div class="preview-banner-body">
+        <strong>Modo visualização</strong>
+        <span>Nenhuma ação é salva. Não compartilhe este link — ative o evento para gerar o link real.</span>
+      </div>
+    </div>
+  }
+
   <!-- LOADING -->
   @if (state() === 'loading') {
     <div class="center-state">
@@ -66,6 +77,7 @@
           {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
         }
       </div>
+
 
       @if (formattedDatetime() || eventAddress()) {
         <div class="cha-event-details">

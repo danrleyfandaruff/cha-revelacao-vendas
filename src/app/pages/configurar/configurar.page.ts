@@ -199,8 +199,10 @@ export class ConfigurarPage implements OnInit {
       else if (n1) parts.push(n1);
     }
     if (dt) {
-      const d = new Date(dt);
-      parts.push(`📅 ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
+      const d = new Date(dt.length === 16 ? dt + ':00' : dt);
+      if (!isNaN(d.getTime())) {
+        parts.push(`📅 ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
+      }
     }
     if (addr) parts.push(`📍 ${addr.length > 30 ? addr.slice(0, 30) + '…' : addr}`);
     return parts.join('  ·  ');
@@ -210,8 +212,10 @@ export class ConfigurarPage implements OnInit {
   showActivationSheet = signal(false);
   showSuccessModal = signal(false);
   highlightLink = signal(false);
+  showQrModal = signal(false);
 
-  @ViewChild('linkCard', { read: ElementRef }) linkCardRef?: ElementRef;
+  @ViewChild('linkCard',    { read: ElementRef }) linkCardRef?: ElementRef;
+  @ViewChild('qrContainer', { read: ElementRef }) qrContainerRef?: ElementRef;
 
   constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService) {
     addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline });
@@ -401,10 +405,69 @@ export class ConfigurarPage implements OnInit {
     }, 300);
   }
 
+  // Link de preview — abre a página do chá com ?preview=1, sem precisar pagar
+  previewLink = computed(() => {
+    const link = this.eventLink();
+    if (!link) return '';
+    return link + '&preview=1';
+  });
+
+  openPreview() {
+    const link = this.previewLink();
+    if (link) window.open(link, '_blank');
+  }
+
   copyLink() {
     navigator.clipboard.writeText(this.eventLink()).then(() =>
       this.showToast('Link copiado! 🔗')
     );
+  }
+
+  shareWhatsApp() {
+    const ev = this.event();
+    const link = this.eventLink();
+    if (!link) return;
+    const name = ev?.baby_name_1 && ev?.baby_name_2 && ev.baby_name_1 !== ev.baby_name_2
+      ? `${ev.baby_name_1} ou ${ev.baby_name_2}`
+      : ev?.baby_name_1 ?? 'o bebê';
+    const msg = `Oi! 🎀 Criei a listinha de presentes do chá de ${name}.\n\nEscolha o que você vai dar aqui 👇\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  openQrModal() {
+    this.showQrModal.set(true);
+    // Aguarda o DOM renderizar o #qrContainer antes de gerar
+    setTimeout(() => this.renderQrCode(), 80);
+  }
+
+  private renderQrCode() {
+    const container = this.qrContainerRef?.nativeElement as HTMLElement | undefined;
+    const link = this.eventLink();
+    if (!container || !link) return;
+
+    container.innerHTML = '';          // limpa geração anterior
+    const QRCode = (window as unknown as Record<string, unknown>)['QRCode'] as
+      (new (el: HTMLElement, opts: Record<string, unknown>) => void) | undefined;
+    if (!QRCode) { container.textContent = 'QR Code indisponível'; return; }
+
+    new QRCode(container, {
+      text:          link,
+      width:         220,
+      height:        220,
+      colorDark:     '#3d2314',
+      colorLight:    '#ffffff',
+      correctLevel:  2, // M
+    });
+  }
+
+  downloadQr() {
+    const container = this.qrContainerRef?.nativeElement as HTMLElement | undefined;
+    const canvas = container?.querySelector('canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const a = document.createElement('a');
+    a.download = 'qrcode-cha.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
   }
 
   goResultados() { this.router.navigate(['/resultados']); }

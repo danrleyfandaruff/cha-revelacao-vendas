@@ -53,9 +53,39 @@ export class ChaPage implements OnInit {
   formattedDatetime = computed(() => {
     const dt = this.eventDatetime();
     if (!dt) return '';
-    const d = new Date(dt);
-    return d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
-      + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    let iso = dt.trim();
+
+    // Corrige ano inválido (mais de 4 dígitos)
+    const yearMatch = iso.match(/^(\d{5,})/);
+    if (yearMatch) {
+      console.warn('Ano inválido detectado:', yearMatch[1]);
+      return ''; // ou corrige manualmente se fizer sentido
+    }
+
+    if (iso.includes(' ') && !iso.includes('T')) {
+      iso = iso.replace(' ', 'T');
+    }
+
+    if (iso.length === 16) {
+      iso += ':00';
+    }
+
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) return '';
+
+    return new Intl.DateTimeFormat('pt-BR', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }).format(date)
+        + ' às ' +
+        new Intl.DateTimeFormat('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(date);
   });
 
   // State flags
@@ -73,6 +103,8 @@ export class ChaPage implements OnInit {
   toastMsg   = signal('');
   toastOpen  = signal(false);
   doneName   = '';
+
+  isPreview = signal(false);   // true quando ?preview=1
 
   // Resposta anterior salva no localStorage
   previousResponse = signal<SavedResponse | null>(null);
@@ -110,15 +142,26 @@ export class ChaPage implements OnInit {
     const s = this.route.snapshot.queryParamMap.get('s');
     if (t === 'bebe') this.eventType.set('bebe');
     if (s === 'menino' || s === 'menina') this.babySex.set(s);
+    if (this.route.snapshot.queryParamMap.get('preview') === '1') {
+      this.isPreview.set(true);
+    }
 
     const a = this.route.snapshot.queryParamMap.get('a');
     const d = this.route.snapshot.queryParamMap.get('d');
     if (a) this.eventAddress.set(a);
     if (d) this.eventDatetime.set(d);
 
-    const ev = await this.supa.getEventBySlug(slug);
+    const ev = this.isPreview()
+      ? await this.supa.getEventBySlugPreview(slug)
+      : await this.supa.getEventBySlug(slug);
     if (!ev) { this.state.set('notfound'); return; }
-    if (ev.expires_at && new Date(ev.expires_at) < new Date()) {
+
+    // Se o evento já está pago, ignora o preview — trata como link normal
+    if (this.isPreview() && ev.paid) {
+      this.isPreview.set(false);
+    }
+
+    if (!this.isPreview() && ev.expires_at && new Date(ev.expires_at) < new Date()) {
       this.state.set('expired'); return;
     }
 
@@ -192,6 +235,12 @@ export class ChaPage implements OnInit {
       this.showToast('Digite seu nome para confirmar! 😊');
       return;
     }
+    // Em preview, simula a confirmação sem gravar no banco
+    if (this.isPreview()) {
+      this.guestName = this.confirmingName.trim();
+      this.confirmed.set(true);
+      return;
+    }
     this.confirmSubmitting.set(true);
     const ev = this.event();
     if (ev) {
@@ -246,6 +295,13 @@ export class ChaPage implements OnInit {
 
   async confirmFinalizar() {
     if (!this.guestName.trim()) return;
+    // Em preview, simula a finalização sem gravar no banco
+    if (this.isPreview()) {
+      this.doneName = this.guestName.trim();
+      this.closeModal();
+      this.state.set('done');
+      return;
+    }
     this.submitting.set(true);
 
     for (const item of this.cart()) {
