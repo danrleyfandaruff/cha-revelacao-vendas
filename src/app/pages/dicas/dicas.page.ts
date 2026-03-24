@@ -2,7 +2,7 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 
-export type Categoria = 'todas' | 'gravidez' | 'revelacao' | 'bebe' | 'presentes';
+export type Categoria = 'todas' | 'gravidez' | 'revelacao' | 'bebe' | 'presentes' | 'economia';
 
 export interface Dica {
   emoji: string;
@@ -79,9 +79,29 @@ const DICAS: Dica[] = [
     emoji: '🎀',
     titulo: 'Como fazer um chá revelação inesquecível',
     resumo: 'Planejamento é tudo. Comece pelo momento da revelação e trabalhe de trás pra frente.',
-    detalhes: 'O ponto mais importante do chá revelação é o momento em que o sexo é revelado. Defina isso primeiro: estouro de bexiga, fumaça colorida, bolo, caixinha de balões, confetes ou uma lista de presentes surpresa? Depois, escolha a paleta de cores (neutro até o momento, depois pink/azul), o local, a lista de convidados e a comida. Dica de ouro: só 1-2 pessoas sabem o sexo antes do evento — guarda o segredo!',
+    detalhes: `📋 PREPARATIVOS (comece com 6-8 semanas de antecedência)
+
+Defina primeiro o momento da revelação — ele é o coração do evento. As opções mais amadas: estouro de bexiga com confetes coloridos, canhão de fumaça, bolo com recheio surpresa ou caixinha de balões. Só 1-2 pessoas devem saber o sexo antes do evento para garantir reações genuínas.
+
+Escolha a paleta de cores neutra para a decoração principal (branco, dourado, bege, verde) e deixe os elementos coloridos para o momento da revelação. Reserve local com antecedência, prefira ambientes com boa iluminação natural para as fotos.
+
+🍰 RECEITAS E CARDÁPIO
+
+Mesa de salgados: mini quiche de queijo, coxinha cremosa, empada de frango, folhado de presunto. Mesa de doces: brigadeiro clássico e gourmet, macarons nas cores da revelação, naked cake com recheio colorido, cupcakes decorados. Para beber: limonada com hortelã, água aromatizada com frutas, sucos naturais e chá gelado de hibisco (cor neutra até a revelação!).
+
+Dica de ouro: prepare um bolo falso para o corte (visual lindo para as fotos) e um bolo real com o recheio colorido guardado escondido até o momento certo.
+
+👥 LISTA DE CONVIDADOS — organize antes do evento!
+
+A lista de convidados é onde tudo começa a dar errado quando não há organização. Com um sistema de lista de presentes online, cada convidado:
+• Confirma presença direto pelo link
+• Escolhe um presente único (sem duplicatas)
+• Vê em tempo real o que ainda está disponível
+
+Você acompanha tudo pelo painel: quem confirmou, quem escolheu o quê, quantos itens ainda faltam. Sem planilha, sem mensagem de WhatsApp perdida, sem presente repetido. Crie sua lista antes de enviar os convites — assim o link já vai junto no convite e você começa a organizar desde o início!`,
     categoria: 'revelacao',
     cor: 'gold',
+    destaque: true,
   },
   {
     emoji: '🎈',
@@ -97,6 +117,31 @@ const DICAS: Dica[] = [
     detalhes: 'Com uma lista de presentes online, cada convidado pode escolher um item único — sem duplicatas, sem constrangimento. Inclua fraldas de vários tamanhos (RN, P, M), mimos úteis como body, macacão, babador e naninha. Organize por categoria e quantidade disponível. Os convidados veem em tempo real o que ainda está disponível. Muito mais prático que lista de papel e loja física!',
     categoria: 'revelacao',
     destaque: true,
+  },
+  {
+    emoji: '🥧',
+    titulo: 'Receitas econômicas que impressionam no chá',
+    resumo: 'Pastelão, empadão e outras receitas caseiras que rendem muito e custam pouco.',
+    detalhes: `Não precisa gastar uma fortuna para ter uma mesa incrível. Essas receitas rendem bastante, ficam lindas na apresentação e cabem no orçamento:
+
+🥧 EMPADÃO DE FRANGO
+Rende muito, é fácil de fatiar e fica ainda melhor no dia seguinte. Faça uma versão grande (assadeira retangular) ou mini empadões individuais para servir de forma mais elegante. Recheio cremoso de frango com requeijão é a combinação favorita. Pode ser preparado na véspera.
+
+🥟 PASTELÃO ASSADO
+Diferente do pastel frito, o pastelão assado é feito em assadeira e cortado em pedaços. Massa caseira de margarina fica crocante e dourada. Recheios populares: frango com catupiry, carne moída, palmito. Rende muito mais que os salgadinhos fritos e fica igual quentinho ou frio.
+
+🍕 ESFIHA DE ASSADEIRA
+Uma única receita de esfiha aberta, feita em assadeira grande e cortada em quadradinhos, alimenta muito mais convidados que a versão individual. Recheio de carne temperada com tomate e cebola é o clássico. Pode variar com frango ou queijo.
+
+🧀 TORTA FRIA DE PÃO DE FORMA
+Sem forno, sem fogão. Montar na véspera, gelar e servir fatiada. Recheio: atum, frango, presunto e queijo. Cobrir com maionese temperada e decorar com azeitonas. Fica linda e custa muito menos que salgados finos.
+
+🍮 BOLO DE ROLO / ROCAMBOLE RECHEADO
+Para a mesa de doces, rocambole com doce de leite ou goiabada custa pouco, rende bastante e faz bonito na mesa quando fatiado em rodinhas. Uma receita única serve 20+ pessoas.
+
+💡 DICA DE OURO: faça tudo na véspera. Comida preparada no dia anterior fica mais saborosa, você não fica estressada no dia do evento, e sobra tempo para se arrumar com calma.`,
+    categoria: 'economia',
+    cor: 'gold',
   },
   {
     emoji: '🍰',
@@ -210,6 +255,139 @@ const DICAS: Dica[] = [
     detalhes: 'Lista ideal para o chá: 40% fraldas e lenços (variedade de tamanhos), 30% roupas e acessórios, 20% mimos e brinquedos, 10% itens especiais. Faixas de preço: inclua itens de R$20 a R$200+ para todos os bolsos. Quantidade: coloque o total que realmente precisa — não subestime. Descrição: seja específica (marca, tamanho, cor) para facilitar a compra. Com uma lista digital, o convidado vê tudo isso em segundos e escolhe online!',
     categoria: 'presentes',
   },
+
+  // ── ECONOMIA ──────────────────────────────────────────
+  {
+    emoji: '💰',
+    titulo: 'Quanto custa um chá revelação? Guia completo de preços',
+    resumo: 'Saiba exatamente o que esperar de cada faixa de orçamento para não ter surpresas.',
+    detalhes: `Os custos variam muito dependendo do número de convidados e das escolhas. Aqui está um guia realista:
+
+💰 ECONÔMICO — R$ 300 a R$ 700 (até 20 convidados)
+Local: casa própria ou de familiar. Comida: receitas caseiras (empadão, pastelão, torta fria). Decoração: balões de ar, tecido TNT colorido, flores artificiais. Bolo: feito em casa ou padaria simples. Fotografia: celular + aplicativo de edição.
+
+💛 INTERMEDIÁRIO — R$ 800 a R$ 1.800 (até 40 convidados)
+Local: salão de festas alugado ou espaço ao ar livre. Comida: mix de caseiro + salgados de buffet. Decoração: kit de festa temático + balões de hélio. Bolo: confeitaria local. Fotografia: fotógrafo iniciante ou semiprofissional.
+
+✨ PREMIUM — R$ 2.000 a R$ 5.000+ (50+ convidados)
+Local: espaço de eventos decorado. Comida: buffet completo com garçons. Decoração: decorador profissional com arco de balões, flores naturais, mesa farta. Bolo: confeitaria especializada com recheio surpresa elaborado. Fotografia: fotógrafo profissional + filmagem.
+
+💡 ONDE ECONOMIZAR SEM PERDER QUALIDADE:
+• Faça as receitas caseiras (empadão, pastelão) — rende mais e fica mais gostoso
+• Alugue louças ao invés de comprar descartáveis premium
+• DIY na decoração: balões, fitas e cartazes feitos em casa
+• Lista de presentes digital — evita presentear o que não precisa e orienta convidados com qualquer orçamento`,
+    categoria: 'economia',
+    cor: 'gold',
+  },
+  {
+    emoji: '🍬',
+    titulo: 'Docinhos caseiros: brigadeiro gourmet e muito mais',
+    resumo: 'Receitas fáceis que custam pouco e impressionam qualquer convidado.',
+    detalhes: `Fazer os docinhos em casa reduz o custo em até 60% comparado à compra pronta. Aqui estão as receitas favoritas:
+
+🍫 BRIGADEIRO GOURMET
+Ingredientes: 1 lata de leite condensado, 2 colheres de manteiga sem sal, 4 colheres de chocolate em pó 50% cacau (ou cacau puro para versão mais sofisticada). Modo: cozinhe em fogo médio mexendo sempre até desgrudar da panela. Esfrie, enrole com as mãos untadas e passe no granulado belga ou chocolate raspado. Rende ~35 unidades.
+
+🥥 BEIJINHO CREMOSO
+Mesma base do brigadeiro mas substituindo o chocolate por coco ralado. Finalize com um cravo na ponta. Dica: use coco fresco ralado na hora para sabor mais intenso. Rende ~35 unidades.
+
+🥜 CAJUZINHO
+Ingredientes: 1 lata de leite condensado, 2 xícaras de amendoim torrado e triturado, 1 colher de manteiga. Cozinhe igual ao brigadeiro. Modele em formato de caju com um amendoim inteiro na ponta. Passa no açúcar cristal colorido. Rende ~40 unidades.
+
+🌸 DOCINHO DE AMEIXA
+Enrole a massa de brigadeiro ao redor de uma ameixa seca e passe em açúcar cristal. Sofisticado, diferente e muito fácil.
+
+💡 DICAS PARA PRODUÇÃO EM ESCALA:
+Faça tudo 2 dias antes e guarde em potes herméticos na geladeira. Use luvas descartáveis para enrolar — mais higiênico e rápido. Para 50 convidados: faça 5 receitas de cada tipo. Invista em forminhas de papel dourado — transforma completamente a apresentação.`,
+    categoria: 'economia',
+    cor: 'pink',
+  },
+  {
+    emoji: '✅',
+    titulo: 'Checklist completo: o que não pode faltar no chá',
+    resumo: 'Da reserva do local até o dia do evento. Nada vai ficar para trás com esse guia.',
+    detalhes: `📅 COM 2 MESES DE ANTECEDÊNCIA
+☐ Definir data e horário
+☐ Reservar o local
+☐ Decidir o tema e paleta de cores
+☐ Escolher como será a revelação (bolo, balões, fumaça…)
+☐ Criar a lista de presentes online e compartilhar o link no convite
+☐ Contratar fotógrafo (os bons lotam rápido!)
+☐ Encomendar o bolo
+
+📋 COM 1 MÊS
+☐ Enviar convites (digital ou impresso)
+☐ Confirmar número de convidados
+☐ Fechar cardápio e definir o que será caseiro x contratado
+☐ Encomendar decoração ou comprar materiais DIY
+☐ Separar músicas para o evento
+
+🛒 COM 1 SEMANA
+☐ Comprar ingredientes das receitas caseiras
+☐ Confirmar com fotógrafo, confeiteiro e fornecedores
+☐ Verificar lista de presentes — quem confirmou, o que ainda falta
+☐ Preparar a playlist do evento
+☐ Separar roupas (mamãe, papai, irmãos)
+
+🍳 NA VÉSPERA
+☐ Preparar toda a comida caseira
+☐ Montar a decoração (exceto balões de hélio)
+☐ Separar utensílios: pratos, talheres, copos, guardanapos
+☐ Carregar câmera/celular
+
+🎀 NO DIA
+☐ Inflar balões de hélio (duram ~8h)
+☐ Montar a mesa de frios e doces 1h antes
+☐ Deixar um responsável pelo segredo da revelação
+☐ Aproveitar cada momento — passa muito rápido! 💛`,
+    categoria: 'economia',
+  },
+  {
+    emoji: '🎨',
+    titulo: 'Decoração DIY: lindo sem gastar muito',
+    resumo: 'Com balões, TNT e um pouco de criatividade você decora sozinha por menos de R$100.',
+    detalhes: `Decoração profissional pode custar R$500 a R$2.000+. Com essas ideias você faz algo lindo com R$80 a R$150:
+
+🎈 ARCO DE BALÕES SEM SUPORTE
+Compre balões nas cores do tema em tamanhos variados (9", 11" e 5"). Encha com ar (sem hélio), prenda dois a dois em pares e entrelace os pares em formato de arco. Fixe com cola quente em papelão ou prenda com fita dupla-face na parede. Resultado visual impressionante por menos de R$40.
+
+🌸 PAINEL DE FLORES DE PAPEL
+Flores gigantes feitas de papel crepom ou papel seda ficam lindas como painel de fundo. Tutorial fácil no YouTube. Uma flor de 40 cm custa ~R$3 para fazer. Um painel com 8-10 flores fica pronto em 2 horas.
+
+✨ MESA DOURADA COM O QUE TEM EM CASA
+Use um tecido bege ou branco como base. Adicione galhos com folhas verdes (naturais ou artificiais), velas e porta-retratos com ultrassom do bebê. Misture alturas com caixas cobertas de tecido. Fica elegante sem gastar quase nada.
+
+💫 TOTEM DE LETRAS
+Recorte as iniciais do nome do bebê em papelão grosso, pinte de dourado com spray ou tinta acrílica. Fica como decoração de mesa de presente ou foto.
+
+📸 BACKDROP PARA FOTOS
+Pregue fios de barbante horizontalmente na parede e pendure fotos da gestante, ultrassons e bilhetinhos. Adicione balões nas pontas. Fica lindo nas fotos e custa quase zero.`,
+    categoria: 'economia',
+    cor: 'blue',
+  },
+  {
+    emoji: '🤍',
+    titulo: 'Como pedir presentes sem parecer interesseira',
+    resumo: 'Existe um jeito elegante de organizar os presentes que os convidados adoram.',
+    detalhes: `Essa é a dúvida de praticamente toda mamãe: como pedir presentes sem parecer grossa ou interesseira? A resposta é mais simples do que parece.
+
+O PROBLEMA DO "PRESENTES À VONTADE"
+Quando não há uma lista, os convidados ficam perdidos. Compram o que acham que é útil (que muitas vezes já tem em casa), compram itens repetidos, ou dão dinheiro em envelope sem saber o valor adequado. Resultado: você recebe 4 cueiros iguais e nenhuma fralda tamanho M.
+
+A SOLUÇÃO: LISTA COMO SERVIÇO, NÃO COMO EXIGÊNCIA
+Apresente a lista como um recurso para facilitar a vida dos convidados, não como obrigação. A frase certa é: "Para quem quiser presentear, preparei uma listinha para facilitar a escolha 🎀" — e inclui o link.
+
+O QUE COLOCAR NA LISTA
+Varie os valores: inclua itens de R$20 (lenços, fraldas P) até R$200+ (carrinho de banho, cadeirinha). Assim cada convidado escolhe dentro do seu orçamento sem constrangimento.
+
+POR QUE LISTA DIGITAL É MELHOR
+Com uma lista online cada convidado vê o que ainda está disponível em tempo real. Quem quer presentear acessa pelo celular, escolhe um item, e o presente fica reservado — ninguém compra o mesmo que outra pessoa. Você acompanha tudo pelo painel sem precisar perguntar para ninguém.
+
+A maioria dos convidados PREFERE ter uma lista — remove a pressão de adivinhar o que você precisa e garante que o presente vai ser realmente usado.`,
+    categoria: 'presentes',
+    destaque: true,
+  },
 ];
 
 @Component({
@@ -229,11 +407,12 @@ export class DicasPage {
   modalDica = signal<Dica | null>(null);
 
   categorias: { id: Categoria; label: string; emoji: string }[] = [
-    { id: 'todas',     label: 'Todas as Dicas', emoji: '✨' },
-    { id: 'gravidez',  label: 'Gravidez',        emoji: '🤰' },
-    { id: 'revelacao', label: 'Chá Revelação',   emoji: '🎀' },
-    { id: 'bebe',      label: 'Bebê',             emoji: '👶' },
-    { id: 'presentes', label: 'Presentes',        emoji: '🎁' },
+    { id: 'todas',     label: 'Todas',        emoji: '✨' },
+    { id: 'gravidez',  label: 'Gravidez',     emoji: '🤰' },
+    { id: 'revelacao', label: 'Revelação',    emoji: '🎀' },
+    { id: 'bebe',      label: 'Bebê',         emoji: '👶' },
+    { id: 'presentes', label: 'Presentes',    emoji: '🎁' },
+    { id: 'economia',  label: 'Economize',    emoji: '💰' },
   ];
 
   dicasFiltradas = computed(() => {
@@ -279,6 +458,7 @@ export class DicasPage {
       revelacao: 'tag-revelacao',
       bebe:      'tag-bebe',
       presentes: 'tag-presente',
+      economia:  'tag-economia',
       todas:     '',
     }[cat] ?? '';
   }
@@ -289,6 +469,7 @@ export class DicasPage {
       revelacao: '🎀 Revelação',
       bebe:      '👶 Bebê',
       presentes: '🎁 Presentes',
+      economia:  '💰 Economize',
       todas:     '',
     }[cat] ?? '';
   }

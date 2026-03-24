@@ -118,9 +118,25 @@
     </div>
   </div>
 
+  <!-- DICAS BANNER -->
+  <div class="lp-dicas-banner" (click)="goDicas()">
+    <div class="lp-dicas-inner">
+      <span class="lp-dicas-emoji">✨</span>
+      <div>
+        <div class="lp-dicas-title">Guia completo da maternidade</div>
+        <div class="lp-dicas-sub">Dicas de gravidez, chá revelação, bebê, receitas e como economizar</div>
+      </div>
+      <span class="lp-dicas-arrow">→</span>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <div class="lp-footer">
     <p>🍼 Chá de Bebê &amp; Revelação · Feito com amor para mamães e papais</p>
-    <p><span class="text-gold" style="cursor:pointer" (click)="goLogin()">Entrar</span> · <span class="text-gold" style="cursor:pointer" (click)="goLogin()">Criar conta</span></p>
+    <p>
+      <span class="text-gold" style="cursor:pointer" (click)="goLogin()">Entrar</span> ·
+      <span class="text-gold" style="cursor:pointer" (click)="goLogin()">Criar conta</span> ·
+      <span class="text-gold" style="cursor:pointer" (click)="goDicas()">Dicas</span>
+    </p>
   </div>
 </ion-content>

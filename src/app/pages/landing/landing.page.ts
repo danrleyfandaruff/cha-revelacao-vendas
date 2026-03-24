@@ -31,4 +31,5 @@ export class LandingPage implements OnInit {
   ngOnInit() { this.analytics.landingView(); }
 
   goLogin() { this.router.navigate(['/login']); }
+  goDicas()  { this.router.navigate(['/dicas']); }
 }
