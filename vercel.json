@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/dicas-maternidade.html", "destination": "/dicas-maternidade.html" },
+    { "source": "/((?!dicas-maternidade\\.html).*)", "destination": "/index.html" }
+  ]
+}
