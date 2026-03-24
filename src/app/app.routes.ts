@@ -36,6 +36,11 @@ export const routes: Routes = [
       import('./pages/cha/cha.page').then((m) => m.ChaPage),
   },
   {
+    path: 'dicas',
+    loadComponent: () =>
+      import('./pages/dicas/dicas.page').then((m) => m.DicasPage),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
