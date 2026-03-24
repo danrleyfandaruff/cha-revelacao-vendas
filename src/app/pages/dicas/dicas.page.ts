@@ -1,4 +1,5 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 
 export type Categoria = 'todas' | 'gravidez' | 'revelacao' | 'bebe' | 'presentes';
@@ -219,11 +220,13 @@ const DICAS: Dica[] = [
   imports: [IonContent],
 })
 export class DicasPage {
+  private router = inject(Router);
+
   readonly WA_GROUP_LINK = 'https://chat.whatsapp.com/Jck0GuQi9UD4On5dP1gsLk?mode=gi_t';
-  readonly PRODUTO_LINK = 'https://cha-revelacao-produto.vercel.app';
 
   categoriaAtiva = signal<Categoria>('todas');
   expandedId = signal<number | null>(null);
+  modalDica = signal<Dica | null>(null);
 
   categorias: { id: Categoria; label: string; emoji: string }[] = [
     { id: 'todas',     label: 'Todas as Dicas', emoji: '✨' },
@@ -251,12 +254,23 @@ export class DicasPage {
     return this.expandedId() === index;
   }
 
+  openModal(dica: Dica, event: Event) {
+    event.stopPropagation();
+    this.modalDica.set(dica);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeModal() {
+    this.modalDica.set(null);
+    document.body.style.overflow = '';
+  }
+
   openWhatsApp() {
     window.open(this.WA_GROUP_LINK, '_blank');
   }
 
   openProduto() {
-    window.open(this.PRODUTO_LINK, '_blank');
+    this.router.navigate(['/']);
   }
 
   tagClass(cat: Categoria): string {

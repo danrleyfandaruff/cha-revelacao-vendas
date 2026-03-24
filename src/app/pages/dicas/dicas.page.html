@@ -43,30 +43,10 @@
     </div>
   </div>
 
-  <!-- PRODUTO DESTAQUE (proeminente!) -->
-  <div class="produto-destaque">
-    <div class="produto-destaque-inner">
-      <div class="produto-badge">⭐ SOLUÇÃO COMPLETA</div>
-      <h2>Organize seu Chá com Lista de Presentes Online</h2>
-      <p>Crie em minutos uma lista personalizada. Seus convidados escolhem presentes sem duplicatas, você acompanha tudo em tempo real.</p>
-      <div class="produto-features">
-        <span class="feat">✅ Sem presentes repetidos</span>
-        <span class="feat">✅ Confirmação de presença</span>
-        <span class="feat">✅ Acompanhe em tempo real</span>
-        <span class="feat">✅ Link fácil de compartilhar</span>
-      </div>
-      <button class="produto-btn" (click)="openProduto()">
-        🎀 Criar minha Lista de Presentes
-        <span class="btn-arrow">→</span>
-      </button>
-      <p class="produto-sub">Já usado por centenas de mamães em todo o Brasil</p>
-    </div>
-  </div>
-
   <!-- TABS -->
   <section class="tabs-section">
     <h2 class="tabs-title">Dicas para cada momento ✨</h2>
-    <p class="tabs-sub">Toque em uma dica para ver mais detalhes</p>
+    <p class="tabs-sub">Toque em uma dica para abrir os detalhes</p>
     <div class="tabs">
       @for (cat of categorias; track cat.id) {
         <button
@@ -86,10 +66,9 @@
       @for (dica of dicasFiltradas(); track $index) {
         <div
           [class]="cardClass(dica)"
-          [class.is-expanded]="isExpanded($index)"
-          (click)="toggleExpand($index)"
+          (click)="openModal(dica, $event)"
           role="button"
-          [attr.aria-expanded]="isExpanded($index)"
+          tabindex="0"
         >
           <span class="tip-card-tag" [class]="tagClass(dica.categoria)">
             {{ tagLabel(dica.categoria) }}
@@ -98,23 +77,10 @@
           <div class="tip-card-title">{{ dica.titulo }}</div>
           <div class="tip-card-text">{{ dica.resumo }}</div>
 
-          <div class="expand-toggle">
-            <span class="expand-label">{{ isExpanded($index) ? 'Ver menos' : 'Ver mais' }}</span>
-            <span class="expand-icon" [class.rotated]="isExpanded($index)">▾</span>
+          <div class="ver-mais-row">
+            <span class="ver-mais-label">Ver mais</span>
+            <span class="ver-mais-icon">→</span>
           </div>
-
-          @if (isExpanded($index)) {
-            <div class="tip-card-details">
-              <p>{{ dica.detalhes }}</p>
-            </div>
-          }
-
-          <!-- CTA inline para dicas de presentes em destaque -->
-          @if (dica.destaque && isExpanded($index)) {
-            <button class="inline-cta" (click)="$event.stopPropagation(); openProduto()">
-              🎀 Criar minha Lista Agora →
-            </button>
-          }
         </div>
       }
     </div>
@@ -133,6 +99,26 @@
         </svg>
         Quero Entrar no Grupo!
       </button>
+    </div>
+  </div>
+
+  <!-- PRODUTO DESTAQUE -->
+  <div class="produto-destaque">
+    <div class="produto-destaque-inner">
+      <div class="produto-badge">⭐ SOLUÇÃO COMPLETA</div>
+      <h2>Organize seu Chá com Lista de Presentes Online</h2>
+      <p>Crie em minutos uma lista personalizada. Seus convidados escolhem presentes sem duplicatas, você acompanha tudo em tempo real.</p>
+      <div class="produto-features">
+        <span class="feat">✅ Sem presentes repetidos</span>
+        <span class="feat">✅ Confirmação de presença</span>
+        <span class="feat">✅ Acompanhe em tempo real</span>
+        <span class="feat">✅ Link fácil de compartilhar</span>
+      </div>
+      <button class="produto-btn" (click)="openProduto()">
+        🎀 Criar minha Lista de Presentes
+        <span class="btn-arrow">→</span>
+      </button>
+      <p class="produto-sub">Já usado por centenas de mamães em todo o Brasil</p>
     </div>
   </div>
 
@@ -164,5 +150,54 @@
       </svg>
     </button>
   </div>
+
+  <!-- ── MODAL ─────────────────────────────────────────── -->
+  @if (modalDica()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+
+        <!-- handle bar -->
+        <div class="modal-handle"></div>
+
+        <!-- close btn -->
+        <button class="modal-close" (click)="closeModal()" aria-label="Fechar">✕</button>
+
+        <!-- header -->
+        <div class="modal-header">
+          <span class="modal-emoji">{{ modalDica()!.emoji }}</span>
+          <span class="modal-tag" [class]="tagClass(modalDica()!.categoria)">
+            {{ tagLabel(modalDica()!.categoria) }}
+          </span>
+          <h2 class="modal-title">{{ modalDica()!.titulo }}</h2>
+          <p class="modal-resumo">{{ modalDica()!.resumo }}</p>
+        </div>
+
+        <!-- divider -->
+        <div class="modal-divider"></div>
+
+        <!-- body -->
+        <div class="modal-body">
+          <p>{{ modalDica()!.detalhes }}</p>
+        </div>
+
+        <!-- CTA para dicas de presentes em destaque -->
+        @if (modalDica()!.destaque) {
+          <button class="modal-cta" (click)="openProduto()">
+            🎀 Criar minha Lista de Presentes →
+          </button>
+        }
+
+        <!-- wa cta -->
+        <button class="modal-wa" (click)="openWhatsApp()">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#fff"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.561 4.14 1.539 5.877L.057 23.997l6.304-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.882a9.875 9.875 0 01-5.032-1.378l-.361-.214-3.741.981.998-3.648-.235-.374A9.861 9.861 0 012.118 12C2.118 6.533 6.533 2.118 12 2.118S21.882 6.533 21.882 12 17.467 21.882 12 21.882z" fill="#fff"/>
+          </svg>
+          Entrar no Grupo das Mamães
+        </button>
+
+      </div>
+    </div>
+  }
 
 </ion-content>
