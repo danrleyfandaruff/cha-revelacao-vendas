@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent, IonButton, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-landing',
@@ -13,7 +14,7 @@ import { arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons';
   standalone: true,
   imports: [IonContent, IonButton, IonIcon],
 })
-export class LandingPage {
+export class LandingPage implements OnInit {
   features = [
     { icon: '🧷', title: 'Fraldas + presentes', desc: 'Organize dois tipos de lista: fraldas por tamanho e mimos personalizados.' },
     { icon: '🔒', title: 'Sem duplicação', desc: 'O sistema reserva automaticamente. Dois convidados não pegam o mesmo item.' },
@@ -23,9 +24,11 @@ export class LandingPage {
     { icon: '🔗', title: 'Link personalizado', desc: 'Seu evento tem um link único com o nome do bebê.' },
   ];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private analytics: AnalyticsService) {
     addIcons({ arrowForwardOutline, checkmarkCircleOutline });
   }
+
+  ngOnInit() { this.analytics.landingView(); }
 
   goLogin() { this.router.navigate(['/login']); }
 }

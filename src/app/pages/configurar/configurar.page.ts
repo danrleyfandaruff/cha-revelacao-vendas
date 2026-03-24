@@ -8,6 +8,7 @@ import {
 import { addIcons } from 'ionicons';
 import { addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline } from 'ionicons/icons';
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import {ToastController} from "@ionic/angular";
 
 // ── Suggestions data ──────────────────────────────────────────────────────────
@@ -154,6 +155,7 @@ export class ConfigurarPage implements OnInit {
   nextTutorialStep() {
     const next = this.tutorialStep() + 1;
     if (next > this.TUTORIAL_STEPS.length) {
+      this.analytics.tutorialCompleted();
       this.dismissTutorial();
     } else {
       this.tutorialStep.set(next);
@@ -161,6 +163,7 @@ export class ConfigurarPage implements OnInit {
   }
 
   dismissTutorial() {
+    this.analytics.tutorialSkipped(this.tutorialStep());
     localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
     this.tutorialStep.set(0);
   }
@@ -210,7 +213,7 @@ export class ConfigurarPage implements OnInit {
 
   @ViewChild('linkCard', { read: ElementRef }) linkCardRef?: ElementRef;
 
-  constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController) {
+  constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService) {
     addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline });
   }
 
@@ -379,8 +382,8 @@ export class ConfigurarPage implements OnInit {
         sort_order:         idx,
       }));
       await this.supa.replaceItems(ev.id, itemsPayload as any);
+      this.analytics.configSaved(this.eventType());
       if (!ev.paid) {
-        // Mostra sheet de ativação em vez de toast simples
         this.showActivationSheet.set(true);
       } else {
         this.showToast('Salvo com sucesso! 🎉');

@@ -5,6 +5,7 @@ import {
   IonContent, IonButton, IonSpinner, IonToast,
 } from '@ionic/angular/standalone';
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 type Step = 'fraldas' | 'mimos';
 
@@ -98,7 +99,7 @@ export class ChaPage implements OnInit {
     this.fraldasInCart().length > 0 && this.mimosInCart().length > 0
   );
 
-  constructor(private route: ActivatedRoute, private supa: SupabaseService) {}
+  constructor(private route: ActivatedRoute, private supa: SupabaseService, private analytics: AnalyticsService) {}
 
   async ngOnInit() {
     const slug = this.route.snapshot.queryParamMap.get('e');
@@ -181,6 +182,7 @@ export class ChaPage implements OnInit {
       setTimeout(() => this.step.set('mimos'), 600);
     } else {
       this.cart.update(arr => [...arr, cartItem]);
+      this.analytics.guestAddedToCart(item.category);
       this.showToast(`${item.emoji} ${item.name} adicionado!`);
     }
   }
@@ -209,6 +211,7 @@ export class ChaPage implements OnInit {
       localStorage.setItem(this.confirmKey, JSON.stringify(confirmation));
     }
 
+    this.analytics.guestConfirmedPresence();
     this.confirmed.set(true);
     this.confirmSubmitting.set(false);
   }
@@ -272,6 +275,7 @@ export class ChaPage implements OnInit {
       localStorage.setItem(this.storageKey, JSON.stringify(saved));
     }
 
+    this.analytics.guestFinalized();
     this.closeModal();
     this.state.set('done');
     this.submitting.set(false);

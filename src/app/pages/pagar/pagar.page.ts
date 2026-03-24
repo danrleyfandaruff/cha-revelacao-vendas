@@ -7,6 +7,7 @@ import {
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { SupabaseService } from '../../services/supabase.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-pagar',
@@ -35,7 +36,7 @@ export class PagarPage implements OnInit {
     '30 dias com reservas abertas aos convidados',
   ];
 
-  constructor(private supa: SupabaseService, private router: Router) {
+  constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService) {
     addIcons({ arrowBackOutline, checkmarkCircleOutline });
   }
 
@@ -57,6 +58,7 @@ export class PagarPage implements OnInit {
   }
 
   goToStripe() {
+    this.analytics.goToStripe();
     // Stripe Payment Links não aceitam success_url por parâmetro —
     // a URL de retorno deve ser configurada no Dashboard do Stripe.
     // Passamos apenas o client_reference_id para identificar o usuário.
