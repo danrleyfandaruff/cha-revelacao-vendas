@@ -778,6 +778,11 @@ export class DicasPage {
     this.router.navigate(['/']);
   }
 
+  goConvite() {
+    this.closeModal();
+    this.router.navigate(['/convite']);
+  }
+
   tagClass(cat: Categoria): string {
     return {
       gravidez:  'tag-gravida',
