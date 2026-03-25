@@ -775,7 +775,8 @@ export class DicasPage {
   }
 
   openProduto() {
-    this.router.navigate(['/']);
+    this.closeModal();
+    this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } });
   }
 
   goConvite() {

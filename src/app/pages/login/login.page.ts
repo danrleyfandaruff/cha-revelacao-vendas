@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonButton, IonSpinner,
@@ -7,6 +7,7 @@ import {
 import { ToastController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { take } from 'rxjs/operators';
 
 type Tab = 'entrar' | 'cadastrar';
 
@@ -26,11 +27,16 @@ export class LoginPage {
   constructor(
     private supa: SupabaseService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastCtrl: ToastController,
     private analytics: AnalyticsService,
   ) {
     this.supa.getSession().then(s => {
       if (s) this.router.navigate(['/configurar'], { replaceUrl: true });
+    });
+
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['tab'] === 'cadastrar') this.tab.set('cadastrar');
     });
   }
 
