@@ -292,6 +292,7 @@ export class ConvitePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private drawSparkle(x: number, y: number, sz: number, alpha: number, color: string) {
+    if (sz <= 0) return;
     const ctx = this.ctx;
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -495,7 +496,7 @@ export class ConvitePage implements OnInit, AfterViewInit, OnDestroy {
       s.life++;
       const prog = s.life / s.maxLife;
       const alpha = prog < 0.25 ? prog/0.25 : 1 - (prog-0.25)/0.75;
-      this.drawSparkle(s.x, s.y, s.sz * Math.sin(prog * Math.PI), alpha * 0.7, s.color);
+      this.drawSparkle(s.x, s.y, Math.max(0, s.sz * Math.sin(prog * Math.PI)), alpha * 0.7, s.color);
     });
 
     /* ── Footer emojis ───────────────────────────────────── */
