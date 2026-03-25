@@ -1,0 +1,116 @@
+<ion-content>
+  <div class="page">
+
+    <!-- TOP BAR (somente no modo criação) -->
+    @if (!isShareMode) {
+      <header class="top-bar">
+        <button class="back-btn" (click)="goBack()">← Voltar</button>
+        <span class="top-title">Convite Digital 💌</span>
+      </header>
+    }
+
+    <!-- SHARE MODE: header animado -->
+    @if (isShareMode) {
+      <div class="share-hero">
+        <div class="share-confete-hint">🎉</div>
+        <div class="share-heading">Você foi convidada!</div>
+        <div class="share-sub">Veja o convite abaixo e salve para compartilhar</div>
+      </div>
+    }
+
+    <div class="layout" [class.share-layout]="isShareMode">
+
+      <!-- ── FORM (somente no modo criação) ────────────── -->
+      @if (!isShareMode) {
+        <div class="form-card">
+          <h2 class="form-h">Personalize seu convite</h2>
+
+          <label class="field">
+            <span>Nome da mamãe</span>
+            <input type="text" placeholder="Ex: Ana Paula" [(ngModel)]="nome" (ngModelChange)="saveDraft()" />
+          </label>
+
+          <label class="field">
+            <span>Data do chá</span>
+            <input type="date" [(ngModel)]="data" (ngModelChange)="saveDraft()" />
+          </label>
+
+          <label class="field">
+            <span>Local</span>
+            <input type="text" placeholder="Ex: Rua das Flores, 123 — SP" [(ngModel)]="local" (ngModelChange)="saveDraft()" />
+          </label>
+
+          <label class="field">
+            <span>Mensagem especial (opcional)</span>
+            <input type="text" placeholder="Ex: Venha celebrar conosco!" [(ngModel)]="mensagem" (ngModelChange)="saveDraft()" />
+          </label>
+
+          <div class="tema-wrap">
+            <span class="field-label">Tipo de evento</span>
+            <div class="tema-row">
+              @for (t of tipoList; track t.id) {
+                <button
+                  class="tema-btn"
+                  [class.ativo]="tipo === t.id"
+                  (click)="tipo = t.id; saveDraft()"
+                >
+                  {{ t.emoji }} {{ t.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="tema-wrap">
+            <span class="field-label">Tema</span>
+            <div class="tema-row">
+              @for (t of temaList; track t.id) {
+                <button
+                  class="tema-btn"
+                  [class.ativo]="tema === t.id"
+                  (click)="setTema(t.id)"
+                >
+                  {{ t.emoji }} {{ t.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Ação 1: baixar PNG -->
+          <button class="dl-btn" (click)="download()">
+            ⬇ Baixar convite (PNG)
+          </button>
+          <p class="dl-hint">Salva como imagem — pronta para enviar no WhatsApp ✅</p>
+
+          <!-- Ação 2: link animado -->
+          <button class="share-link-btn" [class.copiado]="linkCopiado" (click)="copyLink()">
+            @if (linkCopiado) {
+              ✅ Link copiado!
+            } @else {
+              📤 Copiar link animado
+            }
+          </button>
+          <p class="dl-hint">Quem abrir o link vê os confetes ao vivo 🎉</p>
+        </div>
+      }
+
+      <!-- ── CANVAS (sempre no DOM) ─────────────────────── -->
+      <div class="preview-wrap" [class.share-preview]="isShareMode">
+        @if (!isShareMode) {
+          <p class="preview-label">Prévia ao vivo ✨</p>
+        }
+        <div class="cvs-box" [class.share-cvs-box]="isShareMode">
+          <canvas #cvs></canvas>
+        </div>
+
+        <!-- Ações do share mode -->
+        @if (isShareMode) {
+          <div class="share-actions">
+            <button class="share-dl-btn" (click)="download()">⬇ Salvar imagem</button>
+            <button class="share-create-btn" (click)="goCreate()">💌 Criar o meu convite</button>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</ion-content>

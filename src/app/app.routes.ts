@@ -41,6 +41,11 @@ export const routes: Routes = [
       import('./pages/dicas/dicas.page').then((m) => m.DicasPage),
   },
   {
+    path: 'convite',
+    loadComponent: () =>
+      import('./pages/convite/convite.page').then((m) => m.ConvitePage),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
