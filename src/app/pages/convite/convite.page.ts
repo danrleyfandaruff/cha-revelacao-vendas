@@ -143,7 +143,18 @@ export class ConvitePage implements OnInit, AfterViewInit, OnDestroy {
 
   /* ── Public ─────────────────────────────────────────── */
 
-  setTema(t: Tema) { this.tema = t; this.initPts(); this.saveDraft(); }
+  setTema(t: Tema) {
+    this.tema = t;
+    this.initPts();
+    this.saveDraft();
+    this.zone.runOutsideAngular(() => this.draw());
+  }
+
+  setTipo(t: TipoEvento) {
+    this.tipo = t;
+    this.saveDraft();
+    this.zone.runOutsideAngular(() => this.draw());
+  }
 
   saveDraft() {
     try {
@@ -239,7 +250,7 @@ export class ConvitePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loop() {
-    this.draw();
+    try { this.draw(); } catch (e) { console.error('[convite] draw error:', e); }
     this.raf = requestAnimationFrame(() => this.loop());
   }
 

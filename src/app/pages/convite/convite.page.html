@@ -52,7 +52,7 @@
                 <button
                   class="tema-btn"
                   [class.ativo]="tipo === t.id"
-                  (click)="tipo = t.id; saveDraft()"
+                  (click)="setTipo(t.id)"
                 >
                   {{ t.emoji }} {{ t.label }}
                 </button>
