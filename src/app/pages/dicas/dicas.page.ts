@@ -1,6 +1,11 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
+
+const PROMO_KEY     = 'promo_expiry';
+const PROMO_MINUTES = 20;
+const PROMO_PRICE   = '19,90';
+const FULL_PRICE    = '39,90';
 
 export type Categoria = 'todas' | 'gravidez' | 'revelacao' | 'bebe' | 'presentes' | 'economia';
 export type Palpite = 'menino' | 'menina' | null;
@@ -528,11 +533,52 @@ A maioria dos convidados PREFERE ter uma lista — remove a pressão de adivinha
   standalone: true,
   imports: [IonContent],
 })
-export class DicasPage {
+export class DicasPage implements OnDestroy {
   private router = inject(Router);
 
   readonly WA_GROUP_LINK = 'https://chat.whatsapp.com/Jck0GuQi9UD4On5dP1gsLk?mode=gi_t';
 
+  /* ── Promoção ────────────────────────────────────────── */
+  readonly promoPrice = PROMO_PRICE;
+  readonly fullPrice  = FULL_PRICE;
+  promoAtivo = false;
+  promoTimer = '';
+  private promoTick: ReturnType<typeof setInterval> | null = null;
+
+  constructor() { this.initPromo(); }
+
+  ngOnDestroy() { if (this.promoTick) clearInterval(this.promoTick); }
+
+  private initPromo() {
+    try {
+      let expiry = Number(localStorage.getItem(PROMO_KEY) ?? '0');
+      if (!expiry || expiry < Date.now()) {
+        expiry = Date.now() + PROMO_MINUTES * 60 * 1000;
+        localStorage.setItem(PROMO_KEY, String(expiry));
+      }
+      this.atualizarTimer(expiry);
+      this.promoTick = setInterval(() => this.atualizarTimer(expiry), 1000);
+    } catch {}
+  }
+
+  private atualizarTimer(expiry: number) {
+    const diff = Math.max(0, expiry - Date.now());
+    if (diff === 0) {
+      this.promoAtivo = false;
+      if (this.promoTick) clearInterval(this.promoTick);
+      return;
+    }
+    this.promoAtivo = true;
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    this.promoTimer = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  goCadastro() {
+    this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } });
+  }
+
+  /* ── Filtros ─────────────────────────────────────────── */
   categoriaAtiva = signal<Categoria>('todas');
   expandedId = signal<number | null>(null);
   modalDica = signal<Dica | null>(null);

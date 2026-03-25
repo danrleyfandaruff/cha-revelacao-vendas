@@ -61,6 +61,15 @@
     </div>
   </div>
 
+  <!-- BANNER PROMOÇÃO -->
+  @if (promoAtivo) {
+    <div class="promo-banner" (click)="goCadastro()">
+      <span class="promo-left">🔥 Lista de presentes <strong>R$&nbsp;{{ promoPrice }}</strong> <s>{{ fullPrice }}</s></span>
+      <span class="promo-timer">{{ promoTimer }}</span>
+      <span class="promo-cta">Criar →</span>
+    </div>
+  }
+
   <!-- TABS -->
   <section class="tabs-section">
     <h2 class="tabs-title">Dicas para cada momento ✨</h2>
