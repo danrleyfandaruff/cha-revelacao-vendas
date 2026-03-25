@@ -3,6 +3,16 @@ import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 
 export type Categoria = 'todas' | 'gravidez' | 'revelacao' | 'bebe' | 'presentes' | 'economia';
+export type Palpite = 'menino' | 'menina' | null;
+
+export interface QuizItem {
+  emoji: string;
+  titulo: string;
+  descricao: string;
+  peso: number;      // 1–5 — weight used in final score
+  estrelas: string;  // display stars e.g. "★★★★☆"
+  fonte: string;     // short accuracy note shown in PDF
+}
 
 export interface Dica {
   emoji: string;
@@ -12,6 +22,7 @@ export interface Dica {
   categoria: Categoria;
   destaque?: boolean;
   cor?: 'pink' | 'blue' | 'gold' | 'brown';
+  quiz?: QuizItem[];
 }
 
 const DICAS: Dica[] = [
@@ -149,6 +160,126 @@ Para a mesa de doces, rocambole com doce de leite ou goiabada custa pouco, rende
     resumo: 'Salgados finos, doces temáticos e uma mesa bem montada fazem toda a diferença.',
     detalhes: 'Aposte em salgados de festa tradicionais (coxinha, empada, mini quiche) mais 2-3 opções especiais. Para a mesa de doces: brigadeiro, beijinho, bem-casado, macarons e cupcakes decorados com o tema. Opções sem glúten e veganas são bem-vindas. Mesa neutra antes da revelação (branco, dourado, bege) e após, adicione balões e elementos na cor do bebê. Hidratação: sucos naturais, limonada e água com frutas.',
     categoria: 'revelacao',
+  },
+  {
+    emoji: '🔮',
+    titulo: 'Menino ou menina? Todas as superstições e brincadeiras',
+    resumo: 'Tabela chinesa, pêndulo, brincadeira da colher e muito mais. Vale a diversão!',
+    detalhes: `Nenhuma dessas previsões é científica — mas são divertidíssimas de fazer no chá! Reúna os convidados e testem juntos 😄
+
+📊 TABELA CHINESA (pode fazer online)
+Cruza a idade lunar da mãe na concepção com o mês lunar da concepção. Procure "tabela chinesa de gravidez" no Google e insira suas datas — resultado na hora. Dizem ter 70% de acerto... ou não 😄
+
+💓 BATIMENTO CARDÍACO
+Acima de 140 bpm = menina / Abaixo de 140 bpm = menino. Veja no laudo do ultrassom. Estudos mostram que não tem base científica, mas todo mundo adora checar.
+
+🔺 FORMATO DA BARRIGA
+Barriga pontuda para frente = menino / Barriga redonda e larga = menina. Faça uma votação ao vivo no chá com os convidados!
+
+🍕 DESEJO NA GRAVIDEZ
+Vontade de doce = menina / Vontade de salgado e azedo = menino. Conta o que você mais comeu e veja quem acerta.
+
+🍋 TESTE DO BICARBONATO (sugestão para fazer em casa)
+2 colheres de bicarbonato em um copo + um pouco de urina da manhã. Borbulhou muito = menino / Ficou quieto = menina. Divertido e completamente aleatório 😂
+
+💍 PÊNDULO DO ANEL (brincadeira ao vivo no chá)
+Passe o anel de casamento em um fio ou cabelo. Segure sobre a barriga. Balança em círculo = menina / De um lado para o outro = menino. Ótima para fazer na frente de todos!
+
+🥄 BRINCADEIRA DA COLHER E DO GARFO
+Esconda uma colher embaixo de uma cadeira e um garfo embaixo de outra. Peça para a grávida escolher sem saber o que tem embaixo. Colher = menina / Garfo = menino. Simples, hilária, a reação é a melhor parte.
+
+🔑 BRINCADEIRA DA CHAVE
+Coloque uma chave sobre a mesa e peça para a grávida pegá-la naturalmente. Pegou pela parte redonda = menina / Pegou pela ponta longa = menino. Pode variar com tesoura e colher — veja o que ela pega primeiro.
+
+🫀 TEORIA DO CRÂNIO (ultrassom)
+Olhe o perfil do bebê no ultrassom. Fronte arredondada e maxilar suave = menina / Testa mais proeminente e queixo quadrado = menino. Vire o ultrassom para os convidados e peça um palpite de cada um!
+
+💡 DICA: MONTE UMA VOTAÇÃO AO VIVO
+Crie dois times — Menino vs Menina. A cada brincadeira, quem acertou ganha ponto. Revele o resultado no final com o bolo ou a fumaça. Os convidados ficam engajados o evento inteiro e a revelação fica ainda mais emocionante!`,
+    categoria: 'revelacao',
+    cor: 'pink',
+    quiz: [
+      {
+        emoji: '🔬',
+        titulo: 'Lado do Saco Gestacional',
+        descricao: 'Lado direito do utero = menino / Lado esquerdo = menina',
+        peso: 5,
+        estrelas: '★★★★★',
+        fonte: 'Nub Theory — estudos apontam ate 97% de acerto apos 12 semanas quando analisado por especialista',
+      },
+      {
+        emoji: '📊',
+        titulo: 'Tabela Chinesa',
+        descricao: 'Cruzou idade lunar da mae com mes lunar da concepcao',
+        peso: 4,
+        estrelas: '★★★★☆',
+        fonte: 'A mais famosa do mundo — estudos independentes apontam ~55% de acerto (levemente acima do acaso)',
+      },
+      {
+        emoji: '🫀',
+        titulo: 'Teoria do Cranio',
+        descricao: 'Fronte arredondada = menina / Testa proeminente = menino',
+        peso: 3,
+        estrelas: '★★★☆☆',
+        fonte: 'Baseada em diferencas anatomicas reais — alguns estudos relatam ~70% de acerto no ultrassom',
+      },
+      {
+        emoji: '💓',
+        titulo: 'Batimento Cardiaco',
+        descricao: '+140 bpm = menina / -140 bpm = menino',
+        peso: 2,
+        estrelas: '★★☆☆☆',
+        fonte: 'Popular, mas estudos controlados nao encontraram correlacao significativa com o sexo',
+      },
+      {
+        emoji: '🔺',
+        titulo: 'Formato da Barriga',
+        descricao: 'Pontuda = menino / Redonda e larga = menina',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Sem base cientifica — formato depende da musculatura e posicao do bebe',
+      },
+      {
+        emoji: '🍕',
+        titulo: 'Desejo na Gravidez',
+        descricao: 'Doce = menina / Salgado e azedo = menino',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Sem evidencias cientificas — desejos variam por carencias nutricionais e habitos',
+      },
+      {
+        emoji: '🍋',
+        titulo: 'Teste do Bicarbonato',
+        descricao: 'Borbulhou muito = menino / Ficou quieto = menina',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Sem base cientifica — reacao depende do pH urinario, nao do sexo do bebe',
+      },
+      {
+        emoji: '💍',
+        titulo: 'Pendulo do Anel',
+        descricao: 'Circulo = menina / Vai e vem = menino',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Pura diversao — movimento causado pelo ideomotor (microtremores involuntarios)',
+      },
+      {
+        emoji: '🥄',
+        titulo: 'Colher e Garfo',
+        descricao: 'Sentou na colher = menina / No garfo = menino',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Brincadeira tradicional sem base cientifica — mas a reacao da gravida e hilaria!',
+      },
+      {
+        emoji: '🔑',
+        titulo: 'Brincadeira da Chave',
+        descricao: 'Pegou pela parte redonda = menina / Pela ponta = menino',
+        peso: 1,
+        estrelas: '★☆☆☆☆',
+        fonte: 'Tradicao popular sem embasamento — resultado depende do habito de pegar a chave',
+      },
+    ],
   },
   {
     emoji: '📸',
@@ -433,15 +564,210 @@ export class DicasPage {
     return this.expandedId() === index;
   }
 
+  // ── quiz state ─────────────────────────────────────────
+  quizRespostas = signal<Record<number, Palpite>>({});
+
+  quizTotal = computed(() => {
+    const r = this.quizRespostas();
+    const dica = this.modalDica();
+    const quiz = dica?.quiz ?? [];
+    let pesoMenino = 0, pesoMenina = 0, contMenino = 0, contMenina = 0, total = 0;
+    quiz.forEach((item, i) => {
+      const resp = r[i];
+      if (resp === 'menino') { pesoMenino += item.peso; contMenino++; total++; }
+      else if (resp === 'menina') { pesoMenina += item.peso; contMenina++; total++; }
+    });
+    const pesoTotal = pesoMenino + pesoMenina;
+    const pctMenino = pesoTotal ? Math.round((pesoMenino / pesoTotal) * 100) : 0;
+    const pctMenina = pesoTotal ? Math.round((pesoMenina / pesoTotal) * 100) : 0;
+    return { menino: contMenino, menina: contMenina, pesoMenino, pesoMenina, pctMenino, pctMenina, total };
+  });
+
+  quizTemResposta = computed(() => this.quizTotal().total > 0);
+
+  setPalpite(index: number, valor: Palpite) {
+    this.quizRespostas.update(r => ({ ...r, [index]: valor }));
+  }
+
+  getPalpite(index: number): Palpite {
+    return this.quizRespostas()[index] ?? null;
+  }
+
   openModal(dica: Dica, event: Event) {
     event.stopPropagation();
     this.modalDica.set(dica);
+    this.quizRespostas.set({});
     document.body.style.overflow = 'hidden';
+  }
+
+  openQuizModal() {
+    const quizDica = DICAS.find(d => d.quiz && d.quiz.length > 0);
+    if (quizDica) {
+      this.modalDica.set(quizDica);
+      this.quizRespostas.set({});
+      document.body.style.overflow = 'hidden';
+    }
   }
 
   closeModal() {
     this.modalDica.set(null);
+    this.quizRespostas.set({});
     document.body.style.overflow = '';
+  }
+
+  gerarPdf() {
+    const dica = this.modalDica();
+    if (!dica?.quiz) return;
+    const { pctMenino, pctMenina, pesoMenino, pesoMenina, menino, menina, total } = this.quizTotal();
+    const vencedor = pesoMenino > pesoMenina ? 'MENINO' : pesoMenina > pesoMenino ? 'MENINA' : 'EMPATE';
+    const respondidas = total;
+    const totalPerguntas = dica.quiz.length;
+
+    // ── Canvas chart (emoji ok here) ──────────────────────
+    const canvas = document.createElement('canvas');
+    canvas.width = 500; canvas.height = 220;
+    const ctx = canvas.getContext('2d')!;
+
+    // bg
+    ctx.fillStyle = '#fff8f0';
+    ctx.fillRect(0, 0, 500, 220);
+
+    // title
+    ctx.fillStyle = '#3d2314';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('Pontuacao ponderada por confiabilidade', 20, 22);
+
+    const maxW = 360;
+    // bar menino
+    ctx.fillStyle = '#dbeafe';
+    ctx.beginPath(); ctx.roundRect(20, 36, maxW, 68, 8); ctx.fill();
+    ctx.fillStyle = '#3a8fd4';
+    ctx.beginPath(); ctx.roundRect(20, 36, Math.max((pctMenino / 100) * maxW, 4), 68, 8); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText(`${pctMenino}%`, 30, 77);
+    ctx.font = '13px sans-serif';
+    ctx.fillText(`Menino — ${menino} respostas / peso ${pesoMenino}`, 30, 94);
+
+    // bar menina
+    ctx.fillStyle = '#fce7f3';
+    ctx.beginPath(); ctx.roundRect(20, 118, maxW, 68, 8); ctx.fill();
+    ctx.fillStyle = '#e0608a';
+    ctx.beginPath(); ctx.roundRect(20, 118, Math.max((pctMenina / 100) * maxW, 4), 68, 8); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText(`${pctMenina}%`, 30, 159);
+    ctx.font = '13px sans-serif';
+    ctx.fillText(`Menina — ${menina} respostas / peso ${pesoMenina}`, 30, 176);
+
+    // note
+    ctx.fillStyle = '#9a7050';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(`${respondidas} de ${totalPerguntas} brincadeiras respondidas`, 20, 210);
+
+    const imgData = canvas.toDataURL('image/png');
+
+    // ── jsPDF ─────────────────────────────────────────────
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { jsPDF } = (window as any).jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210;
+
+    // Header
+    doc.setFillColor(61, 35, 20);
+    doc.rect(0, 0, W, 52, 'F');
+    doc.setTextColor(201, 149, 62);
+    doc.setFontSize(24); doc.setFont('helvetica', 'bold');
+    doc.text('Menino ou Menina?', W / 2, 22, { align: 'center' });
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+    doc.text('Resultado das Supersticoes e Brincadeiras com Ponderacao', W / 2, 33, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(`${respondidas} de ${totalPerguntas} brincadeiras respondidas`, W / 2, 43, { align: 'center' });
+
+    // Veredicto box
+    const isEmpate = pesoMenino === pesoMenina;
+    const isMenino = pesoMenino > pesoMenina;
+    if (isMenino)       doc.setFillColor(219, 234, 254);
+    else if (!isEmpate) doc.setFillColor(252, 231, 243);
+    else                doc.setFillColor(247, 243, 236);
+    doc.roundedRect(15, 59, W - 30, 26, 7, 7, 'F');
+
+    if (isMenino)       doc.setTextColor(37, 99, 200);
+    else if (!isEmpate) doc.setTextColor(190, 24, 93);
+    else                doc.setTextColor(100, 80, 50);
+    doc.setFontSize(17); doc.setFont('helvetica', 'bold');
+    doc.text(`Resultado: ${vencedor}`, W / 2, 75, { align: 'center' });
+
+    // Score summary line
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 80, 50);
+    doc.text(`Pontuacao ponderada — Menino: ${pesoMenino} pts (${pctMenino}%)   Menina: ${pesoMenina} pts (${pctMenina}%)`, W / 2, 90, { align: 'center' });
+
+    // Chart
+    doc.addImage(imgData, 'PNG', 15, 96, 180, 66);
+
+    // Legend
+    doc.setFontSize(8); doc.setTextColor(130, 100, 60);
+    doc.text('* Pontuacao ponderada: metodos com maior base cientifica valem mais pontos no calculo final.', 15, 168);
+
+    // Divider
+    doc.setDrawColor(201, 149, 62); doc.setLineWidth(0.4);
+    doc.line(15, 173, W - 15, 173);
+
+    // Table header
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(61, 35, 20);
+    doc.text('Detalhamento por brincadeira', 15, 182);
+
+    // Column headers
+    doc.setFontSize(8); doc.setTextColor(120, 90, 50);
+    doc.text('Brincadeira', 15, 190);
+    doc.text('Confiabilidade', 108, 190, { align: 'center' });
+    doc.text('Peso', 148, 190, { align: 'center' });
+    doc.text('Resultado', 185, 190, { align: 'right' });
+    doc.setDrawColor(220, 200, 170); doc.setLineWidth(0.2);
+    doc.line(15, 192, W - 15, 192);
+
+    let y = 200;
+    const respostas = this.quizRespostas();
+
+    dica.quiz!.forEach((item, i) => {
+      const resp = respostas[i];
+      const respLabel = resp === 'menino' ? 'Menino' : resp === 'menina' ? 'Menina' : '—';
+      const corResp: [number, number, number] = resp === 'menino' ? [37, 99, 200] : resp === 'menina' ? [190, 24, 93] : [160, 140, 120];
+
+      // Alternating row bg
+      if (i % 2 === 0) { doc.setFillColor(252, 248, 242); doc.rect(15, y - 5, W - 30, 12, 'F'); }
+
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(61, 35, 20);
+      doc.text(item.titulo, 17, y);
+
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(140, 100, 40);
+      doc.setFontSize(8);
+      doc.text(item.estrelas, 108, y, { align: 'center' });
+
+      doc.setTextColor(100, 80, 50);
+      doc.text(`${item.peso} pts`, 148, y, { align: 'center' });
+
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(...corResp);
+      doc.text(respLabel, 185, y, { align: 'right' });
+
+      // fonte line
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(150, 125, 95);
+      const fonteText = item.fonte.length > 95 ? item.fonte.substring(0, 92) + '...' : item.fonte;
+      doc.text(fonteText, 17, y + 4);
+
+      y += 14;
+      if (y > 275) { doc.addPage(); y = 20; }
+    });
+
+    // Footer
+    doc.setFontSize(8); doc.setTextColor(160, 130, 90);
+    doc.line(15, 285, W - 15, 285);
+    doc.text('Gerado por miminho.com.br', 15, 290);
+    doc.text('Lista de presentes online para o cha de bebe', W - 15, 290, { align: 'right' });
+
+    doc.save('menino-ou-menina.pdf');
   }
 
   openWhatsApp() {
