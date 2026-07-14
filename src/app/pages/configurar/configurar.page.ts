@@ -139,12 +139,6 @@ export class ConfigurarPage implements OnInit {
       desc: 'Toque em "Salvar e gerar link" para guardar tudo. Você pode editar quantas vezes quiser antes de ativar.',
       highlight: 'save',
     },
-    {
-      emoji: '🔓',
-      title: 'Ative e compartilhe',
-      desc: 'Com a lista salva, ative seu evento por R$19,90 — pagamento único. Seu link exclusivo fica disponível por 30 dias para os convidados escolherem os presentes.',
-      highlight: 'none',
-    },
   ];
 
   tutorialCurrent = computed(() => {

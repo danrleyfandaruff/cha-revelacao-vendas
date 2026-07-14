@@ -301,8 +301,7 @@
   @if (tutorialStep() > 0) {
     <div class="tut-overlay" (click)="closeTutorialTemporarily()"></div>
     <div class="tut-card"
-      [class.tut-save-bar]="tutorialCurrent()?.highlight === 'save'"
-      [class.tut-payment]="tutorialCurrent()?.highlight === 'none'">
+      [class.tut-save-bar]="tutorialCurrent()?.highlight === 'save'">
       <div class="tut-progress">
         @for (s of TUTORIAL_STEPS; track $index) {
           <div class="tut-dot" [class.active]="tutorialStep() === $index + 1"></div>
@@ -311,13 +310,6 @@
       <div class="tut-emoji">{{ tutorialCurrent()?.emoji }}</div>
       <div class="tut-title">{{ tutorialCurrent()?.title }}</div>
       <div class="tut-desc">{{ tutorialCurrent()?.desc }}</div>
-
-      @if (tutorialCurrent()?.highlight === 'none') {
-        <div class="tut-price-box">
-          <span class="tut-price">R$19,90</span>
-          <span class="tut-price-label">pagamento único · 30 dias de acesso</span>
-        </div>
-      }
 
       <div class="tut-actions">
         <button class="tut-skip" (click)="dismissTutorial()">Pular</button>
