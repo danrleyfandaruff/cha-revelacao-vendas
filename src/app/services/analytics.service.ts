@@ -23,6 +23,8 @@ export class AnalyticsService {
   configSaved(type: string): void  { this.send('config_saved', { type }); }
   tutorialCompleted(): void        { this.send('tutorial_completed'); }
   tutorialSkipped(step: number): void { this.send('tutorial_skipped', { step }); }
+  wizardCompleted(): void          { this.send('wizard_completed'); }
+  wizardSkipped(step: string): void { this.send('wizard_skipped', { step }); }
 
   // ── Resultados ───────────────────────────────────────────────────────────────
   resultadosView(): void           { this.send('resultados_view'); }

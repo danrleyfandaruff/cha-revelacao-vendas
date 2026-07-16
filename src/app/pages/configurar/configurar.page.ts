@@ -6,7 +6,7 @@ import {
   IonButtons, IonSpinner, IonToast, IonBadge, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline } from 'ionicons/icons';
+import { addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline, arrowBackOutline, calendarOutline } from 'ionicons/icons';
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import {ToastController} from "@ionic/angular";
@@ -206,13 +206,30 @@ export class ConfigurarPage implements OnInit {
   showActivationSheet = signal(false);
   showSuccessModal = signal(false);
   highlightLink = signal(false);
+  highlightPreview = signal(false);
   showQrModal = signal(false);
 
   @ViewChild('linkCard',    { read: ElementRef }) linkCardRef?: ElementRef;
+  @ViewChild('previewCard', { read: ElementRef }) previewCardRef?: ElementRef;
   @ViewChild('qrContainer', { read: ElementRef }) qrContainerRef?: ElementRef;
 
+  // ── Wizard de primeiro cadastro (cards estilo stories) ────────────────────────
+  wizardActive     = signal(false);
+  wizardStep       = signal(0);
+  wizardDirection  = signal<'fwd' | 'back'>('fwd');
+  private wizardTouchStartX = 0;
+
+  readonly wizardStepIds = computed<string[]>(() => {
+    const ids = ['intro', 'tipo'];
+    if (this.eventType() === 'bebe') ids.push('sexo');
+    ids.push('nome', 'local', 'data', 'final');
+    return ids;
+  });
+
+  wizardStepId = computed(() => this.wizardStepIds()[this.wizardStep()] ?? 'final');
+
   constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService) {
-    addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline });
+    addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline, arrowBackOutline, calendarOutline });
   }
 
   async ngOnInit() {
@@ -242,6 +259,10 @@ export class ConfigurarPage implements OnInit {
       if (this.eventType() === 'revelacao') {
         this.name2 = ev.baby_name_2;
       }
+      // Banco tem prioridade sobre o localStorage; se ainda não tiver sido salvo
+      // no banco (evento criado antes desta coluna existir), mantém o valor local.
+      if (ev.address)        this.eventAddress.set(ev.address);
+      if (ev.event_datetime) this.eventDatetime.set(this.isoToDatetimeLocal(ev.event_datetime));
       // Load existing items
       const items = await this.supa.getItems(ev.id);
       if (items.length) {
@@ -260,7 +281,14 @@ export class ConfigurarPage implements OnInit {
       this.initSuggestions();
     }
     this.loading.set(false);
-    this.checkTutorial();
+
+    if (!ev) {
+      // Primeiro acesso: o wizard guiado substitui o tutorial explicativo antigo
+      localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
+      this.wizardActive.set(true);
+    } else {
+      this.checkTutorial();
+    }
   }
 
   private initSuggestions() {
@@ -342,6 +370,19 @@ export class ConfigurarPage implements OnInit {
     } catch { /* ignora */ }
   }
 
+  private toIsoOrNull(local: string): string | null {
+    if (!local) return null;
+    const d = new Date(local.length === 16 ? local + ':00' : local);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  }
+
+  private isoToDatetimeLocal(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
   async save() {
     const isBebe = this.eventType() === 'bebe';
     if (!this.name1) { this.showToast('Digite o nome do bebê.'); return; }
@@ -355,12 +396,14 @@ export class ConfigurarPage implements OnInit {
       this.userId
     );
     const ev = await this.supa.upsertEvent({
-      user_id:     this.userId,
+      user_id:        this.userId,
       slug,
-      baby_name_1: this.name1,
-      baby_name_2: n2,
-      paid:        this.event()?.paid ?? false,
-      expires_at:  this.event()?.expires_at ?? null,
+      baby_name_1:    this.name1,
+      baby_name_2:    n2,
+      paid:           this.event()?.paid ?? false,
+      expires_at:     this.event()?.expires_at ?? null,
+      address:        this.eventAddress() || null,
+      event_datetime: this.toIsoOrNull(this.eventDatetime()),
     });
     this.saveMeta();
     this.event.set(ev);
@@ -382,7 +425,8 @@ export class ConfigurarPage implements OnInit {
       await this.supa.replaceItems(ev.id, itemsPayload as any);
       this.analytics.configSaved(this.eventType());
       if (!ev.paid) {
-        this.showActivationSheet.set(true);
+        this.showToast('Lista salva! Veja como seus convidados vão ver 👀');
+        this.highlightPreviewCard();
       } else {
         this.showToast('Salvo com sucesso! 🎉');
       }
@@ -397,6 +441,70 @@ export class ConfigurarPage implements OnInit {
       this.highlightLink.set(true);
       setTimeout(() => this.highlightLink.set(false), 3000);
     }, 300);
+  }
+
+  private highlightPreviewCard() {
+    setTimeout(() => {
+      this.previewCardRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.highlightPreview.set(true);
+      setTimeout(() => this.highlightPreview.set(false), 3000);
+    }, 300);
+  }
+
+  // Ativação é sempre uma escolha explícita do usuário — nunca abre sozinha
+  openActivation() {
+    this.showActivationSheet.set(true);
+  }
+
+  // ── Wizard de primeiro cadastro ────────────────────────────────────────────
+  wizardNext() {
+    this.saveMeta();
+    const ids = this.wizardStepIds();
+    if (this.wizardStep() < ids.length - 1) {
+      this.wizardDirection.set('fwd');
+      this.wizardStep.update(s => s + 1);
+    }
+  }
+
+  wizardBack() {
+    if (this.wizardStep() > 0) {
+      this.wizardDirection.set('back');
+      this.wizardStep.update(s => s - 1);
+    }
+  }
+
+  skipWizard() {
+    this.analytics.wizardSkipped(this.wizardStepId());
+    this.wizardActive.set(false);
+  }
+
+  selectWizardType(t: EventType) {
+    this.setEventType(t);
+    this.wizardNext();
+  }
+
+  selectWizardSex(s: BabySex) {
+    this.setBabySex(s);
+    this.wizardNext();
+  }
+
+  wizardCanContinueNome(): boolean {
+    if (this.eventType() === 'bebe') return !!this.name1.trim();
+    return !!this.name1.trim() && !!this.name2.trim();
+  }
+
+  onWizardTouchStart(ev: TouchEvent) {
+    this.wizardTouchStartX = ev.touches[0].clientX;
+  }
+
+  onWizardTouchEnd(ev: TouchEvent) {
+    const dx = ev.changedTouches[0].clientX - this.wizardTouchStartX;
+    if (dx > 70) this.wizardBack();
+  }
+
+  finishWizard() {
+    this.analytics.wizardCompleted();
+    this.wizardActive.set(false);
   }
 
   // Link de preview — abre a página do chá com ?preview=1, sem precisar pagar

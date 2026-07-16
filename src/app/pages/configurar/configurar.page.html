@@ -25,7 +25,7 @@
           <span>Configurar</span>
         </div>
         <div class="step-line" [class.done]="!!event()"></div>
-        <div class="step" [class.active]="!!event() && !isPaid()">
+        <div class="step" [class.active]="!!event() && !isPaid()" [class.clickable]="!!event()" (click)="event() && openActivation()">
           <div class="step-num">2</div>
           <span>Ativar</span>
         </div>
@@ -96,7 +96,7 @@
 
       <!-- PREVIEW — aparece quando evento existe mas ainda não foi pago -->
       @if (!isPaid() && eventLink()) {
-        <div class="preview-card" (click)="openPreview()">
+        <div #previewCard class="preview-card" [class.preview-highlight]="highlightPreview()" (click)="openPreview()">
           <div class="preview-left">
             <div class="preview-icon">👁️</div>
             <div>
@@ -106,6 +106,10 @@
           </div>
           <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
         </div>
+
+        <button class="preview-activate-cta" (click)="openActivation()">
+          Gostou? Ative por R$19,90 e libere o compartilhamento →
+        </button>
       }
 
       <!-- LINK + RESPOSTAS (only if paid + event exists) -->
@@ -246,14 +250,14 @@
     </div>
   }
 
-  <!-- ACTIVATION SHEET — aparece após salvar -->
+  <!-- ACTIVATION SHEET — aberta pelo usuário quando decide ativar -->
   @if (showActivationSheet()) {
     <div class="sheet-backdrop" (click)="showActivationSheet.set(false)"></div>
     <div class="activation-sheet">
       <div class="sheet-handle"></div>
 
-      <div class="sheet-check">✓</div>
-      <h2 class="playfair sheet-title">Lista salva!</h2>
+      <div class="sheet-check">🔓</div>
+      <h2 class="playfair sheet-title">Ativar meu evento</h2>
       <p class="sheet-sub">Último passo: ative para compartilhar o link com seus convidados.</p>
 
       <div class="sheet-price-box">
@@ -293,6 +297,118 @@
           ⬇️ Salvar imagem
         </ion-button>
         <button class="sheet-dismiss" (click)="showQrModal.set(false)">Fechar</button>
+      </div>
+    </div>
+  }
+
+  <!-- WIZARD DE CADASTRO — cards estilo stories, aparece no primeiro acesso -->
+  @if (wizardActive()) {
+    <div class="wizard-overlay">
+      <div class="wizard-progress">
+        @for (id of wizardStepIds(); track id; let i = $index) {
+          <div class="wizard-progress-seg" [class.filled]="i <= wizardStep()"></div>
+        }
+      </div>
+
+      <button class="wizard-skip" (click)="skipWizard()">Pular ✕</button>
+
+      <div class="wizard-card" (touchstart)="onWizardTouchStart($event)" (touchend)="onWizardTouchEnd($event)">
+        @if (wizardStep() > 0) {
+          <button class="wizard-back" (click)="wizardBack()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          </button>
+        }
+
+        <div class="wizard-card-inner" [class.dir-back]="wizardDirection() === 'back'">
+          @switch (wizardStepId()) {
+
+            @case ('intro') {
+              <div class="wizard-step wizard-step-intro">
+                <div class="wizard-emoji">🎀</div>
+                <h2 class="playfair wizard-title">Vamos criar seu chá!</h2>
+                <p class="wizard-sub">Só algumas perguntinhas rápidas e sua página já fica pronta.</p>
+                <button class="wizard-btn-primary" (click)="wizardNext()">Começar →</button>
+              </div>
+            }
+
+            @case ('tipo') {
+              <div class="wizard-step">
+                <p class="wizard-question">Qual o tipo do seu evento?</p>
+                <div class="wizard-options">
+                  <button class="wizard-option" [class.active]="eventType() === 'revelacao'" (click)="selectWizardType('revelacao')">
+                    <span class="wizard-option-emoji">🎊</span>
+                    <span class="wizard-option-label">Chá Revelação</span>
+                  </button>
+                  <button class="wizard-option" [class.active]="eventType() === 'bebe'" (click)="selectWizardType('bebe')">
+                    <span class="wizard-option-emoji">🍼</span>
+                    <span class="wizard-option-label">Chá de Bebê</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @case ('sexo') {
+              <div class="wizard-step">
+                <p class="wizard-question">Qual o sexo do bebê?</p>
+                <div class="wizard-options">
+                  <button class="wizard-option menino" [class.active]="babySex() === 'menino'" (click)="selectWizardSex('menino')">
+                    <span class="wizard-option-emoji">👦</span>
+                    <span class="wizard-option-label">Menino</span>
+                  </button>
+                  <button class="wizard-option menina" [class.active]="babySex() === 'menina'" (click)="selectWizardSex('menina')">
+                    <span class="wizard-option-emoji">👧</span>
+                    <span class="wizard-option-label">Menina</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @case ('nome') {
+              <div class="wizard-step">
+                <p class="wizard-question">{{ eventType() === 'bebe' ? 'Qual o nome do bebê?' : 'Quais são os dois nomes possíveis?' }}</p>
+                @if (eventType() === 'revelacao') {
+                  <input class="wizard-input" [(ngModel)]="name1" placeholder="Nome 1" maxlength="30"/>
+                  <div class="wizard-input-sep">ou</div>
+                  <input class="wizard-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
+                } @else {
+                  <input class="wizard-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
+                }
+                <button class="wizard-btn-primary" [disabled]="!wizardCanContinueNome()" (click)="wizardNext()">Continuar →</button>
+              </div>
+            }
+
+            @case ('local') {
+              <div class="wizard-step">
+                <p class="wizard-question">Onde vai ser o evento?</p>
+                <input class="wizard-input" [ngModel]="eventAddress()" (ngModelChange)="eventAddress.set($event)" placeholder="📍 Endereço do evento" maxlength="120"/>
+                <button class="wizard-btn-primary" (click)="wizardNext()">Continuar →</button>
+                <button class="wizard-btn-text" (click)="wizardNext()">Definir depois</button>
+              </div>
+            }
+
+            @case ('data') {
+              <div class="wizard-step">
+                <p class="wizard-question">Data e horário do chá?</p>
+                <label class="wizard-date-btn">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <input class="wizard-date-input" type="datetime-local" [ngModel]="eventDatetime()" (ngModelChange)="eventDatetime.set($event)"/>
+                </label>
+                <button class="wizard-btn-primary" [disabled]="!eventDatetime()" (click)="wizardNext()">Continuar →</button>
+                <button class="wizard-btn-text" (click)="wizardNext()">Definir depois</button>
+              </div>
+            }
+
+            @case ('final') {
+              <div class="wizard-step wizard-step-final">
+                <div class="wizard-emoji">🎉</div>
+                <h2 class="playfair wizard-title">Tudo pronto!</h2>
+                <p class="wizard-sub">{{ configSummary() || 'Agora é só montar a lista de presentes.' }}</p>
+                <button class="wizard-btn-primary" (click)="finishWizard()">Montar minha lista de presentes 🎁</button>
+              </div>
+            }
+
+          }
+        </div>
       </div>
     </div>
   }

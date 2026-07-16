@@ -17,6 +17,8 @@ export interface ChaEvent {
   paid: boolean;
   expires_at: string | null;
   created_at: string;
+  address: string | null;
+  event_datetime: string | null;
 }
 
 export interface EventItem {
