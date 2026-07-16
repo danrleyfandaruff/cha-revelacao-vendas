@@ -536,7 +536,8 @@ A maioria dos convidados PREFERE ter uma lista — remove a pressão de adivinha
 export class DicasPage implements OnDestroy {
   private router = inject(Router);
 
-  readonly WA_GROUP_LINK = 'https://chat.whatsapp.com/Jck0GuQi9UD4On5dP1gsLk?mode=gi_t';
+  readonly WA_NUMBER  = '5548991593331';
+  readonly WA_MESSAGE = 'Quero entrar no grupo das mamães! 🤰';
 
   /* ── Promoção ────────────────────────────────────────── */
   readonly promoPrice = PROMO_PRICE;
@@ -817,7 +818,8 @@ export class DicasPage implements OnDestroy {
   }
 
   openWhatsApp() {
-    window.open(this.WA_GROUP_LINK, '_blank');
+    const url = `https://wa.me/${this.WA_NUMBER}?text=${encodeURIComponent(this.WA_MESSAGE)}`;
+    window.open(url, '_blank');
   }
 
   openProduto() {
