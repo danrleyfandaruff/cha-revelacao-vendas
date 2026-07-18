@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header [style.visibility]="wizardActive() ? 'hidden' : null">
   <ion-toolbar>
     <ion-title>🍼 Configurar evento</ion-title>
     <ion-buttons slot="end">
@@ -189,18 +189,16 @@
                 </div>
                 <div class="item-emoji">{{ item.emoji }}</div>
                 <div class="item-info">
-                  <span class="item-name">{{ item.name }}</span>
+                  <input class="item-name-input" [(ngModel)]="item.name" maxlength="50"/>
                 </div>
                 <div class="item-qty">
                   <button class="qty-btn" (click)="item.qty = Math.max(1, item.qty - 1)">−</button>
                   <span class="qty-val">{{ item.qty }}</span>
                   <button class="qty-btn" (click)="item.qty = item.qty + 1">+</button>
                 </div>
-                @if (item.isCustom) {
-                  <ion-button fill="clear" size="small" color="danger" (click)="removeItem(item)">
-                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-                  </ion-button>
-                }
+                <ion-button fill="clear" size="small" color="danger" (click)="removeItem(item)">
+                  <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                </ion-button>
               </div>
             }
           </div>

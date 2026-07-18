@@ -660,8 +660,26 @@ ion-content {
   }
 
   .item-emoji { font-size: 1.2rem; }
-  .item-info  { flex: 1; }
-  .item-name  { font-size: 0.88rem; font-weight: 700; color: var(--brand-brown); }
+  .item-info  { flex: 1; min-width: 0; }
+}
+
+.item-name-input {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  padding: 3px 6px;
+  margin: -3px -6px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--brand-brown);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover   { background: var(--brand-cream); }
+  &:focus   { border-color: var(--brand-gold); background: #fff; }
 }
 
 // Qty controls
