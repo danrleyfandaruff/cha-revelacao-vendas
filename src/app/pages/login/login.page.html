@@ -25,7 +25,7 @@
           <div class="field-group">
             <label class="label-small">E-mail</label>
             <input class="text-input" type="email" [(ngModel)]="email"
-              placeholder="seu@email.com" autocomplete="email"/>
+              placeholder="seu@email.com" autocomplete="email" (blur)="onEmailBlur()"/>
           </div>
           <div class="field-group">
             <label class="label-small">Senha</label>

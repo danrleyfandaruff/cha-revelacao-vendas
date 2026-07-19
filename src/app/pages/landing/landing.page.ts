@@ -35,7 +35,8 @@ export class LandingPage implements OnInit {
     this.analytics.landingView();
   }
 
-  goLogin()   { this.router.navigate(['/login']); }
-  goDicas()   { this.router.navigate(['/dicas']); }
-  goConvite() { this.router.navigate(['/convite']); }
+  goLogin()    { this.router.navigate(['/login']); }
+  goCadastro() { this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } }); }
+  goDicas()    { this.router.navigate(['/dicas']); }
+  goConvite()  { this.router.navigate(['/convite']); }
 }

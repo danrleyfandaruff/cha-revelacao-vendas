@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -18,11 +18,12 @@ type Tab = 'entrar' | 'cadastrar';
   standalone: true,
   imports: [FormsModule, IonContent, IonButton, IonSpinner],
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   tab      = signal<Tab>('entrar');
   email    = '';
   password = '';
   loading  = signal(false);
+  private emailEngaged = false;
 
   constructor(
     private supa: SupabaseService,
@@ -40,12 +41,26 @@ export class LoginPage {
     });
   }
 
+  ngOnInit() {
+    this.analytics.loginView(this.tab());
+  }
+
   setTab(t: Tab) {
     this.tab.set(t);
+    this.analytics.loginTabSwitch(t);
+  }
+
+  onEmailBlur() {
+    if (this.emailEngaged || !this.email.trim()) return;
+    this.emailEngaged = true;
+    this.analytics.loginEmailEngaged(this.tab());
   }
 
   async submit() {
+    this.analytics.loginSubmitClick(this.tab());
+
     if (!this.email || !this.password) {
+      this.analytics.loginValidationError(this.tab(), 'campos_vazios');
       this.showToast('Preencha e-mail e senha.', 'danger');
       return;
     }
@@ -54,6 +69,7 @@ export class LoginPage {
     if (this.tab() === 'entrar') {
       const { error } = await this.supa.signInWithEmail(this.email, this.password);
       if (error) {
+        this.analytics.loginError('entrar', this.errorReason(error.message, error.code));
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
         this.analytics.loginSuccess();
@@ -63,6 +79,7 @@ export class LoginPage {
     } else {
       const { data, error } = await this.supa.signUpWithEmail(this.email, this.password);
       if (error) {
+        this.analytics.loginError('cadastrar', this.errorReason(error.message, error.code));
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
         this.analytics.signupSuccess();
@@ -74,7 +91,16 @@ export class LoginPage {
   }
 
   async googleLogin() {
+    this.analytics.loginGoogleClick();
     await this.supa.signInWithGoogle();
+  }
+
+  private errorReason(msg: string, code?: string): string {
+    if (code === 'invalid_credentials' || msg.includes('Invalid login credentials')) return 'credenciais_invalidas';
+    if (msg.includes('Email not confirmed')) return 'email_nao_confirmado';
+    if (msg.includes('User already registered')) return 'email_ja_cadastrado';
+    if (msg.includes('Password should be at least')) return 'senha_fraca';
+    return 'outro';
   }
 
   private friendlyError(msg: string, code?: string): string {

@@ -282,11 +282,13 @@ export class ConfigurarPage implements OnInit {
     }
     this.savedSnapshot = this.buildSnapshot();
     this.loading.set(false);
+    this.analytics.configurarView(!!ev, ev?.paid ?? false);
 
     if (!ev) {
       // Primeiro acesso: o wizard guiado substitui o tutorial explicativo antigo
       localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
       this.wizardActive.set(true);
+      this.analytics.configWizardStepView(this.wizardStepId());
     } else {
       this.checkTutorial();
     }
@@ -297,9 +299,15 @@ export class ConfigurarPage implements OnInit {
     this.presentes.set(SUGESTOES['presentes'].map(s => ({ ...s, category: 'presentes', checked: true })));
   }
 
-  setTab(t: 'fraldas' | 'presentes') { this.activeTab.set(t); }
+  setTab(t: 'fraldas' | 'presentes') {
+    this.activeTab.set(t);
+    this.analytics.configTabChange(t);
+  }
 
-  toggleItem(item: DraftItem) { item.checked = !item.checked; }
+  toggleItem(item: DraftItem) {
+    item.checked = !item.checked;
+    this.analytics.configItemToggle(item.category, item.checked);
+  }
 
   addCustomItem() {
     if (!this.newName.trim()) { this.showToast('Digite o nome do item.'); return; }
@@ -317,6 +325,7 @@ export class ConfigurarPage implements OnInit {
     } else {
       this.presentes.update(arr => [...arr, item]);
     }
+    this.analytics.configItemAdd(cat);
     this.newName = '';
     this.newEmoji = '';
     this.newQty = 1;
@@ -330,6 +339,7 @@ export class ConfigurarPage implements OnInit {
   }
 
   cancelRemoveItem() {
+    this.analytics.configItemDeleteCancel();
     this.confirmDeleteItem.set(null);
   }
 
@@ -341,6 +351,7 @@ export class ConfigurarPage implements OnInit {
     } else {
       this.presentes.update(arr => arr.filter(i => i !== item));
     }
+    this.analytics.configItemDeleteConfirm(item.category);
     this.confirmDeleteItem.set(null);
   }
 
@@ -353,11 +364,13 @@ export class ConfigurarPage implements OnInit {
     this.eventType.set(t);
     if (t === 'revelacao') this.babySex.set(null);
     this.saveMeta();
+    this.analytics.configTipoChange(t);
   }
 
   setBabySex(s: BabySex) {
     this.babySex.set(s);
     this.saveMeta();
+    this.analytics.configSexoChange(s);
   }
 
   private metaKey() { return `event_meta_${this.userId}`; }
@@ -420,10 +433,23 @@ export class ConfigurarPage implements OnInit {
   }
 
   async save() {
+    this.analytics.configSaveClick();
     const isBebe = this.eventType() === 'bebe';
-    if (!this.name1) { this.showToast('Digite o nome do bebê.'); return; }
-    if (!isBebe && !this.name2) { this.showToast('Digite os dois nomes para revelação.'); return; }
-    if (isBebe && !this.babySex()) { this.showToast('Selecione o sexo do bebê.'); return; }
+    if (!this.name1) {
+      this.analytics.configSaveValidationError('nome_vazio');
+      this.showToast('Digite o nome do bebê.');
+      return;
+    }
+    if (!isBebe && !this.name2) {
+      this.analytics.configSaveValidationError('segundo_nome_vazio');
+      this.showToast('Digite os dois nomes para revelação.');
+      return;
+    }
+    if (isBebe && !this.babySex()) {
+      this.analytics.configSaveValidationError('sexo_nao_selecionado');
+      this.showToast('Selecione o sexo do bebê.');
+      return;
+    }
     this.saving.set(true);
 
     const n2   = isBebe ? this.name1 : this.name2;
@@ -467,11 +493,15 @@ export class ConfigurarPage implements OnInit {
       } else {
         this.showToast('Salvo com sucesso! 🎉');
       }
+    } else {
+      this.analytics.configSaveError();
+      this.showToast('Erro ao salvar. Tente novamente.');
     }
     this.saving.set(false);
   }
 
   verMeuLink() {
+    this.analytics.configSuccessModalCta();
     this.showSuccessModal.set(false);
     setTimeout(() => {
       this.linkCardRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -490,6 +520,7 @@ export class ConfigurarPage implements OnInit {
 
   // Ativação é sempre uma escolha explícita do usuário — nunca abre sozinha
   openActivation() {
+    this.analytics.configActivationOpen();
     this.showActivationSheet.set(true);
   }
 
@@ -500,6 +531,7 @@ export class ConfigurarPage implements OnInit {
     if (this.wizardStep() < ids.length - 1) {
       this.wizardDirection.set('fwd');
       this.wizardStep.update(s => s + 1);
+      this.analytics.configWizardStepView(this.wizardStepId());
     }
   }
 
@@ -553,19 +585,24 @@ export class ConfigurarPage implements OnInit {
 
   openPreview() {
     const link = this.previewLink();
-    if (link) window.open(link, '_blank');
+    if (link) {
+      this.analytics.configPreviewOpen();
+      window.open(link, '_blank');
+    }
   }
 
   copyLink() {
-    navigator.clipboard.writeText(this.eventLink()).then(() =>
-      this.showToast('Link copiado! 🔗')
-    );
+    navigator.clipboard.writeText(this.eventLink()).then(() => {
+      this.analytics.configCopyLink();
+      this.showToast('Link copiado! 🔗');
+    });
   }
 
   shareWhatsApp() {
     const ev = this.event();
     const link = this.eventLink();
     if (!link) return;
+    this.analytics.configShareWhatsApp();
     const name = ev?.baby_name_1 && ev?.baby_name_2 && ev.baby_name_1 !== ev.baby_name_2
       ? `${ev.baby_name_1} ou ${ev.baby_name_2}`
       : ev?.baby_name_1 ?? 'o bebê';
@@ -574,6 +611,7 @@ export class ConfigurarPage implements OnInit {
   }
 
   openQrModal() {
+    this.analytics.configQrOpen();
     this.showQrModal.set(true);
     // Aguarda o DOM renderizar o #qrContainer antes de gerar
     setTimeout(() => this.renderQrCode(), 80);
@@ -603,16 +641,18 @@ export class ConfigurarPage implements OnInit {
     const container = this.qrContainerRef?.nativeElement as HTMLElement | undefined;
     const canvas = container?.querySelector('canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
+    this.analytics.configQrDownload();
     const a = document.createElement('a');
     a.download = 'qrcode-cha.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
   }
 
-  goResultados() { this.router.navigate(['/resultados']); }
-  goPagar()      { this.router.navigate(['/pagar']); }
+  goResultados() { this.analytics.configGoResultados(); this.router.navigate(['/resultados']); }
+  goPagar()      { this.analytics.configGoPagar();      this.router.navigate(['/pagar']); }
 
   async logout() {
+    this.analytics.configLogout();
     await this.supa.signOut();
     this.router.navigate(['/login'], { replaceUrl: true });
   }
