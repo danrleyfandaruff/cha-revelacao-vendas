@@ -1,6 +1,7 @@
-import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
+import { AnalyticsService } from '../../services/analytics.service';
 
 const PROMO_KEY     = 'promo_expiry';
 const PROMO_MINUTES = 20;
@@ -533,8 +534,11 @@ A maioria dos convidados PREFERE ter uma lista — remove a pressão de adivinha
   standalone: true,
   imports: [IonContent],
 })
-export class DicasPage implements OnDestroy {
-  private router = inject(Router);
+export class DicasPage implements OnInit, AfterViewInit, OnDestroy {
+  private router    = inject(Router);
+  private analytics = inject(AnalyticsService);
+
+  @ViewChild(IonContent) ionContent!: IonContent;
 
   readonly WA_NUMBER  = '5548991593331';
   readonly WA_MESSAGE = 'Quero entrar no grupo das mamães! 🤰';
@@ -548,7 +552,32 @@ export class DicasPage implements OnDestroy {
 
   constructor() { this.initPromo(); }
 
+  ngOnInit() {
+    this.analytics.dicasView();
+  }
+
+  async ngAfterViewInit() {
+    this.scrollEl = await this.ionContent.getScrollElement();
+  }
+
   ngOnDestroy() { if (this.promoTick) clearInterval(this.promoTick); }
+
+  /* ── Scroll depth ──────────────────────────────────────── */
+  private scrollEl: HTMLElement | null = null;
+  private scrollMilestones = new Set<number>();
+
+  onScroll(ev: CustomEvent<{ scrollTop: number }>) {
+    if (!this.scrollEl) return;
+    const scrollable = this.scrollEl.scrollHeight - this.scrollEl.clientHeight;
+    if (scrollable <= 0) return;
+    const pct = Math.min(100, Math.round((ev.detail.scrollTop / scrollable) * 100));
+    for (const milestone of [25, 50, 75, 100]) {
+      if (pct >= milestone && !this.scrollMilestones.has(milestone)) {
+        this.scrollMilestones.add(milestone);
+        this.analytics.dicasScrollDepth(milestone);
+      }
+    }
+  }
 
   private initPromo() {
     try {
@@ -576,6 +605,7 @@ export class DicasPage implements OnDestroy {
   }
 
   goCadastro() {
+    this.analytics.dicasPromoBannerClick();
     this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } });
   }
 
@@ -599,6 +629,7 @@ export class DicasPage implements OnDestroy {
   });
 
   setCategoria(id: Categoria) {
+    this.analytics.dicasCategoriaClick(id);
     this.categoriaAtiva.set(id);
     this.expandedId.set(null);
   }
@@ -633,6 +664,10 @@ export class DicasPage implements OnDestroy {
   quizTemResposta = computed(() => this.quizTotal().total > 0);
 
   setPalpite(index: number, valor: Palpite) {
+    if (this.getPalpite(index) === null) {
+      const titulo = this.modalDica()?.quiz?.[index]?.titulo ?? '';
+      this.analytics.dicasQuizAnswered(index + 1, titulo);
+    }
     this.quizRespostas.update(r => ({ ...r, [index]: valor }));
   }
 
@@ -642,12 +677,14 @@ export class DicasPage implements OnDestroy {
 
   openModal(dica: Dica, event: Event) {
     event.stopPropagation();
+    this.analytics.dicasCardOpen(dica.titulo, dica.categoria);
     this.modalDica.set(dica);
     this.quizRespostas.set({});
     document.body.style.overflow = 'hidden';
   }
 
   openQuizModal() {
+    this.analytics.dicasQuizBannerClick();
     const quizDica = DICAS.find(d => d.quiz && d.quiz.length > 0);
     if (quizDica) {
       this.modalDica.set(quizDica);
@@ -669,6 +706,8 @@ export class DicasPage implements OnDestroy {
     const vencedor = pesoMenino > pesoMenina ? 'MENINO' : pesoMenina > pesoMenino ? 'MENINA' : 'EMPATE';
     const respondidas = total;
     const totalPerguntas = dica.quiz.length;
+    this.analytics.dicasQuizCompleted(vencedor);
+    this.analytics.dicasQuizPdfDownload();
 
     // ── Canvas chart (emoji ok here) ──────────────────────
     const canvas = document.createElement('canvas');
@@ -817,17 +856,20 @@ export class DicasPage implements OnDestroy {
     doc.save('menino-ou-menina.pdf');
   }
 
-  openWhatsApp() {
+  openWhatsApp(local: string) {
+    this.analytics.dicasWhatsAppClick(local);
     const url = `https://wa.me/${this.WA_NUMBER}?text=${encodeURIComponent(this.WA_MESSAGE)}`;
     window.open(url, '_blank');
   }
 
-  openProduto() {
+  openProduto(local: string) {
+    this.analytics.dicasProdutoCtaClick(local);
     this.closeModal();
     this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } });
   }
 
   goConvite() {
+    this.analytics.dicasConviteCtaClick();
     this.closeModal();
     this.router.navigate(['/convite']);
   }

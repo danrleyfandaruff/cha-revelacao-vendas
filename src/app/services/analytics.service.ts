@@ -26,6 +26,20 @@ export class AnalyticsService {
   wizardCompleted(): void          { this.send('wizard_completed'); }
   wizardSkipped(step: string): void { this.send('wizard_skipped', { step }); }
 
+  // ── Dicas ────────────────────────────────────────────────────────────────────
+  dicasView(): void                              { this.send('dicas_view'); }
+  dicasScrollDepth(pct: number): void            { this.send('dicas_scroll_depth', { pct }); }
+  dicasWhatsAppClick(local: string): void        { this.send('dicas_whatsapp_click', { local }); }
+  dicasQuizBannerClick(): void                   { this.send('dicas_quiz_banner_click'); }
+  dicasPromoBannerClick(): void                  { this.send('dicas_promo_banner_click'); }
+  dicasCategoriaClick(categoria: string): void   { this.send('dicas_categoria_click', { categoria }); }
+  dicasCardOpen(titulo: string, categoria: string): void { this.send('dicas_card_open', { titulo, categoria }); }
+  dicasQuizAnswered(pergunta: number, titulo: string): void { this.send('dicas_quiz_answered', { pergunta, titulo }); }
+  dicasQuizCompleted(resultado: string): void    { this.send('dicas_quiz_completed', { resultado }); }
+  dicasQuizPdfDownload(): void                   { this.send('dicas_quiz_pdf_download'); }
+  dicasProdutoCtaClick(local: string): void      { this.send('dicas_produto_cta_click', { local }); }
+  dicasConviteCtaClick(): void                   { this.send('dicas_convite_cta_click'); }
+
   // ── Resultados ───────────────────────────────────────────────────────────────
   resultadosView(): void           { this.send('resultados_view'); }
 
