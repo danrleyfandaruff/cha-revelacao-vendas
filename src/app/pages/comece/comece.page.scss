@@ -1,0 +1,278 @@
+ion-content {
+  --background: var(--brand-cream);
+}
+
+// ── Nav ──────────────────────────────────────────────────────────────────────
+.cm-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--brand-beige);
+
+  .cm-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--brand-brown);
+    font-weight: 700;
+  }
+
+  .cm-nav-login {
+    font-size: 0.8rem;
+    color: var(--brand-brown-light);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+.cm-hero {
+  text-align: center;
+  padding: 40px 24px 28px;
+  max-width: 600px;
+  margin: 0 auto;
+
+  .hero-emoji { font-size: 3rem; margin-bottom: 16px; }
+
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    color: var(--brand-brown);
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+
+  p {
+    font-size: 0.97rem;
+    color: var(--brand-brown-light);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .btn-hero {
+    --border-radius: 14px;
+    font-size: 1rem;
+    height: 52px;
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+.cm-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 600px;
+  margin: 0 auto 28px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 30px rgba(61,35,20,0.1);
+  overflow: hidden;
+}
+
+.cm-stat {
+  flex: 1;
+  min-width: 100px;
+  padding: 16px 10px;
+  text-align: center;
+  border-right: 1px solid var(--brand-beige);
+  &:last-child { border-right: none; }
+
+  .cm-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--brand-gold);
+  }
+  .cm-stat-label {
+    font-size: 0.7rem;
+    color: var(--brand-brown-light);
+    margin-top: 2px;
+  }
+}
+
+// ── Demo ──────────────────────────────────────────────────────────────────────
+.cm-demo-wrap {
+  max-width: 640px;
+  margin: 0 auto 48px;
+  padding: 0 16px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--brand-beige);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(74, 55, 40, 0.1);
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+
+.demo-card {
+  border: 2px solid var(--brand-beige);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+
+  &.chosen { border-color: var(--brand-green); background: #f4faf4; }
+
+  .de { font-size: 1.5rem; }
+  .dn { font-weight: 700; font-size: 0.78rem; color: var(--brand-brown); margin-top: 3px; }
+  .dq { font-size: 0.65rem; color: var(--brand-brown-light); }
+  .db {
+    margin-top: 6px;
+    padding: 5px 4px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    &.add { background: var(--brand-gold); color: #fff; }
+    &.chosen { background: var(--brand-green); color: #fff; }
+  }
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+.cm-section {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.cm-section-title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.cm-section-sub {
+  text-align: center;
+  color: var(--brand-brown-light);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+// Dicas rápidas
+.cm-dicas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cm-dica-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--brand-beige);
+  padding: 18px 20px;
+
+  .cm-dica-emoji { font-size: 1.6rem; flex-shrink: 0; }
+  h3 { font-size: 0.95rem; color: var(--brand-brown); margin-bottom: 4px; font-weight: 700; }
+  p  { font-size: 0.84rem; color: var(--brand-brown-light); line-height: 1.55; }
+}
+
+// Steps
+.cm-steps-wrap {
+  background: #fff;
+  border-top: 1px solid var(--brand-beige);
+  border-bottom: 1px solid var(--brand-beige);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.step-item {
+  background: var(--brand-cream);
+  border-radius: 14px;
+  border: 1px solid var(--brand-beige);
+  padding: 24px 18px;
+  text-align: center;
+
+  .step-num {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--brand-gold);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+  }
+
+  h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 6px; }
+  p  { color: var(--brand-brown-light); font-size: 0.83rem; line-height: 1.5; }
+}
+
+// Features
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.feature-item {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--brand-beige);
+  padding: 18px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  .fi-icon { font-size: 1.4rem; flex-shrink: 0; }
+  h4 { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+  p  { color: var(--brand-brown-light); font-size: 0.8rem; line-height: 1.4; }
+}
+
+// Price
+.cm-price-wrap {
+  padding: 0;
+  background: #fff;
+  border-top: 1px solid var(--brand-beige);
+
+  .cm-section { text-align: center; }
+}
+
+.price-card {
+  background: linear-gradient(135deg, var(--brand-brown), #6a4a38);
+  border-radius: 18px;
+  padding: 32px 24px;
+  color: #fff;
+  margin-top: 20px;
+
+  .price-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    line-height: 1;
+    sup { font-size: 1.3rem; vertical-align: super; }
+  }
+  .price-period { font-size: 0.8rem; opacity: 0.75; margin-top: 6px; }
+  .price-pill {
+    display: inline-block;
+    background: var(--brand-gold);
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+}
+
+// Footer
+.cm-footer {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--brand-brown-light);
+  font-size: 0.8rem;
+  p + p { margin-top: 8px; }
+}
