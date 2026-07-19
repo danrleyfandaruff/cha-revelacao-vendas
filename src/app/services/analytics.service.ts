@@ -15,6 +15,10 @@ export class AnalyticsService {
   // ── Landing ──────────────────────────────────────────────────────────────────
   landingView(): void              { this.send('landing_view'); }
 
+  // ── Comece (landing page de ads) ────────────────────────────────────────────
+  comeceView(): void                 { this.send('comece_view'); }
+  comeceCtaClick(local: string): void { this.send('comece_cta_click', { local }); }
+
   // ── Login / Cadastro ─────────────────────────────────────────────────────────
   loginSuccess(): void             { this.send('login_success'); }
   signupSuccess(): void            { this.send('signup_success'); }

@@ -41,6 +41,11 @@ export const routes: Routes = [
       import('./pages/dicas/dicas.page').then((m) => m.DicasPage),
   },
   {
+    path: 'comece',
+    loadComponent: () =>
+      import('./pages/comece/comece.page').then((m) => m.ComecePage),
+  },
+  {
     path: 'convite',
     loadComponent: () =>
       import('./pages/convite/convite.page').then((m) => m.ConvitePage),
