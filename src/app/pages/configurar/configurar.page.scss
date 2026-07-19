@@ -866,6 +866,11 @@ ion-content {
   align-items: center;
   justify-content: center;
   margin: 0 auto 14px;
+
+  &.danger {
+    background: #fdecea;
+    color: #e53935;
+  }
 }
 
 .sheet-title {
@@ -984,7 +989,23 @@ ion-content {
   .bar-info {
     font-size: 0.85rem;
     color: var(--brand-brown-light);
+    transition: color 0.2s;
   }
+
+  &.needs-save {
+    border-top-color: var(--brand-gold);
+    animation: save-bar-pulse 1.6s ease-in-out infinite;
+
+    .bar-info {
+      color: var(--brand-gold);
+      font-weight: 700;
+    }
+  }
+}
+
+@keyframes save-bar-pulse {
+  0%, 100% { box-shadow: 0 -4px 20px rgba(74, 55, 40, 0.1); }
+  50%       { box-shadow: 0 -4px 26px rgba(196, 152, 57, 0.55); }
 }
 
 // ── Tutorial de primeira vez ───────────────────────────────────────────────────

@@ -280,6 +280,7 @@ export class ConfigurarPage implements OnInit {
     } else {
       this.initSuggestions();
     }
+    this.savedSnapshot = this.buildSnapshot();
     this.loading.set(false);
 
     if (!ev) {
@@ -321,12 +322,26 @@ export class ConfigurarPage implements OnInit {
     this.newQty = 1;
   }
 
-  removeItem(item: DraftItem) {
+  // Pede confirmação antes de remover — evita exclusão acidental
+  confirmDeleteItem = signal<DraftItem | null>(null);
+
+  askRemoveItem(item: DraftItem) {
+    this.confirmDeleteItem.set(item);
+  }
+
+  cancelRemoveItem() {
+    this.confirmDeleteItem.set(null);
+  }
+
+  confirmRemoveItem() {
+    const item = this.confirmDeleteItem();
+    if (!item) return;
     if (item.category === 'fraldas') {
       this.fraldas.update(arr => arr.filter(i => i !== item));
     } else {
       this.presentes.update(arr => arr.filter(i => i !== item));
     }
+    this.confirmDeleteItem.set(null);
   }
 
   totalChecked(cat: 'fraldas' | 'presentes') {
@@ -383,6 +398,27 @@ export class ConfigurarPage implements OnInit {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  // ── Alterações não salvas ────────────────────────────────────────────────────
+  private savedSnapshot = '';
+
+  private buildSnapshot(): string {
+    return JSON.stringify({
+      eventType:     this.eventType(),
+      babySex:       this.babySex(),
+      name1:         this.name1,
+      name2:         this.name2,
+      eventAddress:  this.eventAddress(),
+      eventDatetime: this.eventDatetime(),
+      fraldas:       this.fraldas().map(i => ({ name: i.name, emoji: i.emoji, qty: i.qty, checked: i.checked })),
+      presentes:     this.presentes().map(i => ({ name: i.name, emoji: i.emoji, qty: i.qty, checked: i.checked })),
+    });
+  }
+
+  // true se nunca salvou (primeiro cadastro) ou se algo mudou desde o último save
+  needsSave(): boolean {
+    return !this.event() || this.buildSnapshot() !== this.savedSnapshot;
+  }
+
   async save() {
     const isBebe = this.eventType() === 'bebe';
     if (!this.name1) { this.showToast('Digite o nome do bebê.'); return; }
@@ -424,6 +460,7 @@ export class ConfigurarPage implements OnInit {
       }));
       await this.supa.replaceItems(ev.id, itemsPayload as any);
       this.analytics.configSaved(this.eventType());
+      this.savedSnapshot = this.buildSnapshot();
       if (!ev.paid) {
         this.showToast('Lista salva! Veja como seus convidados vão ver 👀');
         this.highlightPreviewCard();

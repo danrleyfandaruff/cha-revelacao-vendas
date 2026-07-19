@@ -196,7 +196,7 @@
                   <span class="qty-val">{{ item.qty }}</span>
                   <button class="qty-btn" (click)="item.qty = item.qty + 1">+</button>
                 </div>
-                <ion-button fill="clear" size="small" color="danger" (click)="removeItem(item)">
+                <ion-button fill="clear" size="small" color="danger" (click)="askRemoveItem(item)">
                   <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
                 </ion-button>
               </div>
@@ -296,6 +296,30 @@
         </ion-button>
         <button class="sheet-dismiss" (click)="showQrModal.set(false)">Fechar</button>
       </div>
+    </div>
+  }
+
+  <!-- CONFIRMAÇÃO DE EXCLUSÃO DE ITEM -->
+  @if (confirmDeleteItem()) {
+    <div class="sheet-backdrop" (click)="cancelRemoveItem()"></div>
+    <div class="activation-sheet">
+      <div class="sheet-handle"></div>
+
+      <div class="sheet-check danger">🗑️</div>
+      <h2 class="playfair sheet-title">Remover item?</h2>
+      <p class="sheet-sub">
+        Tem certeza que quer remover
+        <strong>{{ confirmDeleteItem()!.emoji }} {{ confirmDeleteItem()!.name }}</strong>
+        da lista?
+      </p>
+
+      <ion-button expand="block" color="danger" (click)="confirmRemoveItem()">
+        Sim, remover
+      </ion-button>
+
+      <button class="sheet-dismiss" (click)="cancelRemoveItem()">
+        Cancelar
+      </button>
     </div>
   }
 
@@ -435,9 +459,17 @@
   }
 
   <!-- SAVE BAR -->
-  <div class="save-bar" [class.tut-spotlight]="tutorialCurrent()?.highlight === 'save'">
+  <div class="save-bar" [class.needs-save]="needsSave()" [class.tut-spotlight]="tutorialCurrent()?.highlight === 'save'">
     <span class="bar-info">
-      {{ totalChecked('fraldas') + totalChecked('presentes') }} itens selecionados
+      @if (needsSave()) {
+        @if (!event()) {
+          ⚠️ Primeira vez? Não esqueça de salvar!
+        } @else {
+          ⚠️ Você tem alterações não salvas
+        }
+      } @else {
+        {{ totalChecked('fraldas') + totalChecked('presentes') }} itens selecionados
+      }
     </span>
     <ion-button (click)="save()" >
       @if (saving()) { <ion-spinner name="dots"></ion-spinner> }

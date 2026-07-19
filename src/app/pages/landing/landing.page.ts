@@ -6,6 +6,7 @@ import {
 import { addIcons } from 'ionicons';
 import { arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { AnalyticsService } from '../../services/analytics.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-landing',
@@ -24,11 +25,15 @@ export class LandingPage implements OnInit {
     { icon: '🔗', title: 'Link personalizado', desc: 'Seu evento tem um link único com o nome do bebê.' },
   ];
 
-  constructor(private router: Router, private analytics: AnalyticsService) {
+  constructor(private router: Router, private analytics: AnalyticsService, private supa: SupabaseService) {
     addIcons({ arrowForwardOutline, checkmarkCircleOutline });
   }
 
-  ngOnInit() { this.analytics.landingView(); }
+  async ngOnInit() {
+    const session = await this.supa.getSession();
+    if (session) { this.router.navigate(['/configurar'], { replaceUrl: true }); return; }
+    this.analytics.landingView();
+  }
 
   goLogin()   { this.router.navigate(['/login']); }
   goDicas()   { this.router.navigate(['/dicas']); }
