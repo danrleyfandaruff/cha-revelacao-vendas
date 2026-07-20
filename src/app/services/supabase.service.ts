@@ -147,10 +147,20 @@ export class SupabaseService {
     return data ?? [];
   }
 
-  async replaceItems(eventId: string, items: Omit<EventItem, 'id'>[]): Promise<void> {
-    await this.supabase.from('event_items').delete().eq('event_id', eventId);
+  // Sincroniza os itens do evento preservando o id de quem já existia — evita
+  // que o CASCADE de event_reservations.item_id apague reservas de convidados
+  // sempre que o dono só edita quantidade/nome de um item já existente.
+  // `deletableIds` é decidido pelo chamador (só itens sem reserva) — o service
+  // nunca apaga nada por conta própria além do que foi explicitamente permitido.
+  async syncItems(items: EventItem[], deletableIds: string[]): Promise<void> {
+    if (deletableIds.length) {
+      const { error } = await this.supabase.from('event_items').delete().in('id', deletableIds);
+      if (error) throw error;
+    }
+
     if (items.length) {
-      await this.supabase.from('event_items').insert(items);
+      const { error } = await this.supabase.from('event_items').upsert(items, { onConflict: 'id' });
+      if (error) throw error;
     }
   }
 

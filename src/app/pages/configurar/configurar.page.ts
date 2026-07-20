@@ -36,12 +36,14 @@ const SUGESTOES: Record<string, Array<{ name: string; emoji: string; qty: number
 };
 
 export interface DraftItem {
+  id?: string;
   name: string;
   emoji: string;
   qty: number;
   category: 'fraldas' | 'presentes';
   checked: boolean;
   isCustom?: boolean;
+  reserved?: number; // quantos convidados já reservaram esse item (protege contra remoção)
 }
 
 export type EventType = 'revelacao' | 'bebe';
@@ -267,12 +269,14 @@ export class ConfigurarPage implements OnInit {
       const items = await this.supa.getItems(ev.id);
       if (items.length) {
         this.fraldas.set(items.filter(i => i.category === 'fraldas').map(i => ({
-          name: i.name, emoji: i.emoji, qty: i.quantity_total,
+          id: i.id, name: i.name, emoji: i.emoji, qty: i.quantity_total,
           category: 'fraldas', checked: true,
+          reserved: i.quantity_total - i.quantity_available,
         })));
         this.presentes.set(items.filter(i => i.category === 'presentes').map(i => ({
-          name: i.name, emoji: i.emoji, qty: i.quantity_total,
+          id: i.id, name: i.name, emoji: i.emoji, qty: i.quantity_total,
           category: 'presentes', checked: true,
+          reserved: i.quantity_total - i.quantity_available,
         })));
       } else {
         this.initSuggestions();
@@ -305,6 +309,10 @@ export class ConfigurarPage implements OnInit {
   }
 
   toggleItem(item: DraftItem) {
+    if (item.checked && (item.reserved ?? 0) > 0) {
+      this.showToast(`Esse item já foi reservado por ${item.reserved} convidado(s) e não pode ser desmarcado.`);
+      return;
+    }
     item.checked = !item.checked;
     this.analytics.configItemToggle(item.category, item.checked);
   }
@@ -335,6 +343,10 @@ export class ConfigurarPage implements OnInit {
   confirmDeleteItem = signal<DraftItem | null>(null);
 
   askRemoveItem(item: DraftItem) {
+    if ((item.reserved ?? 0) > 0) {
+      this.showToast(`Esse item já foi reservado por ${item.reserved} convidado(s) e não pode ser removido.`);
+      return;
+    }
     this.confirmDeleteItem.set(item);
   }
 
@@ -475,19 +487,54 @@ export class ConfigurarPage implements OnInit {
         ...this.fraldas().filter(i => i.checked),
         ...this.presentes().filter(i => i.checked),
       ];
-      const itemsPayload = checked.map((i, idx) => ({
-        event_id:           ev.id,
-        category:           i.category,
-        name:               i.name,
-        emoji:              i.emoji,
-        quantity_total:     i.qty,
-        quantity_available: i.qty,
-        sort_order:         idx,
-      }));
-      await this.supa.replaceItems(ev.id, itemsPayload as any);
+
+      // Busca o estado atual no banco para preservar a quantidade já reservada
+      // por convidados nos itens que continuam na lista.
+      const existingItems = await this.supa.getItems(ev.id);
+      const existingById = new Map(existingItems.map(i => [i.id, i]));
+
+      const keepIds = new Set<string>();
+      const itemsPayload = checked.map((i, idx) => {
+        const existing = i.id ? existingById.get(i.id) : undefined;
+        const reserved = existing ? existing.quantity_total - existing.quantity_available : 0;
+        const id = i.id ?? crypto.randomUUID();
+        i.id = id; // mantém o mesmo id nos próximos saves em vez de gerar um novo
+        keepIds.add(id);
+        return {
+          id,
+          event_id:           ev.id,
+          category:           i.category,
+          name:               i.name,
+          emoji:              i.emoji,
+          quantity_total:     i.qty,
+          quantity_available: Math.max(0, i.qty - reserved),
+          sort_order:         idx,
+        };
+      });
+
+      // Trava: um item que saiu da lista só é apagado se NUNCA foi reservado.
+      // Itens já reservados por convidados são mantidos no banco (ocultos do
+      // rascunho local não importa — o registro sobrevive) mesmo que o dono
+      // tenha desmarcado/removido na tela.
+      const toRemove = existingItems.filter(i => !keepIds.has(i.id));
+      const deletableIds = toRemove.filter(i => i.quantity_available >= i.quantity_total).map(i => i.id);
+      const protectedItems = toRemove.filter(i => i.quantity_available < i.quantity_total);
+
+      try {
+        await this.supa.syncItems(itemsPayload, deletableIds);
+      } catch {
+        // O banco também tem essa trava (FK com ON DELETE RESTRICT) — se cair aqui,
+        // foi uma reserva feita bem no instante do save. Nada foi perdido.
+        this.showToast('Alguns itens já reservados por convidados não puderam ser alterados agora. Tente salvar de novo.');
+        this.saving.set(false);
+        return;
+      }
+
       this.analytics.configSaved(this.eventType());
       this.savedSnapshot = this.buildSnapshot();
-      if (!ev.paid) {
+      if (protectedItems.length) {
+        this.showToast(`${protectedItems.length} item(ns) já reservado(s) por convidados foi(ram) mantido(s) para não cancelar reservas.`);
+      } else if (!ev.paid) {
         this.showToast('Lista salva! Veja como seus convidados vão ver 👀');
         this.highlightPreviewCard();
       } else {
