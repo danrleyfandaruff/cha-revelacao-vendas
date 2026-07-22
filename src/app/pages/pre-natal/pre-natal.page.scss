@@ -136,18 +136,15 @@ h1.playfair {
   margin: 4px 0 14px;
 }
 
-.pn-privacy {
-  font-size: 0.74rem;
-  color: var(--brand-brown-light);
-  margin: 14px 0 0;
-  line-height: 1.5;
-}
-
 .pn-lock {
   .pn-input {
     margin-bottom: 14px;
     text-align: center;
   }
+}
+
+.pn-sub-tight {
+  margin-bottom: 0;
 }
 
 .pn-access-banner {
@@ -163,6 +160,26 @@ h1.playfair {
     color: var(--brand-brown);
     margin: 0 0 8px;
     line-height: 1.4;
+  }
+}
+
+.pn-warning-banner {
+  text-align: left;
+  background: #fff8e8;
+  border: 1px solid #f0d18a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+
+  p {
+    font-size: 0.8rem;
+    color: var(--brand-brown);
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  p + p {
+    margin-top: 6px;
   }
 }
 

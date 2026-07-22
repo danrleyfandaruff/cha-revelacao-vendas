@@ -22,7 +22,7 @@
           (keydown.enter)="tentarDesbloquear()"/>
 
         @if (passwordError()) {
-          <p class="pn-error">Código inválido. Confira o link que você recebeu na compra.</p>
+          <p class="pn-error">{{ passwordError() }}</p>
         }
 
         <ion-button expand="block" [disabled]="passwordChecking()" (click)="tentarDesbloquear()">
@@ -34,91 +34,103 @@
         </ion-button>
       </div>
     } @else {
-      <!-- FORMULÁRIO DE PERSONALIZAÇÃO -->
-      <div class="pn-card">
-        <div class="pn-emoji">🤰</div>
-        <h1 class="playfair">Personalize seu Pré-Natal</h1>
-        <p class="pn-sub">Preencha seus dados — geramos o PDF na hora, prontinho pra baixar.</p>
+      @if (!podeBaixar()) {
+        <div class="pn-card pn-lock">
+          <div class="pn-emoji">✅</div>
+          <h1 class="playfair">Download já utilizado</h1>
+          <p class="pn-sub">Este acesso permitia 1 download do PDF e ele já foi usado.</p>
+          <p class="pn-sub pn-sub-tight">Se precisar liberar novamente, basta reativar esse token no Supabase ou gerar um novo acesso.</p>
+        </div>
+      } @else {
+        <!-- FORMULÁRIO DE PERSONALIZAÇÃO -->
+        <div class="pn-card">
+          <div class="pn-emoji">🤰</div>
+          <h1 class="playfair">Personalize seu Pré-Natal</h1>
+          <p class="pn-sub">Preencha seus dados — geramos o PDF na hora, prontinho pra baixar.</p>
 
-        <div class="pn-access-banner">
-          <p>💾 <strong>Guarde este link</strong> — é seu acesso permanente, caso feche a página ou troque de aparelho:</p>
-          <div class="pn-access-link-row">
-            <span class="pn-access-link">{{ accessLink() }}</span>
-            <button class="pn-copy-btn" (click)="copiarLink()">{{ linkCopiado() ? 'Copiado!' : 'Copiar' }}</button>
+          <div class="pn-access-banner">
+            <p>💾 <strong>Guarde este link</strong> — ele dá acesso ao seu formulário até o download final.</p>
+            <div class="pn-access-link-row">
+              <span class="pn-access-link">{{ accessLink() }}</span>
+              <button class="pn-copy-btn" (click)="copiarLink()">{{ linkCopiado() ? 'Copiado!' : 'Copiar' }}</button>
+            </div>
           </div>
-        </div>
 
-        <div class="pn-field">
-          <label>Nome completo</label>
-          <input class="pn-input" type="text" [(ngModel)]="nome" maxlength="60" placeholder="Seu nome completo"/>
-        </div>
+          <div class="pn-warning-banner">
+            <p><strong>Atenção:</strong> este acesso permite apenas <strong>1 download</strong> do PDF final.</p>
+            <p>Downloads restantes: <strong>{{ downloadsRestantes() }}</strong></p>
+          </div>
 
-        <div class="pn-field">
-          <label>Data de nascimento</label>
-          <input class="pn-input" type="date" [(ngModel)]="dataNascimento"/>
-          @if (idadeCalculada() !== null) {
-            <span class="pn-hint">Idade: {{ idadeCalculada() }} anos</span>
-          }
-        </div>
+          <div class="pn-field">
+            <label>Nome completo</label>
+            <input class="pn-input" type="text" [(ngModel)]="nome" maxlength="60" placeholder="Seu nome completo"/>
+          </div>
 
-        <div class="pn-field">
-          <label>CPF</label>
-          <input class="pn-input" type="text" [(ngModel)]="cpf" maxlength="20" placeholder="000.000.000-00"/>
-        </div>
-
-        <div class="pn-field">
-          <label>Celular</label>
-          <input class="pn-input" type="text" [(ngModel)]="celular" maxlength="20" placeholder="(00) 00000-0000"/>
-        </div>
-
-        <div class="pn-field">
-          <label>Número de emergência</label>
-          <input class="pn-input" type="text" [(ngModel)]="emergencia" maxlength="20" placeholder="(00) 00000-0000"/>
-        </div>
-
-        <div class="pn-field">
-          <label>Cartão SUS</label>
-          <input class="pn-input" type="text" [(ngModel)]="sus" maxlength="20" placeholder="000000000000000"/>
-        </div>
-
-        <div class="pn-field">
-          <label>Endereço</label>
-          <input class="pn-input" type="text" [(ngModel)]="endereco" maxlength="100" placeholder="Rua, número, bairro, cidade - UF"/>
-        </div>
-
-        <div class="pn-field">
-          <label>Escolha a cor dos detalhes do PDF</label>
-          <div class="pn-color-grid">
-            @for (opcao of colorOptions; track opcao.id) {
-              <button
-                type="button"
-                class="pn-color-option"
-                [class.is-active]="corSelecionada === opcao.id"
-                (click)="corSelecionada = opcao.id">
-                <span class="pn-color-swatch" [style.background]="opcao.hex"></span>
-                <span class="pn-color-copy">
-                  <strong>{{ opcao.nome }}</strong>
-                  <small>{{ opcao.hint }}</small>
-                </span>
-              </button>
+          <div class="pn-field">
+            <label>Data de nascimento</label>
+            <input class="pn-input" type="date" [(ngModel)]="dataNascimento"/>
+            @if (idadeCalculada() !== null) {
+              <span class="pn-hint">Idade: {{ idadeCalculada() }} anos</span>
             }
           </div>
-        </div>
 
-        @if (errorMsg()) {
-          <p class="pn-error">{{ errorMsg() }}</p>
-        }
+          <div class="pn-field">
+            <label>CPF</label>
+            <input class="pn-input" type="text" [(ngModel)]="cpf" maxlength="20" placeholder="000.000.000-00"/>
+          </div>
 
-        <ion-button expand="block" [disabled]="!podeGerar()" (click)="gerarPdf()">
-          @if (generating()) {
-            <ion-spinner name="dots"></ion-spinner>
-          } @else {
-            Gerar meu Pré-Natal
+          <div class="pn-field">
+            <label>Celular</label>
+            <input class="pn-input" type="text" [(ngModel)]="celular" maxlength="20" placeholder="(00) 00000-0000"/>
+          </div>
+
+          <div class="pn-field">
+            <label>Número de emergência</label>
+            <input class="pn-input" type="text" [(ngModel)]="emergencia" maxlength="20" placeholder="(00) 00000-0000"/>
+          </div>
+
+          <div class="pn-field">
+            <label>Cartão SUS</label>
+            <input class="pn-input" type="text" [(ngModel)]="sus" maxlength="20" placeholder="000000000000000"/>
+          </div>
+
+          <div class="pn-field">
+            <label>Endereço</label>
+            <input class="pn-input" type="text" [(ngModel)]="endereco" maxlength="100" placeholder="Rua, número, bairro, cidade - UF"/>
+          </div>
+
+          <div class="pn-field">
+            <label>Escolha a cor dos detalhes do PDF</label>
+            <div class="pn-color-grid">
+              @for (opcao of colorOptions; track opcao.id) {
+                <button
+                  type="button"
+                  class="pn-color-option"
+                  [class.is-active]="corSelecionada === opcao.id"
+                  (click)="corSelecionada = opcao.id">
+                  <span class="pn-color-swatch" [style.background]="opcao.hex"></span>
+                  <span class="pn-color-copy">
+                    <strong>{{ opcao.nome }}</strong>
+                    <small>{{ opcao.hint }}</small>
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (errorMsg()) {
+            <p class="pn-error">{{ errorMsg() }}</p>
           }
-        </ion-button>
 
-        <p class="pn-privacy">Tudo acontece aqui no seu navegador — nenhum dado seu é enviado ou guardado em servidor.</p>
-      </div>
+          <ion-button expand="block" [disabled]="!podeGerar()" (click)="gerarPdf()">
+            @if (generating()) {
+              <ion-spinner name="dots"></ion-spinner>
+            } @else {
+              Gerar meu Pré-Natal
+            }
+          </ion-button>
+        </div>
+      }
     }
 
   </div>

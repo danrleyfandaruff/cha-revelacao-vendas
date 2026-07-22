@@ -47,6 +47,21 @@ export interface EventConfirmation {
   confirmed_at: string;
 }
 
+export interface PreNatalTokenStatus {
+  valid: boolean;
+  active: boolean;
+  downloads_used: number;
+  max_downloads: number;
+  can_download: boolean;
+  downloaded_at: string | null;
+}
+
+export interface PreNatalDownloadResult {
+  success: boolean;
+  reason?: 'already_used' | 'invalid' | 'error';
+  status?: PreNatalTokenStatus;
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -230,6 +245,38 @@ export class SupabaseService {
     });
     if (error) return false;
     return !!data;
+  }
+
+  async getPreNatalTokenStatus(token: string): Promise<PreNatalTokenStatus> {
+    const { data, error } = await this.supabase.rpc('get_pre_natal_token_status', {
+      p_token: token,
+    });
+
+    if (error || !data) {
+      const valid = await this.verifyPreNatalToken(token);
+      return {
+        valid,
+        active: valid,
+        downloads_used: 0,
+        max_downloads: 1,
+        can_download: valid,
+        downloaded_at: null,
+      };
+    }
+
+    return data as PreNatalTokenStatus;
+  }
+
+  async consumePreNatalDownload(token: string): Promise<PreNatalDownloadResult> {
+    const { data, error } = await this.supabase.rpc('consume_pre_natal_download', {
+      p_token: token,
+    });
+
+    if (error || !data) {
+      return { success: false, reason: 'error' };
+    }
+
+    return data as PreNatalDownloadResult;
   }
 
   // ── Slug helper ───────────────────────────────────────────────────────────

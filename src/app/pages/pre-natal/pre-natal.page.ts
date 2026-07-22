@@ -3,7 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { SupabaseService } from '../../services/supabase.service';
+import {
+  PreNatalTokenStatus,
+  SupabaseService,
+} from '../../services/supabase.service';
 
 const TOKEN_STORAGE_KEY = 'pre_natal_token';
 
@@ -137,18 +140,27 @@ export class PreNatalPage implements OnInit {
   checking = signal(true); // true enquanto tenta liberar sozinho (token salvo ou retorno do Stripe)
   checkingDemorado = signal(false); // true depois de alguns segundos, pra avisar que pode demorar
   currentToken = signal<string | null>(null);
+  tokenStatus = signal<PreNatalTokenStatus | null>(null);
   linkCopiado = signal(false);
   passwordInput = '';
-  passwordError = signal(false);
+  passwordError = signal('');
   passwordChecking = signal(false);
 
   constructor(private supa: SupabaseService) {}
 
-  private desbloquear(token: string) {
+  private desbloquear(token: string, status: PreNatalTokenStatus) {
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
     this.currentToken.set(token);
+    this.tokenStatus.set(status);
     this.unlocked.set(true);
     this.checking.set(false);
+  }
+
+  private async tentarDesbloquearComStatus(token: string): Promise<boolean> {
+    const status = await this.supa.getPreNatalTokenStatus(token);
+    if (!status.valid) return false;
+    this.desbloquear(token, status);
+    return true;
   }
 
   accessLink(): string {
@@ -169,8 +181,7 @@ export class PreNatalPage implements OnInit {
 
     // 1) Já tem token salvo de uma visita anterior?
     const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (saved && await this.supa.verifyPreNatalToken(saved)) {
-      this.desbloquear(saved);
+    if (saved && await this.tentarDesbloquearComStatus(saved)) {
       return;
     }
 
@@ -182,7 +193,7 @@ export class PreNatalPage implements OnInit {
         const token = await this.supa.claimPreNatalToken(sessionId);
         if (token) {
           window.history.replaceState({}, '', '/pre-natal');
-          this.desbloquear(token);
+          await this.tentarDesbloquearComStatus(token);
           return;
         }
         if (tentativa === 3) this.checkingDemorado.set(true);
@@ -191,9 +202,8 @@ export class PreNatalPage implements OnInit {
     }
 
     // 3) Link direto /pre-natal?token=XYZ (ex: reenviado por suporte)
-    if (tokenFromUrl && await this.supa.verifyPreNatalToken(tokenFromUrl)) {
+    if (tokenFromUrl && await this.tentarDesbloquearComStatus(tokenFromUrl)) {
       window.history.replaceState({}, '', '/pre-natal');
-      this.desbloquear(tokenFromUrl);
       return;
     }
 
@@ -231,20 +241,20 @@ export class PreNatalPage implements OnInit {
   }
 
   podeGerar(): boolean {
-    return !!this.nome.trim() && !!this.dataNascimento && !this.generating();
+    return !!this.nome.trim() && !!this.dataNascimento && !this.generating() && this.podeBaixar();
   }
 
   async tentarDesbloquear() {
     const token = this.passwordInput.trim();
     if (!token) return;
     this.passwordChecking.set(true);
-    this.passwordError.set(false);
+    this.passwordError.set('');
 
-    const valido = await this.supa.verifyPreNatalToken(token);
-    if (valido) {
-      this.desbloquear(token);
+    const desbloqueado = await this.tentarDesbloquearComStatus(token);
+    if (!desbloqueado) {
+      this.passwordError.set('Código inválido. Confira o link que você recebeu na compra.');
     } else {
-      this.passwordError.set(true);
+      this.passwordInput = '';
     }
     this.passwordChecking.set(false);
   }
@@ -258,8 +268,23 @@ export class PreNatalPage implements OnInit {
     return this.colorOptions.find(option => option.id === this.corSelecionada) ?? this.colorOptions[0];
   }
 
+  podeBaixar(): boolean {
+    return this.tokenStatus()?.can_download !== false;
+  }
+
+  downloadsRestantes(): number {
+    const status = this.tokenStatus();
+    if (!status) return 1;
+    return Math.max(0, status.max_downloads - status.downloads_used);
+  }
+
   async gerarPdf() {
     if (!this.podeGerar()) return;
+    const token = this.currentToken();
+    if (!token) {
+      this.errorMsg.set('Seu acesso expirou. Entre novamente pelo link da compra.');
+      return;
+    }
     this.generating.set(true);
     this.errorMsg.set('');
 
@@ -370,6 +395,18 @@ export class PreNatalPage implements OnInit {
       }
 
       const bytes = await pdfDoc.save();
+      const consumo = await this.supa.consumePreNatalDownload(token);
+      if (!consumo.success) {
+        if (consumo.reason === 'already_used') {
+          this.tokenStatus.set((await this.supa.getPreNatalTokenStatus(token)));
+          this.errorMsg.set('Este acesso já foi usado para baixar o PDF.');
+        } else {
+          this.errorMsg.set('O bloqueio de download único ainda não foi ativado no Supabase. Rode o SQL novo e tente novamente.');
+        }
+        return;
+      }
+      if (consumo.status) this.tokenStatus.set(consumo.status);
+
       const blob = new Blob([bytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

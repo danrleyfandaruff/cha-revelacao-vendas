@@ -8,6 +8,11 @@ create table if not exists pre_natal_access (
   active             boolean not null default true
 );
 
+alter table pre_natal_access
+  add column if not exists download_count integer not null default 0,
+  add column if not exists max_downloads integer not null default 1,
+  add column if not exists downloaded_at timestamptz;
+
 -- RLS ligado, sem policy nenhuma pra anon/authenticated: ninguém lê a tabela
 -- direto. O único jeito de "ler" um token é através das funções abaixo
 -- (security definer, rodam com privilégio de dono, ignoram RLS).
@@ -42,6 +47,80 @@ as $$
     select 1 from pre_natal_access
     where token = p_token and active = true
   );
+$$;
+
+create or replace function get_pre_natal_token_status(p_token text)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (
+      select jsonb_build_object(
+        'valid', true,
+        'active', active,
+        'downloads_used', download_count,
+        'max_downloads', max_downloads,
+        'can_download', active and download_count < max_downloads,
+        'downloaded_at', downloaded_at
+      )
+      from pre_natal_access
+      where token = p_token
+      limit 1
+    ),
+    jsonb_build_object(
+      'valid', false,
+      'active', false,
+      'downloads_used', 0,
+      'max_downloads', 1,
+      'can_download', false,
+      'downloaded_at', null
+    )
+  );
+$$;
+
+create or replace function consume_pre_natal_download(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row pre_natal_access%rowtype;
+begin
+  update pre_natal_access
+     set download_count = download_count + 1,
+         downloaded_at = now(),
+         active = case
+           when download_count + 1 >= max_downloads then false
+           else active
+         end
+   where token = p_token
+     and active = true
+     and download_count < max_downloads
+  returning * into v_row;
+
+  if found then
+    return jsonb_build_object(
+      'success', true,
+      'status', jsonb_build_object(
+        'valid', true,
+        'active', v_row.active,
+        'downloads_used', v_row.download_count,
+        'max_downloads', v_row.max_downloads,
+        'can_download', v_row.active and v_row.download_count < v_row.max_downloads,
+        'downloaded_at', v_row.downloaded_at
+      )
+    );
+  end if;
+
+  if exists(select 1 from pre_natal_access where token = p_token) then
+    return jsonb_build_object('success', false, 'reason', 'already_used');
+  end if;
+
+  return jsonb_build_object('success', false, 'reason', 'invalid');
+end;
 $$;
 
 -- Pra revogar o acesso de alguém específico no futuro, rode:
