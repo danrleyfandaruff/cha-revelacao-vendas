@@ -7,8 +7,8 @@ import { SupabaseService } from '../../services/supabase.service';
 
 const TOKEN_STORAGE_KEY = 'pre_natal_token';
 
-const TEMPLATE_URL = 'assets/templates/pre-natal-rosa.pdf';
 const COVER_FONT_URL = 'assets/fonts/LibreBaskerville-Regular.ttf'; // mesma fonte serifada do design original
+const BROWN = { r: 0x4a / 255, g: 0x37 / 255, b: 0x28 / 255 };
 
 type ColorOptionId = 'rosa' | 'lilas' | 'azul' | 'verde';
 
@@ -17,37 +17,37 @@ interface ColorOption {
   nome: string;
   hint: string;
   hex: string;
-  rgb: { r: number; g: number; b: number };
+  templateUrl: string;
 }
 
 const COLOR_OPTIONS: ColorOption[] = [
   {
     id: 'rosa',
     nome: 'Rosa delicado',
-    hint: 'Mais romântico e clássico',
+    hint: 'Detalhes suaves e românticos',
     hex: '#b45c7a',
-    rgb: { r: 0xb4 / 255, g: 0x5c / 255, b: 0x7a / 255 },
+    templateUrl: 'assets/templates/pre-natal-rosa.pdf',
   },
   {
     id: 'lilas',
     nome: 'Lilás suave',
     hint: 'Leve e elegante',
     hex: '#8d6aa8',
-    rgb: { r: 0x8d / 255, g: 0x6a / 255, b: 0xa8 / 255 },
+    templateUrl: 'assets/templates/pre-natal-lilas.pdf',
   },
   {
     id: 'azul',
     nome: 'Azul sereno',
     hint: 'Calmo e moderno',
     hex: '#5a86b8',
-    rgb: { r: 0x5a / 255, g: 0x86 / 255, b: 0xb8 / 255 },
+    templateUrl: 'assets/templates/pre-natal-azul.pdf',
   },
   {
     id: 'verde',
     nome: 'Verde sálvia',
     hint: 'Neutro e sofisticado',
     hex: '#708c73',
-    rgb: { r: 0x70 / 255, g: 0x8c / 255, b: 0x73 / 255 },
+    templateUrl: 'assets/templates/pre-natal-verde.pdf',
   },
 ];
 
@@ -265,7 +265,7 @@ export class PreNatalPage implements OnInit {
 
     try {
       const [templateBytes, coverFontBytes] = await Promise.all([
-        fetch(TEMPLATE_URL).then(r => {
+        fetch(this.corAtual().templateUrl).then(r => {
           if (!r.ok) throw new Error('Não foi possível carregar o modelo do PDF.');
           return r.arrayBuffer();
         }),
@@ -279,8 +279,7 @@ export class PreNatalPage implements OnInit {
       pdfDoc.registerFontkit(fontkit);
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const coverFont = await pdfDoc.embedFont(coverFontBytes); // Libre Baskerville, igual à fonte original da capa
-      const selectedColor = this.corAtual();
-      const color = rgb(selectedColor.rgb.r, selectedColor.rgb.g, selectedColor.rgb.b);
+      const color = rgb(BROWN.r, BROWN.g, BROWN.b);
       const pages = pdfDoc.getPages();
       const capa = pages[0];
       const dados = pages[1];
