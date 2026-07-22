@@ -9,7 +9,47 @@ const TOKEN_STORAGE_KEY = 'pre_natal_token';
 
 const TEMPLATE_URL = 'assets/templates/pre-natal-rosa.pdf';
 const COVER_FONT_URL = 'assets/fonts/LibreBaskerville-Regular.ttf'; // mesma fonte serifada do design original
-const BROWN = { r: 0x4a / 255, g: 0x37 / 255, b: 0x28 / 255 };
+
+type ColorOptionId = 'rosa' | 'lilas' | 'azul' | 'verde';
+
+interface ColorOption {
+  id: ColorOptionId;
+  nome: string;
+  hint: string;
+  hex: string;
+  rgb: { r: number; g: number; b: number };
+}
+
+const COLOR_OPTIONS: ColorOption[] = [
+  {
+    id: 'rosa',
+    nome: 'Rosa delicado',
+    hint: 'Mais romântico e clássico',
+    hex: '#b45c7a',
+    rgb: { r: 0xb4 / 255, g: 0x5c / 255, b: 0x7a / 255 },
+  },
+  {
+    id: 'lilas',
+    nome: 'Lilás suave',
+    hint: 'Leve e elegante',
+    hex: '#8d6aa8',
+    rgb: { r: 0x8d / 255, g: 0x6a / 255, b: 0xa8 / 255 },
+  },
+  {
+    id: 'azul',
+    nome: 'Azul sereno',
+    hint: 'Calmo e moderno',
+    hex: '#5a86b8',
+    rgb: { r: 0x5a / 255, g: 0x86 / 255, b: 0xb8 / 255 },
+  },
+  {
+    id: 'verde',
+    nome: 'Verde sálvia',
+    hint: 'Neutro e sofisticado',
+    hex: '#708c73',
+    rgb: { r: 0x70 / 255, g: 0x8c / 255, b: 0x73 / 255 },
+  },
+];
 
 // Posições dos valores na página 2 (Dados Pessoais), extraídas do template
 // (xMax do rótulo + yMax do rótulo, no sistema de coordenadas do PDF, origem no topo).
@@ -92,6 +132,7 @@ function slopeAt(yTop: number): number {
   imports: [FormsModule, IonContent, IonButton, IonSpinner],
 })
 export class PreNatalPage implements OnInit {
+  readonly colorOptions = COLOR_OPTIONS;
   unlocked = signal(false);
   checking = signal(true); // true enquanto tenta liberar sozinho (token salvo ou retorno do Stripe)
   checkingDemorado = signal(false); // true depois de alguns segundos, pra avisar que pode demorar
@@ -167,6 +208,7 @@ export class PreNatalPage implements OnInit {
   emergencia = '';
   sus = '';
   endereco = '';
+  corSelecionada: ColorOptionId = 'rosa';
 
   generating = signal(false);
   errorMsg = signal('');
@@ -212,6 +254,10 @@ export class PreNatalPage implements OnInit {
     return `${dia}/${mes}/${ano}`;
   }
 
+  corAtual(): ColorOption {
+    return this.colorOptions.find(option => option.id === this.corSelecionada) ?? this.colorOptions[0];
+  }
+
   async gerarPdf() {
     if (!this.podeGerar()) return;
     this.generating.set(true);
@@ -233,7 +279,8 @@ export class PreNatalPage implements OnInit {
       pdfDoc.registerFontkit(fontkit);
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const coverFont = await pdfDoc.embedFont(coverFontBytes); // Libre Baskerville, igual à fonte original da capa
-      const color = rgb(BROWN.r, BROWN.g, BROWN.b);
+      const selectedColor = this.corAtual();
+      const color = rgb(selectedColor.rgb.r, selectedColor.rgb.g, selectedColor.rgb.b);
       const pages = pdfDoc.getPages();
       const capa = pages[0];
       const dados = pages[1];

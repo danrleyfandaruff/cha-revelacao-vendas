@@ -86,6 +86,25 @@
           <input class="pn-input" type="text" [(ngModel)]="endereco" maxlength="100" placeholder="Rua, número, bairro, cidade - UF"/>
         </div>
 
+        <div class="pn-field">
+          <label>Escolha a cor do seu PDF</label>
+          <div class="pn-color-grid">
+            @for (opcao of colorOptions; track opcao.id) {
+              <button
+                type="button"
+                class="pn-color-option"
+                [class.is-active]="corSelecionada === opcao.id"
+                (click)="corSelecionada = opcao.id">
+                <span class="pn-color-swatch" [style.background]="opcao.hex"></span>
+                <span class="pn-color-copy">
+                  <strong>{{ opcao.nome }}</strong>
+                  <small>{{ opcao.hint }}</small>
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+
         @if (errorMsg()) {
           <p class="pn-error">{{ errorMsg() }}</p>
         }
