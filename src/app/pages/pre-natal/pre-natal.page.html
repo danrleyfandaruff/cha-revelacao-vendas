@@ -32,6 +32,13 @@
             Acessar
           }
         </ion-button>
+
+        <div class="pn-offer-card">
+          <span class="pn-offer-tag">Outro produto</span>
+          <h2>Lista de presentes online</h2>
+          <p>Monte sua lista para <strong>chá revelação</strong> ou <strong>chá de bebê</strong> e compartilhe com os convidados sem presentes repetidos.</p>
+          <a class="pn-offer-btn" href="/comece">Conhecer a lista de presentes</a>
+        </div>
       </div>
     } @else {
       @if (!podeBaixar()) {
@@ -39,7 +46,17 @@
           <div class="pn-emoji">✅</div>
           <h1 class="playfair">Download já utilizado</h1>
           <p class="pn-sub">Este acesso permitia 1 download do PDF e ele já foi usado.</p>
-          <p class="pn-sub pn-sub-tight">Se precisar liberar novamente, basta reativar esse token no Supabase ou gerar um novo acesso.</p>
+          <p class="pn-sub pn-sub-tight">Se precisar de ajuda, entre em contato para liberar um novo acesso.</p>
+          <a class="pn-contact-btn" href="https://wa.me/5548991593331" target="_blank" rel="noopener noreferrer">
+            Falar no WhatsApp
+          </a>
+
+          <div class="pn-offer-card pn-offer-card-soft">
+            <span class="pn-offer-tag">Aproveite também</span>
+            <h2>Lista de presentes online</h2>
+            <p>Ideal para organizar seu <strong>chá revelação</strong> ou <strong>chá de bebê</strong> com link único, reservas em tempo real e mais praticidade para os convidados.</p>
+            <a class="pn-offer-btn" href="/comece">Quero conhecer</a>
+          </div>
         </div>
       } @else {
         <!-- FORMULÁRIO DE PERSONALIZAÇÃO -->
@@ -129,6 +146,13 @@
               Gerar meu Pré-Natal
             }
           </ion-button>
+
+          <div class="pn-offer-card pn-offer-card-soft">
+            <span class="pn-offer-tag">Conheça também</span>
+            <h2>Lista de presentes online</h2>
+            <p>Crie a lista do seu <strong>chá revelação</strong> ou <strong>chá de bebê</strong>, envie o link e acompanhe as reservas dos presentes em tempo real.</p>
+            <a class="pn-offer-btn" href="/comece">Ver produto</a>
+          </div>
         </div>
       }
     }
