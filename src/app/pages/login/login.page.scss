@@ -96,6 +96,30 @@ ion-content {
   color: #4285F4;
 }
 
+.google-wrap {
+  padding: 24px 24px 0;
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 2px solid var(--brand-beige);
+  border-radius: 10px;
+  background: #fff;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--brand-brown);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: var(--brand-gold); }
+  &:active { background: var(--brand-cream); }
+}
+
 // Tabs
 .login-tabs {
   display: flex;

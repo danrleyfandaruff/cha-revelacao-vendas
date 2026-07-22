@@ -10,6 +10,14 @@
     <!-- ── FORMULÁRIO ── -->
     <div class="login-card">
 
+        <!-- Google -->
+        <div class="google-wrap">
+          <button class="google-btn" (click)="googleLogin()">
+            <span class="google-g">G</span> Continuar com Google
+          </button>
+          <div class="divider">ou continue com e-mail</div>
+        </div>
+
         <!-- Tabs -->
         <div class="login-tabs">
           <button class="ltab" [class.active]="tab() === 'entrar'" (click)="setTab('entrar')">
