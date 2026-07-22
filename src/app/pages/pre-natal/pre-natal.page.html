@@ -6,6 +6,9 @@
       <div class="pn-card pn-lock">
         <ion-spinner name="dots"></ion-spinner>
         <p class="pn-sub" style="margin-top:10px">Confirmando seu acesso…</p>
+        @if (checkingDemorado()) {
+          <p class="pn-sub">Pode levar até 30 segundos logo após o pagamento. Não feche esta página.</p>
+        }
       </div>
     } @else if (!unlocked()) {
       <!-- BLOQUEIO POR TOKEN -->
@@ -36,6 +39,14 @@
         <div class="pn-emoji">🤰</div>
         <h1 class="playfair">Personalize seu Pré-Natal</h1>
         <p class="pn-sub">Preencha seus dados — geramos o PDF na hora, prontinho pra baixar.</p>
+
+        <div class="pn-access-banner">
+          <p>💾 <strong>Guarde este link</strong> — é seu acesso permanente, caso feche a página ou troque de aparelho:</p>
+          <div class="pn-access-link-row">
+            <span class="pn-access-link">{{ accessLink() }}</span>
+            <button class="pn-copy-btn" (click)="copiarLink()">{{ linkCopiado() ? 'Copiado!' : 'Copiar' }}</button>
+          </div>
+        </div>
 
         <div class="pn-field">
           <label>Nome completo</label>

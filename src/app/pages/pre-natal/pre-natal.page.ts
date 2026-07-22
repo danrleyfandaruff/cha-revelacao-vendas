@@ -94,11 +94,32 @@ function slopeAt(yTop: number): number {
 export class PreNatalPage implements OnInit {
   unlocked = signal(false);
   checking = signal(true); // true enquanto tenta liberar sozinho (token salvo ou retorno do Stripe)
+  checkingDemorado = signal(false); // true depois de alguns segundos, pra avisar que pode demorar
+  currentToken = signal<string | null>(null);
+  linkCopiado = signal(false);
   passwordInput = '';
   passwordError = signal(false);
   passwordChecking = signal(false);
 
   constructor(private supa: SupabaseService) {}
+
+  private desbloquear(token: string) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    this.currentToken.set(token);
+    this.unlocked.set(true);
+    this.checking.set(false);
+  }
+
+  accessLink(): string {
+    return `${window.location.origin}/pre-natal?token=${this.currentToken()}`;
+  }
+
+  copiarLink() {
+    navigator.clipboard.writeText(this.accessLink()).then(() => {
+      this.linkCopiado.set(true);
+      setTimeout(() => this.linkCopiado.set(false), 2500);
+    });
+  }
 
   async ngOnInit() {
     const params = new URLSearchParams(window.location.search);
@@ -108,33 +129,30 @@ export class PreNatalPage implements OnInit {
     // 1) Já tem token salvo de uma visita anterior?
     const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
     if (saved && await this.supa.verifyPreNatalToken(saved)) {
-      this.unlocked.set(true);
-      this.checking.set(false);
+      this.desbloquear(saved);
       return;
     }
 
     // 2) Voltando do Stripe agora mesmo — o webhook pode levar alguns
-    // segundos pra gerar o token, então tenta algumas vezes.
+    // segundos pra gerar o token (a function "fria", recém-implantada, pode
+    // demorar mais ainda), então tenta por até ~30s antes de desistir.
     if (sessionId) {
-      for (let tentativa = 0; tentativa < 6; tentativa++) {
+      for (let tentativa = 0; tentativa < 15; tentativa++) {
         const token = await this.supa.claimPreNatalToken(sessionId);
         if (token) {
-          localStorage.setItem(TOKEN_STORAGE_KEY, token);
           window.history.replaceState({}, '', '/pre-natal');
-          this.unlocked.set(true);
-          this.checking.set(false);
+          this.desbloquear(token);
           return;
         }
-        await new Promise(r => setTimeout(r, 1500));
+        if (tentativa === 3) this.checkingDemorado.set(true);
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
 
     // 3) Link direto /pre-natal?token=XYZ (ex: reenviado por suporte)
     if (tokenFromUrl && await this.supa.verifyPreNatalToken(tokenFromUrl)) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, tokenFromUrl);
       window.history.replaceState({}, '', '/pre-natal');
-      this.unlocked.set(true);
-      this.checking.set(false);
+      this.desbloquear(tokenFromUrl);
       return;
     }
 
@@ -182,8 +200,7 @@ export class PreNatalPage implements OnInit {
 
     const valido = await this.supa.verifyPreNatalToken(token);
     if (valido) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
-      this.unlocked.set(true);
+      this.desbloquear(token);
     } else {
       this.passwordError.set(true);
     }
