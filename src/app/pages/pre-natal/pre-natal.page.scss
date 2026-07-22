@@ -1,0 +1,95 @@
+.pn-wrap {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background: var(--brand-cream);
+}
+
+.pn-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid var(--brand-beige);
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 12px 40px rgba(74, 55, 40, 0.1);
+  text-align: center;
+}
+
+.pn-emoji {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+h1.playfair {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  color: var(--brand-brown);
+  margin: 0 0 8px;
+}
+
+.pn-sub {
+  font-size: 0.88rem;
+  color: var(--brand-brown-light);
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+.pn-field {
+  text-align: left;
+  margin-bottom: 14px;
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--brand-brown-light);
+    margin-bottom: 4px;
+  }
+}
+
+.pn-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--brand-beige-dark);
+  background: var(--brand-cream);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  color: var(--brand-brown);
+
+  &:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+  }
+}
+
+.pn-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--brand-gold);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.pn-error {
+  color: var(--brand-red);
+  font-size: 0.84rem;
+  margin: 4px 0 14px;
+}
+
+.pn-privacy {
+  font-size: 0.74rem;
+  color: var(--brand-brown-light);
+  margin: 14px 0 0;
+  line-height: 1.5;
+}
+
+.pn-lock {
+  .pn-input {
+    margin-bottom: 14px;
+    text-align: center;
+  }
+}

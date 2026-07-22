@@ -1,0 +1,83 @@
+<ion-content>
+  <div class="pn-wrap">
+
+    @if (!unlocked()) {
+      <!-- BLOQUEIO POR SENHA -->
+      <div class="pn-card pn-lock">
+        <div class="pn-emoji">🔒</div>
+        <h1 class="playfair">Seu Pré-Natal personalizado</h1>
+        <p class="pn-sub">Digite a senha que você recebeu na confirmação da compra.</p>
+
+        <input class="pn-input" type="password" [(ngModel)]="passwordInput"
+          placeholder="Senha de acesso"
+          (keydown.enter)="tentarDesbloquear()"/>
+
+        @if (passwordError()) {
+          <p class="pn-error">Senha incorreta. Confira o que você recebeu na compra.</p>
+        }
+
+        <ion-button expand="block" (click)="tentarDesbloquear()">Acessar</ion-button>
+      </div>
+    } @else {
+      <!-- FORMULÁRIO DE PERSONALIZAÇÃO -->
+      <div class="pn-card">
+        <div class="pn-emoji">🤰</div>
+        <h1 class="playfair">Personalize seu Pré-Natal</h1>
+        <p class="pn-sub">Preencha seus dados — geramos o PDF na hora, prontinho pra baixar.</p>
+
+        <div class="pn-field">
+          <label>Nome completo</label>
+          <input class="pn-input" type="text" [(ngModel)]="nome" maxlength="60" placeholder="Seu nome completo"/>
+        </div>
+
+        <div class="pn-field">
+          <label>Data de nascimento</label>
+          <input class="pn-input" type="date" [(ngModel)]="dataNascimento"/>
+          @if (idadeCalculada() !== null) {
+            <span class="pn-hint">Idade: {{ idadeCalculada() }} anos</span>
+          }
+        </div>
+
+        <div class="pn-field">
+          <label>CPF</label>
+          <input class="pn-input" type="text" [(ngModel)]="cpf" maxlength="20" placeholder="000.000.000-00"/>
+        </div>
+
+        <div class="pn-field">
+          <label>Celular</label>
+          <input class="pn-input" type="text" [(ngModel)]="celular" maxlength="20" placeholder="(00) 00000-0000"/>
+        </div>
+
+        <div class="pn-field">
+          <label>Número de emergência</label>
+          <input class="pn-input" type="text" [(ngModel)]="emergencia" maxlength="20" placeholder="(00) 00000-0000"/>
+        </div>
+
+        <div class="pn-field">
+          <label>Cartão SUS</label>
+          <input class="pn-input" type="text" [(ngModel)]="sus" maxlength="20" placeholder="000000000000000"/>
+        </div>
+
+        <div class="pn-field">
+          <label>Endereço</label>
+          <input class="pn-input" type="text" [(ngModel)]="endereco" maxlength="100" placeholder="Rua, número, bairro, cidade - UF"/>
+        </div>
+
+        @if (errorMsg()) {
+          <p class="pn-error">{{ errorMsg() }}</p>
+        }
+
+        <ion-button expand="block" [disabled]="!podeGerar()" (click)="gerarPdf()">
+          @if (generating()) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            Gerar meu Pré-Natal 📄
+          }
+        </ion-button>
+
+        <p class="pn-privacy">Tudo acontece aqui no seu navegador — nenhum dado seu é enviado ou guardado em servidor.</p>
+      </div>
+    }
+
+  </div>
+</ion-content>

@@ -51,6 +51,11 @@ export const routes: Routes = [
       import('./pages/convite/convite.page').then((m) => m.ConvitePage),
   },
   {
+    path: 'pre-natal',
+    loadComponent: () =>
+      import('./pages/pre-natal/pre-natal.page').then((m) => m.PreNatalPage),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
