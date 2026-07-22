@@ -92,6 +92,7 @@ export class LoginPage implements OnInit {
 
   async googleLogin() {
     this.analytics.loginGoogleClick();
+    sessionStorage.setItem('pending_google_login', '1');
     await this.supa.signInWithGoogle();
   }
 

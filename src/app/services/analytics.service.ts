@@ -24,6 +24,7 @@ export class AnalyticsService {
   loginTabSwitch(tab: string): void         { this.send('login_tab_switch', { tab }); }
   loginEmailEngaged(tab: string): void      { this.send('login_email_engaged', { tab }); }
   loginGoogleClick(): void                  { this.send('login_google_click'); }
+  loginGoogleSuccess(): void                { this.send('login_google_success'); }
   loginSubmitClick(tab: string): void       { this.send('login_submit_click', { tab }); }
   loginValidationError(tab: string, reason: string): void { this.send('login_validation_error', { tab, reason }); }
   loginError(tab: string, reason: string): void { this.send('login_error', { tab, reason }); }
@@ -56,7 +57,9 @@ export class AnalyticsService {
   tutorialCompleted(): void                 { this.send('tutorial_completed'); }
   tutorialSkipped(step: number): void       { this.send('tutorial_skipped', { step }); }
   configWizardStepView(step: string): void  { this.send('config_wizard_step_view', { step }); }
-  wizardCompleted(): void                   { this.send('wizard_completed'); }
+  configWizardStepCompleted(step: string, props?: TrackProps): void { this.send('config_wizard_step_completed', { step, ...props }); }
+  configSetupCompleted(props?: TrackProps): void { this.send('config_setup_completed', props); }
+  wizardCompleted(props?: TrackProps): void { this.send('wizard_completed', props); }
   wizardSkipped(step: string): void         { this.send('wizard_skipped', { step }); }
 
   // ── Dicas ────────────────────────────────────────────────────────────────────

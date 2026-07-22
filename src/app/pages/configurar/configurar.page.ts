@@ -230,6 +230,43 @@ export class ConfigurarPage implements OnInit {
 
   wizardStepId = computed(() => this.wizardStepIds()[this.wizardStep()] ?? 'final');
 
+  private wizardStepAnalyticsProps(step: string): Record<string, string | number | boolean | null> {
+    switch (step) {
+      case 'tipo':
+        return { event_type: this.eventType() };
+      case 'sexo':
+        return { baby_sex: this.babySex() };
+      case 'nome':
+        return {
+          has_name_1: !!this.name1.trim(),
+          has_name_2: !!this.name2.trim(),
+          event_type: this.eventType(),
+        };
+      case 'local':
+        return { has_address: !!this.eventAddress().trim() };
+      case 'data':
+        return { has_datetime: !!this.eventDatetime() };
+      default:
+        return {};
+    }
+  }
+
+  private configAnalyticsProps(): Record<string, string | number | boolean | null> {
+    const checkedFraldas = this.fraldas().filter(i => i.checked).length;
+    const checkedPresentes = this.presentes().filter(i => i.checked).length;
+    return {
+      event_type: this.eventType(),
+      baby_sex: this.babySex(),
+      has_address: !!this.eventAddress().trim(),
+      has_datetime: !!this.eventDatetime(),
+      has_second_name: !!this.name2.trim(),
+      checked_fraldas: checkedFraldas,
+      checked_presentes: checkedPresentes,
+      total_checked_items: checkedFraldas + checkedPresentes,
+      is_first_save: !this.event(),
+    };
+  }
+
   constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService) {
     addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline, arrowBackOutline, calendarOutline });
   }
@@ -239,6 +276,11 @@ export class ConfigurarPage implements OnInit {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
+
+    if (sessionStorage.getItem('pending_google_login') === '1') {
+      this.analytics.loginGoogleSuccess();
+      sessionStorage.removeItem('pending_google_login');
+    }
 
     // Carrega metadados salvos localmente (tipo e sexo)
     this.loadMeta();
@@ -531,6 +573,7 @@ export class ConfigurarPage implements OnInit {
       }
 
       this.analytics.configSaved(this.eventType());
+      this.analytics.configSetupCompleted(this.configAnalyticsProps());
       this.savedSnapshot = this.buildSnapshot();
       if (protectedItems.length) {
         this.showToast(`${protectedItems.length} item(ns) já reservado(s) por convidados foi(ram) mantido(s) para não cancelar reservas.`);
@@ -574,6 +617,8 @@ export class ConfigurarPage implements OnInit {
   // ── Wizard de primeiro cadastro ────────────────────────────────────────────
   wizardNext() {
     this.saveMeta();
+    const currentStep = this.wizardStepId();
+    this.analytics.configWizardStepCompleted(currentStep, this.wizardStepAnalyticsProps(currentStep));
     const ids = this.wizardStepIds();
     if (this.wizardStep() < ids.length - 1) {
       this.wizardDirection.set('fwd');
@@ -619,7 +664,8 @@ export class ConfigurarPage implements OnInit {
   }
 
   finishWizard() {
-    this.analytics.wizardCompleted();
+    this.analytics.configWizardStepCompleted('final', this.configAnalyticsProps());
+    this.analytics.wizardCompleted(this.configAnalyticsProps());
     this.wizardActive.set(false);
   }
 
