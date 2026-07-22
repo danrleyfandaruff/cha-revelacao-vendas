@@ -1,12 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
+import { SupabaseService } from '../../services/supabase.service';
 
-// Senha simples só pra evitar que o arquivo circule sem quem comprou —
-// não é uma trava de segurança de verdade, é só uma barreira de fricção.
-const ACCESS_PASSWORD = 'meubebe2026';
+const TOKEN_STORAGE_KEY = 'pre_natal_token';
 
 const TEMPLATE_URL = 'assets/templates/pre-natal-rosa.pdf';
 const COVER_FONT_URL = 'assets/fonts/LibreBaskerville-Regular.ttf'; // mesma fonte serifada do design original
@@ -92,10 +91,56 @@ function slopeAt(yTop: number): number {
   standalone: true,
   imports: [FormsModule, IonContent, IonButton, IonSpinner],
 })
-export class PreNatalPage {
+export class PreNatalPage implements OnInit {
   unlocked = signal(false);
+  checking = signal(true); // true enquanto tenta liberar sozinho (token salvo ou retorno do Stripe)
   passwordInput = '';
   passwordError = signal(false);
+  passwordChecking = signal(false);
+
+  constructor(private supa: SupabaseService) {}
+
+  async ngOnInit() {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    const tokenFromUrl = params.get('token');
+
+    // 1) Já tem token salvo de uma visita anterior?
+    const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (saved && await this.supa.verifyPreNatalToken(saved)) {
+      this.unlocked.set(true);
+      this.checking.set(false);
+      return;
+    }
+
+    // 2) Voltando do Stripe agora mesmo — o webhook pode levar alguns
+    // segundos pra gerar o token, então tenta algumas vezes.
+    if (sessionId) {
+      for (let tentativa = 0; tentativa < 6; tentativa++) {
+        const token = await this.supa.claimPreNatalToken(sessionId);
+        if (token) {
+          localStorage.setItem(TOKEN_STORAGE_KEY, token);
+          window.history.replaceState({}, '', '/pre-natal');
+          this.unlocked.set(true);
+          this.checking.set(false);
+          return;
+        }
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    }
+
+    // 3) Link direto /pre-natal?token=XYZ (ex: reenviado por suporte)
+    if (tokenFromUrl && await this.supa.verifyPreNatalToken(tokenFromUrl)) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, tokenFromUrl);
+      window.history.replaceState({}, '', '/pre-natal');
+      this.unlocked.set(true);
+      this.checking.set(false);
+      return;
+    }
+
+    // 4) Nada disso — mostra o campo pra digitar o código manualmente.
+    this.checking.set(false);
+  }
 
   nome = '';
   dataNascimento = ''; // input type="date" -> aaaa-mm-dd
@@ -129,13 +174,20 @@ export class PreNatalPage {
     return !!this.nome.trim() && !!this.dataNascimento && !this.generating();
   }
 
-  tentarDesbloquear() {
-    if (this.passwordInput.trim().toLowerCase() === ACCESS_PASSWORD) {
+  async tentarDesbloquear() {
+    const token = this.passwordInput.trim();
+    if (!token) return;
+    this.passwordChecking.set(true);
+    this.passwordError.set(false);
+
+    const valido = await this.supa.verifyPreNatalToken(token);
+    if (valido) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
       this.unlocked.set(true);
-      this.passwordError.set(false);
     } else {
       this.passwordError.set(true);
     }
+    this.passwordChecking.set(false);
   }
 
   private formatarNascimento(): string {

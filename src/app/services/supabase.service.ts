@@ -214,6 +214,24 @@ export class SupabaseService {
     return data ?? { success: false };
   }
 
+  // Retorna o token gerado pelo webhook do Stripe pra essa sessão de checkout,
+  // ou null se ainda não processou (ou a sessão não existe).
+  async claimPreNatalToken(sessionId: string): Promise<string | null> {
+    const { data, error } = await this.supabase.rpc('claim_pre_natal_token', {
+      p_session_id: sessionId,
+    });
+    if (error) return null;
+    return data ?? null;
+  }
+
+  async verifyPreNatalToken(token: string): Promise<boolean> {
+    const { data, error } = await this.supabase.rpc('verify_pre_natal_token', {
+      p_token: token,
+    });
+    if (error) return false;
+    return !!data;
+  }
+
   // ── Slug helper ───────────────────────────────────────────────────────────
   slugify(text: string, userId?: string): string {
     const base = text
