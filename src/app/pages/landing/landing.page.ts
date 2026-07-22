@@ -32,6 +32,17 @@ export class LandingPage implements OnInit {
   async ngOnInit() {
     const session = await this.supa.getSession();
     if (session) { this.router.navigate(['/configurar'], { replaceUrl: true }); return; }
+
+    // Cobre o retorno do OAuth (Google): o Supabase ainda pode estar processando
+    // o token da URL nesse instante, e getSession() acima pega "sem sessão" por
+    // uma fração de segundo. Esse listener pega a sessão assim que ela existir.
+    const { data: sub } = this.supa.onAuthStateChange((s) => {
+      if (s) {
+        sub.subscription.unsubscribe();
+        this.router.navigate(['/configurar'], { replaceUrl: true });
+      }
+    });
+
     this.analytics.landingView();
   }
 
