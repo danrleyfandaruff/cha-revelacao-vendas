@@ -275,3 +275,107 @@ ion-content {
   font-size: 0.8rem;
   p + p { margin-top: 8px; }
 }
+
+// ── Popup: kit de brinde ────────────────────────────────────────────────────
+.kit-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 55, 40, 0.55);
+  z-index: 1000;
+  animation: kit-fade-in 0.2s ease;
+}
+
+.kit-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  width: min(92vw, 420px);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 22px 22px;
+  box-shadow: 0 20px 60px rgba(74, 55, 40, 0.35);
+  text-align: center;
+  animation: kit-pop-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kit-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brand-cream);
+  color: var(--brand-brown-light);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.kit-popup-tag {
+  display: inline-flex;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(201, 168, 76, 0.16);
+  color: var(--brand-brown);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.kit-popup-title {
+  font-size: 1.2rem;
+  color: var(--brand-brown);
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+
+.kit-popup-sub {
+  font-size: 0.85rem;
+  color: var(--brand-brown-light);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.kit-popup-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+
+  img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--brand-beige);
+  }
+}
+
+.kit-popup-whatsapp {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--brand-brown-light);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+@keyframes kit-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kit-pop-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

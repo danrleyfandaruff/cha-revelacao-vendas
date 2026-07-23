@@ -18,6 +18,9 @@ export class AnalyticsService {
   // ── Comece (landing page de ads) ────────────────────────────────────────────
   comeceView(): void                 { this.send('comece_view'); }
   comeceCtaClick(local: string): void { this.send('comece_cta_click', { local }); }
+  comeceKitPopupView(): void          { this.send('comece_kit_popup_view'); }
+  comeceKitPopupClose(): void         { this.send('comece_kit_popup_close'); }
+  comeceKitPopupWhatsapp(): void      { this.send('comece_kit_popup_whatsapp'); }
 
   // ── Login / Cadastro ─────────────────────────────────────────────────────────
   loginView(tab: string): void              { this.send('login_view', { tab }); }

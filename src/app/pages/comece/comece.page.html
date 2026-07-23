@@ -125,4 +125,30 @@
     <p><span class="text-gold" style="cursor:pointer" (click)="goDicas()">Prefere só ler dicas antes? Veja o guia completo →</span></p>
   </div>
 
+  <!-- POPUP: KIT DE BRINDE -->
+  @if (showKitPopup()) {
+    <div class="kit-popup-backdrop" (click)="fecharKitPopup()"></div>
+    <div class="kit-popup">
+      <button class="kit-popup-close" (click)="fecharKitPopup()" aria-label="Fechar">✕</button>
+
+      <div class="kit-popup-tag">🎁 Brinde de cadastro</div>
+      <h2 class="playfair kit-popup-title">Cadastre-se e ganhe um kit em PDF pra pasta de pré-natal</h2>
+      <p class="kit-popup-sub">Um material completo pra organizar consultas, exames e documentos da gravidez — de graça pra quem criar a lista de presentes.</p>
+
+      <div class="kit-popup-images">
+        @for (img of kitImages; track img) {
+          <img [src]="img" alt="Página do kit de pré-natal"/>
+        }
+      </div>
+
+      <ion-button expand="block" class="btn-hero" (click)="kitPopupCadastro()">
+        Criar minha lista grátis &nbsp;→
+      </ion-button>
+
+      <button class="kit-popup-whatsapp" (click)="kitPopupWhatsapp()">
+        Já me cadastrei — falar no WhatsApp pra resgatar
+      </button>
+    </div>
+  }
+
 </ion-content>
