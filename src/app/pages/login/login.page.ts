@@ -21,6 +21,7 @@ type Tab = 'entrar' | 'cadastrar';
 export class LoginPage implements OnInit {
   tab      = signal<Tab>('entrar');
   email    = '';
+  phone    = '';
   password = '';
   loading  = signal(false);
   private emailEngaged = false;
@@ -64,6 +65,12 @@ export class LoginPage implements OnInit {
       this.showToast('Preencha e-mail e senha.', 'danger');
       return;
     }
+
+    if (this.tab() === 'cadastrar' && !this.telefoneValido()) {
+      this.analytics.loginValidationError('cadastrar', 'telefone_invalido');
+      this.showToast('Informe um número de telefone válido com DDD.', 'danger');
+      return;
+    }
     this.loading.set(true);
 
     if (this.tab() === 'entrar') {
@@ -77,7 +84,11 @@ export class LoginPage implements OnInit {
       }
 
     } else {
-      const { data, error } = await this.supa.signUpWithEmail(this.email, this.password);
+      const { data, error } = await this.supa.signUpWithEmail(
+        this.email,
+        this.password,
+        this.telefoneCompleto()
+      );
       if (error) {
         this.analytics.loginError('cadastrar', this.errorReason(error.message, error.code));
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
@@ -94,6 +105,32 @@ export class LoginPage implements OnInit {
     this.analytics.loginGoogleClick();
     sessionStorage.setItem('pending_google_login', '1');
     await this.supa.signInWithGoogle();
+  }
+
+  onPhoneChange(value: string) {
+    this.phone = this.formatPhone(value);
+  }
+
+  private digitsFromPhone(): string {
+    return this.phone.replace(/\D/g, '').slice(0, 11);
+  }
+
+  private telefoneValido(): boolean {
+    const digits = this.digitsFromPhone();
+    return digits.length === 10 || digits.length === 11;
+  }
+
+  private telefoneCompleto(): string {
+    const digits = this.digitsFromPhone();
+    return digits ? `+55${digits}` : '';
+  }
+
+  private formatPhone(value: string): string {
+    const digits = value.replace(/\D/g, '').replace(/^55/, '').slice(0, 11);
+    if (digits.length <= 2) return digits ? `(${digits}` : '';
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   }
 
   private errorReason(msg: string, code?: string): string {

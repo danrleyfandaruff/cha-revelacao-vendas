@@ -35,6 +35,17 @@
             <input class="text-input" type="email" [(ngModel)]="email"
               placeholder="seu@email.com" autocomplete="email" (blur)="onEmailBlur()"/>
           </div>
+          @if (tab() === 'cadastrar') {
+            <div class="field-group">
+              <label class="label-small">Telefone</label>
+              <div class="phone-input-wrap">
+                <span class="phone-prefix">+55</span>
+                <input class="text-input phone-input" type="tel" [ngModel]="phone"
+                  (ngModelChange)="onPhoneChange($event)"
+                  placeholder="(48) 99159-3331" autocomplete="tel"/>
+              </div>
+            </div>
+          }
           <div class="field-group">
             <label class="label-small">Senha</label>
             <input class="text-input" type="password" [(ngModel)]="password"

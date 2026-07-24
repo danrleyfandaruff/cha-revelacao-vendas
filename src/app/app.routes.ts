@@ -4,8 +4,8 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/landing/landing.page').then((m) => m.LandingPage),
+    redirectTo: 'login',
+    pathMatch: 'full',
   },
   {
     path: 'login',
@@ -42,8 +42,18 @@ export const routes: Routes = [
   },
   {
     path: 'comece',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'comece2',
     loadComponent: () =>
       import('./pages/comece/comece.page').then((m) => m.ComecePage),
+  },
+  {
+    path: 'landing',
+    loadComponent: () =>
+      import('./pages/landing/landing.page').then((m) => m.LandingPage),
   },
   {
     path: 'convite',
@@ -57,6 +67,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'login',
   },
 ];

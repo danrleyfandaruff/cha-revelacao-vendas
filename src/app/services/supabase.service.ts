@@ -90,8 +90,14 @@ export class SupabaseService {
     return this.supabase.auth.signInWithPassword({ email, password });
   }
 
-  signUpWithEmail(email: string, password: string) {
-    return this.supabase.auth.signUp({ email, password });
+  signUpWithEmail(email: string, password: string, phone?: string) {
+    return this.supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: phone ? { phone } : undefined,
+      },
+    });
   }
 
   signInWithGoogle() {
