@@ -13,6 +13,12 @@ export const routes: Routes = [
       import('./pages/login/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'comece',
+    loadComponent: () =>
+      import('./pages/login/login.page').then((m) => m.LoginPage),
+    data: { defaultTab: 'cadastrar' },
+  },
+  {
     path: 'configurar',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -39,11 +45,6 @@ export const routes: Routes = [
     path: 'dicas',
     loadComponent: () =>
       import('./pages/dicas/dicas.page').then((m) => m.DicasPage),
-  },
-  {
-    path: 'comece',
-    redirectTo: 'login',
-    pathMatch: 'full',
   },
   {
     path: 'comece2',

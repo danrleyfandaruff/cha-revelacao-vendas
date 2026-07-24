@@ -37,6 +37,9 @@ export class LoginPage implements OnInit {
       if (s) this.router.navigate(['/configurar'], { replaceUrl: true });
     });
 
+    const defaultTab = this.route.snapshot.data['defaultTab'] as Tab | undefined;
+    if (defaultTab) this.tab.set(defaultTab);
+
     this.route.queryParams.pipe(take(1)).subscribe(params => {
       if (params['tab'] === 'cadastrar') this.tab.set('cadastrar');
     });
