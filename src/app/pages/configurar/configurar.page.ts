@@ -344,15 +344,27 @@ export class ConfigurarPage implements OnInit {
     this.loading.set(false);
     this.analytics.configurarView(!!ev, ev?.paid ?? false);
 
-    if (!ev) {
-      // Primeiro acesso: o wizard guiado substitui o tutorial explicativo antigo
-      localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
-      this.wizardActive.set(true);
-      this.analytics.configWizardStepView(this.wizardStepId());
+    const startOnboarding = () => {
+      if (!ev) {
+        // Primeiro acesso: o wizard guiado substitui o tutorial explicativo antigo
+        localStorage.setItem(`cfg_tutorial_${this.userId}`, '1');
+        this.wizardActive.set(true);
+        this.analytics.configWizardStepView(this.wizardStepId());
+      } else {
+        this.checkTutorial();
+      }
+    };
+
+    // Telefone tem prioridade: se o modal de telefone estiver pendente, o
+    // wizard/tutorial só entra depois que o usuário resolver (salvar ou pular).
+    if (this.showPhoneCaptureSheet()) {
+      this.pendingOnboarding = startOnboarding;
     } else {
-      this.checkTutorial();
+      startOnboarding();
     }
   }
+
+  private pendingOnboarding: (() => void) | null = null;
 
   private initSuggestions() {
     this.fraldas.set(SUGESTOES['fraldas'].map(s => ({ ...s, category: 'fraldas', checked: true })));
@@ -797,12 +809,19 @@ export class ConfigurarPage implements OnInit {
     await this.supa.syncCurrentUserProfile(`+55${digits}`);
     this.analytics.phoneCaptureSubmit();
     this.showPhoneCaptureSheet.set(false);
+    this.runPendingOnboarding();
   }
 
   dismissPhoneCapture() {
     sessionStorage.setItem('phone_capture_dismissed', '1');
     this.analytics.phoneCaptureSkip();
     this.showPhoneCaptureSheet.set(false);
+    this.runPendingOnboarding();
+  }
+
+  private runPendingOnboarding() {
+    this.pendingOnboarding?.();
+    this.pendingOnboarding = null;
   }
 
   private digitsFromPhoneCapture(): string {
