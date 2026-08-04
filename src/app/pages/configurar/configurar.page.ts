@@ -211,6 +211,10 @@ export class ConfigurarPage implements OnInit {
   highlightPreview = signal(false);
   showQrModal = signal(false);
 
+  // ── Captura de telefone (login via Google, que não fornece telefone) ──────────
+  showPhoneCaptureSheet = signal(false);
+  phoneCapture = '';
+
   @ViewChild('linkCard',    { read: ElementRef }) linkCardRef?: ElementRef;
   @ViewChild('previewCard', { read: ElementRef }) previewCardRef?: ElementRef;
   @ViewChild('qrContainer', { read: ElementRef }) qrContainerRef?: ElementRef;
@@ -276,11 +280,20 @@ export class ConfigurarPage implements OnInit {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
-    await this.supa.syncCurrentUserProfile();
+    const profile = await this.supa.syncCurrentUserProfile();
 
     if (sessionStorage.getItem('pending_google_login') === '1') {
       this.analytics.loginGoogleSuccess();
       sessionStorage.removeItem('pending_google_login');
+    }
+
+    if (
+      profile?.auth_provider === 'google' &&
+      !profile.phone &&
+      !sessionStorage.getItem('phone_capture_dismissed')
+    ) {
+      this.analytics.phoneCapturePromptView();
+      this.showPhoneCaptureSheet.set(true);
     }
 
     // Carrega metadados salvos localmente (tipo e sexo)
@@ -763,5 +776,44 @@ export class ConfigurarPage implements OnInit {
 
   onToastDismiss() {
     this.toastOpen.set(false);
+  }
+
+  // ── Captura de telefone (login via Google) ─────────────────────────────────
+  onPhoneCaptureChange(value: string) {
+    this.phoneCapture = this.formatPhoneCapture(value);
+  }
+
+  phoneCaptureValido(): boolean {
+    const digits = this.digitsFromPhoneCapture();
+    return digits.length === 10 || digits.length === 11;
+  }
+
+  async savePhoneCapture() {
+    if (!this.phoneCaptureValido()) {
+      this.analytics.phoneCaptureValidationError();
+      return;
+    }
+    const digits = this.digitsFromPhoneCapture();
+    await this.supa.syncCurrentUserProfile(`+55${digits}`);
+    this.analytics.phoneCaptureSubmit();
+    this.showPhoneCaptureSheet.set(false);
+  }
+
+  dismissPhoneCapture() {
+    sessionStorage.setItem('phone_capture_dismissed', '1');
+    this.analytics.phoneCaptureSkip();
+    this.showPhoneCaptureSheet.set(false);
+  }
+
+  private digitsFromPhoneCapture(): string {
+    return this.phoneCapture.replace(/\D/g, '').slice(0, 11);
+  }
+
+  private formatPhoneCapture(value: string): string {
+    const digits = value.replace(/\D/g, '').replace(/^55/, '').slice(0, 11);
+    if (digits.length <= 2) return digits ? `(${digits}` : '';
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   }
 }

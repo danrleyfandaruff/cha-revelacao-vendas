@@ -65,6 +65,12 @@ export class AnalyticsService {
   wizardCompleted(props?: TrackProps): void { this.send('wizard_completed', props); }
   wizardSkipped(step: string): void         { this.send('wizard_skipped', { step }); }
 
+  // ── Captura de telefone (pós-login Google) ──────────────────────────────────
+  phoneCapturePromptView(): void            { this.send('phone_capture_prompt_view'); }
+  phoneCaptureSubmit(): void                { this.send('phone_capture_submit'); }
+  phoneCaptureSkip(): void                  { this.send('phone_capture_skip'); }
+  phoneCaptureValidationError(): void       { this.send('phone_capture_validation_error'); }
+
   // ── Dicas ────────────────────────────────────────────────────────────────────
   dicasView(): void                              { this.send('dicas_view'); }
   dicasScrollDepth(pct: number): void            { this.send('dicas_scroll_depth', { pct }); }

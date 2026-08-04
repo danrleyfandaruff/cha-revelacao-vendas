@@ -248,6 +248,36 @@
     </div>
   }
 
+  <!-- CAPTURA DE TELEFONE — login via Google não fornece telefone -->
+  @if (showPhoneCaptureSheet()) {
+    <div class="sheet-backdrop"></div>
+    <div class="activation-sheet">
+      <div class="sheet-handle"></div>
+
+      <div class="sheet-check">📱</div>
+      <h2 class="playfair sheet-title">Só mais um passo</h2>
+      <p class="sheet-sub">Informe seu telefone para que possamos te avisar sobre reservas e novidades do seu evento.</p>
+
+      <div class="field-group" style="text-align:left; margin-top:8px;">
+        <label class="label-small">Telefone *</label>
+        <div class="phone-input-wrap">
+          <span class="phone-prefix">+55</span>
+          <input class="text-input phone-input" type="tel" [ngModel]="phoneCapture"
+            (ngModelChange)="onPhoneCaptureChange($event)"
+            placeholder="(48) 99159-3331" autocomplete="tel" required/>
+        </div>
+      </div>
+
+      <ion-button expand="block" color="warning" [disabled]="!phoneCaptureValido()" (click)="savePhoneCapture()" style="margin-top:16px">
+        Salvar telefone →
+      </ion-button>
+
+      <button class="sheet-dismiss" (click)="dismissPhoneCapture()">
+        Agora não
+      </button>
+    </div>
+  }
+
   <!-- ACTIVATION SHEET — aberta pelo usuário quando decide ativar -->
   @if (showActivationSheet()) {
     <div class="sheet-backdrop" (click)="showActivationSheet.set(false)"></div>
