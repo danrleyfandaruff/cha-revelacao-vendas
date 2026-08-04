@@ -37,13 +37,14 @@
           </div>
           @if (tab() === 'cadastrar') {
             <div class="field-group">
-              <label class="label-small">Telefone</label>
+              <label class="label-small">Telefone *</label>
               <div class="phone-input-wrap">
                 <span class="phone-prefix">+55</span>
                 <input class="text-input phone-input" type="tel" [ngModel]="phone"
                   (ngModelChange)="onPhoneChange($event)"
-                  placeholder="(48) 99159-3331" autocomplete="tel"/>
+                  placeholder="(48) 99159-3331" autocomplete="tel" required/>
               </div>
+              <span class="field-hint">Obrigatório para criar a conta</span>
             </div>
           }
           <div class="field-group">
@@ -55,7 +56,7 @@
             }
           </div>
 
-          <ion-button expand="block" (click)="submit()" [disabled]="loading()">
+          <ion-button expand="block" (click)="submit()" [disabled]="!podeEnviar()">
             @if (loading()) {
               <ion-spinner name="dots"></ion-spinner>
             } @else {

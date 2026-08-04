@@ -276,6 +276,7 @@ export class ConfigurarPage implements OnInit {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
+    await this.supa.syncCurrentUserProfile();
 
     if (sessionStorage.getItem('pending_google_login') === '1') {
       this.analytics.loginGoogleSuccess();

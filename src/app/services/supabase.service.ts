@@ -62,6 +62,16 @@ export interface PreNatalDownloadResult {
   status?: PreNatalTokenStatus;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  auth_provider: string | null;
+  phone_source: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -105,6 +115,41 @@ export class SupabaseService {
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/configurar` },
     });
+  }
+
+  async syncCurrentUserProfile(phoneOverride?: string | null): Promise<UserProfile | null> {
+    const user = await this.getUser();
+    if (!user) return null;
+
+    const phoneFromMetadata = typeof user.user_metadata?.['phone'] === 'string'
+      ? user.user_metadata['phone']
+      : null;
+    const profilePayload = {
+      id: user.id,
+      email: user.email ?? null,
+      phone: phoneOverride ?? phoneFromMetadata,
+      auth_provider: typeof user.app_metadata?.['provider'] === 'string'
+        ? user.app_metadata['provider']
+        : null,
+      phone_source: phoneOverride
+        ? 'manual'
+        : phoneFromMetadata
+          ? 'auth_metadata'
+          : null,
+    };
+
+    const { data, error } = await this.supabase
+      .from('user_profiles')
+      .upsert(profilePayload, { onConflict: 'id' })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao sincronizar perfil do usuário:', error);
+      return null;
+    }
+
+    return data as UserProfile;
   }
 
   signOut() {

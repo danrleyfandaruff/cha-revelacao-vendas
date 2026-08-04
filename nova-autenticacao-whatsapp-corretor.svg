@@ -1,0 +1,323 @@
+<svg width="1800" height="1320" viewBox="0 0 1800 1320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font: 700 34px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #25324A; }
+      .section-title { font: 700 16px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #4A5568; letter-spacing: 0.04em; }
+      .lane-label { font: 700 12px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #5B6475; }
+      .card-title { font: 700 13px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #2D3748; }
+      .card-text { font: 600 12px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #2D3748; }
+      .card-text-small { font: 600 11px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #2D3748; }
+      .note-title { font: 700 18px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #364152; }
+      .note-text { font: 500 14px 'Avenir Next', 'Segoe UI', Arial, sans-serif; fill: #4B5563; }
+      .muted { fill: #7C8798; }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#20304A" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#94A3B8"/>
+    </marker>
+    <g id="start-node">
+      <circle cx="0" cy="0" r="10" fill="#FFFFFF" stroke="#94A3B8" stroke-width="2"/>
+    </g>
+    <g id="end-node">
+      <circle cx="0" cy="0" r="10" fill="#111827"/>
+    </g>
+    <g id="green-card">
+      <rect x="0" y="0" width="112" height="46" rx="14" fill="#CFE7B3" stroke="#7EA45C" stroke-width="2"/>
+    </g>
+    <g id="blue-card">
+      <rect x="0" y="0" width="112" height="46" rx="14" fill="#86C5F3" stroke="#4A8DC1" stroke-width="2"/>
+    </g>
+    <g id="blue-card-lg">
+      <rect x="0" y="0" width="148" height="64" rx="18" fill="#86C5F3" stroke="#4A8DC1" stroke-width="2"/>
+    </g>
+    <g id="service-card">
+      <rect x="0" y="0" width="126" height="42" rx="12" fill="#E9C7EF" stroke="#A770B6" stroke-width="2"/>
+    </g>
+  </defs>
+
+  <rect width="1800" height="1320" fill="#F6F8FC"/>
+  <rect x="28" y="28" width="1744" height="1264" rx="28" fill="#FFFFFF"/>
+
+  <text x="70" y="96" class="title">Nova Autenticação WhatsApp Corretor</text>
+  <text x="70" y="126" class="note-text">Fluxo reorganizado para leitura mais clara no Miro, mantendo as jornadas e integrações do diagrama original.</text>
+
+  <g transform="translate(70 170)" filter="url(#shadow)">
+    <rect width="1240" height="300" rx="24" fill="#FFFFFF" stroke="#D8DEE9" stroke-width="2"/>
+    <text x="28" y="34" class="section-title">JORNADA INICIAL (AUTENTICAÇÃO PRIMÁRIA)</text>
+    <rect x="24" y="58" width="1192" height="128" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="204" width="1192" height="72" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="58" width="30" height="128" fill="#EFF2F7"/>
+    <rect x="24" y="204" width="30" height="72" fill="#EFF2F7"/>
+    <text x="43" y="126" class="lane-label" transform="rotate(-90 43 126)">AUTENTICAÇÃO CORRETOR</text>
+    <text x="43" y="252" class="lane-label" transform="rotate(-90 43 252)">SERVIÇOS</text>
+
+    <use href="#start-node" transform="translate(96 122)"/>
+    <line x1="106" y1="122" x2="154" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(154 99)">
+      <use href="#green-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">NOVA</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">MENSAGEM</text>
+    </g>
+    <line x1="266" y1="122" x2="318" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(318 99)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">NUNCA SE</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">AUTENTICOU</text>
+    </g>
+    <line x1="430" y1="122" x2="492" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(492 90)">
+      <use href="#blue-card-lg"/>
+      <text x="74" y="20" text-anchor="middle" class="card-text-small">MENSAGEM</text>
+      <text x="74" y="34" text-anchor="middle" class="card-text-small">SOLICITANDO</text>
+      <text x="74" y="48" text-anchor="middle" class="card-text-small">INFORMAÇÕES (FLOW)</text>
+    </g>
+    <line x1="640" y1="122" x2="704" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(704 99)">
+      <use href="#green-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">ENVIAR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">INFORMAÇÕES</text>
+    </g>
+    <line x1="760" y1="145" x2="760" y2="215" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="816" y1="145" x2="816" y2="215" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="816" y1="122" x2="876" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(876 99)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">CORRETOR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">AUTENTICADO</text>
+    </g>
+    <line x1="988" y1="122" x2="1050" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(1050 99)">
+      <use href="#blue-card"/>
+      <text x="56" y="14" text-anchor="middle" class="card-text-small">LISTAR</text>
+      <text x="56" y="28" text-anchor="middle" class="card-text-small">CORRETORAS</text>
+      <text x="56" y="40" text-anchor="middle" class="card-text-small" fill="#0F4C81">SELECIONAR</text>
+    </g>
+    <line x1="1162" y1="122" x2="1204" y2="122" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(1204 90)">
+      <use href="#blue-card-lg"/>
+      <text x="74" y="20" text-anchor="middle" class="card-text-small">CORRETOR</text>
+      <text x="74" y="34" text-anchor="middle" class="card-text-small">AUTENTICADO</text>
+      <text x="74" y="48" text-anchor="middle" class="card-text-small">(FINAL)</text>
+    </g>
+    <use href="#end-node" transform="translate(1196 122)"/>
+
+    <g transform="translate(704 220)">
+      <rect width="168" height="40" rx="14" fill="#FFFFFF" stroke="#C9A3D4" stroke-width="2"/>
+      <g transform="translate(10 5)">
+        <use href="#service-card"/>
+        <text x="63" y="25" text-anchor="middle" class="card-text-small">AUTHN</text>
+      </g>
+    </g>
+    <g transform="translate(805 220)">
+      <use href="#service-card"/>
+      <text x="63" y="25" text-anchor="middle" class="card-text-small">CONTEXTOS</text>
+    </g>
+  </g>
+
+  <g transform="translate(70 510)" filter="url(#shadow)">
+    <rect width="860" height="250" rx="24" fill="#FFFFFF" stroke="#D8DEE9" stroke-width="2"/>
+    <text x="28" y="34" class="section-title">TROCAR VÍNCULO (AUTENTICAÇÃO PRIMÁRIA)</text>
+    <rect x="24" y="58" width="812" height="108" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="186" width="812" height="54" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="58" width="30" height="108" fill="#EFF2F7"/>
+    <rect x="24" y="186" width="30" height="54" fill="#EFF2F7"/>
+    <text x="43" y="112" class="lane-label" transform="rotate(-90 43 112)">TROCA DE VÍNCULO</text>
+    <text x="43" y="216" class="lane-label" transform="rotate(-90 43 216)">SERVIÇOS</text>
+
+    <use href="#start-node" transform="translate(94 112)"/>
+    <line x1="104" y1="112" x2="146" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(146 89)">
+      <use href="#green-card"/>
+      <text x="56" y="25" text-anchor="middle" class="card-text-small">MENU INICIAL</text>
+    </g>
+    <line x1="258" y1="112" x2="302" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(302 89)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">TROCAR VÍNCULO</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">(CORRETORA)</text>
+    </g>
+    <line x1="414" y1="112" x2="472" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(472 89)">
+      <use href="#green-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">LISTAR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">CORRETORAS</text>
+    </g>
+    <line x1="528" y1="135" x2="528" y2="198" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="548" y1="135" x2="548" y2="198" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="584" y1="112" x2="642" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(642 78)">
+      <use href="#blue-card-lg"/>
+      <text x="74" y="18" text-anchor="middle" class="card-text-small">MENSAGEM:</text>
+      <text x="74" y="31" text-anchor="middle" class="card-text-small">TROCA</text>
+      <text x="74" y="44" text-anchor="middle" class="card-text-small">EFETUADA COM</text>
+      <text x="74" y="57" text-anchor="middle" class="card-text-small">SUCESSO</text>
+    </g>
+    <use href="#end-node" transform="translate(780 112)"/>
+
+    <g transform="translate(490 194)">
+      <use href="#service-card"/>
+      <text x="63" y="25" text-anchor="middle" class="card-text-small">CONTEXTOS</text>
+    </g>
+  </g>
+
+  <g transform="translate(70 790)" filter="url(#shadow)">
+    <rect width="860" height="250" rx="24" fill="#FFFFFF" stroke="#D8DEE9" stroke-width="2"/>
+    <text x="28" y="34" class="section-title">DESLOGAR (AUTENTICAÇÃO PRIMÁRIA)</text>
+    <rect x="24" y="58" width="812" height="108" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="186" width="812" height="54" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="58" width="30" height="108" fill="#EFF2F7"/>
+    <rect x="24" y="186" width="30" height="54" fill="#EFF2F7"/>
+    <text x="43" y="112" class="lane-label" transform="rotate(-90 43 112)">LOGOUT</text>
+    <text x="43" y="216" class="lane-label" transform="rotate(-90 43 216)">SERVIÇOS</text>
+
+    <use href="#start-node" transform="translate(94 112)"/>
+    <line x1="104" y1="112" x2="146" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(146 89)">
+      <use href="#green-card"/>
+      <text x="56" y="25" text-anchor="middle" class="card-text-small">MENU INICIAL</text>
+    </g>
+    <line x1="258" y1="112" x2="302" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(302 89)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">OPÇÃO DESLOGAR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">CORRETOR</text>
+    </g>
+    <line x1="414" y1="112" x2="472" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(472 89)">
+      <use href="#green-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">CHAMADA</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">SERVIÇO</text>
+    </g>
+    <line x1="528" y1="135" x2="528" y2="198" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="548" y1="135" x2="548" y2="198" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="584" y1="112" x2="642" y2="112" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(642 64)">
+      <use href="#blue-card-lg"/>
+      <text x="74" y="16" text-anchor="middle" class="card-text-small">MENSAGEM:</text>
+      <text x="74" y="28" text-anchor="middle" class="card-text-small">CORRETOR</text>
+      <text x="74" y="40" text-anchor="middle" class="card-text-small">DESLOGADO</text>
+      <text x="74" y="52" text-anchor="middle" class="card-text-small">COM SUCESSO</text>
+      <text x="74" y="63" text-anchor="middle" class="card-text-small">E DIRECIONAR</text>
+    </g>
+    <use href="#end-node" transform="translate(780 112)"/>
+
+    <g transform="translate(490 194)">
+      <use href="#service-card"/>
+      <text x="63" y="25" text-anchor="middle" class="card-text-small">LOGOUT</text>
+    </g>
+  </g>
+
+  <g transform="translate(70 1070)" filter="url(#shadow)">
+    <rect width="1240" height="200" rx="24" fill="#FFFFFF" stroke="#D8DEE9" stroke-width="2"/>
+    <text x="28" y="34" class="section-title">AUTENTICAÇÃO (JORNADAS SENSÍVEIS)</text>
+    <rect x="24" y="58" width="1192" height="104" rx="18" fill="#FBFCFE" stroke="#D8DEE9"/>
+    <rect x="24" y="170" width="1192" height="20" rx="10" fill="#FBFCFE" opacity="0"/>
+    <rect x="24" y="58" width="30" height="104" fill="#EFF2F7"/>
+    <text x="43" y="112" class="lane-label" transform="rotate(-90 43 112)">AUTENTICAÇÃO CORRETOR</text>
+    <text x="43" y="184" class="lane-label" transform="rotate(-90 43 184)">SERVIÇOS</text>
+
+    <use href="#start-node" transform="translate(96 110)"/>
+    <line x1="106" y1="110" x2="160" y2="110" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(160 76)">
+      <rect x="0" y="0" width="116" height="68" rx="18" fill="#CFE7B3" stroke="#7EA45C" stroke-width="2"/>
+      <text x="58" y="24" text-anchor="middle" class="card-text-small">PARA</text>
+      <text x="58" y="38" text-anchor="middle" class="card-text-small">CONTINUAR É</text>
+      <text x="58" y="52" text-anchor="middle" class="card-text-small">NECESSÁRIO SE</text>
+      <text x="58" y="64" text-anchor="middle" class="card-text-small">AUTENTICAR</text>
+    </g>
+    <line x1="276" y1="110" x2="342" y2="110" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(342 78)">
+      <use href="#blue-card-lg"/>
+      <text x="74" y="20" text-anchor="middle" class="card-text-small">MENSAGEM</text>
+      <text x="74" y="34" text-anchor="middle" class="card-text-small">SOLICITANDO</text>
+      <text x="74" y="48" text-anchor="middle" class="card-text-small">INFORMAÇÕES</text>
+      <text x="74" y="61" text-anchor="middle" class="card-text-small">(FLOW)</text>
+    </g>
+    <line x1="490" y1="110" x2="558" y2="110" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(558 87)">
+      <use href="#green-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">ENVIAR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">INFORMAÇÕES</text>
+    </g>
+    <line x1="614" y1="133" x2="614" y2="172" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="670" y1="133" x2="670" y2="172" stroke="#C0C7D4" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="670" y1="110" x2="736" y2="110" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(736 87)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">CORRETOR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">AUTENTICADO</text>
+    </g>
+    <line x1="848" y1="110" x2="916" y2="110" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(916 87)">
+      <use href="#blue-card"/>
+      <text x="56" y="19" text-anchor="middle" class="card-text-small">CONTINUAR</text>
+      <text x="56" y="33" text-anchor="middle" class="card-text-small">JORNADA</text>
+    </g>
+    <use href="#end-node" transform="translate(1062 110)"/>
+
+    <g transform="translate(595 144)">
+      <rect width="136" height="40" rx="14" fill="#FFFFFF" stroke="#C9A3D4" stroke-width="2"/>
+      <g transform="translate(5 -1)">
+        <use href="#service-card"/>
+        <text x="63" y="26" text-anchor="middle" class="card-text-small">AUTHN</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(1340 170)" filter="url(#shadow)">
+    <rect width="390" height="390" rx="24" fill="#FFFDF8" stroke="#E6DFC8" stroke-width="2"/>
+    <text x="28" y="42" class="note-title">Informações</text>
+    <rect x="28" y="68" width="334" height="1" fill="#E5E7EB"/>
+    <text x="28" y="112" class="note-text">Corretor fica logado por 120 minutos,</text>
+    <text x="28" y="136" class="note-text">entao novas jornadas podem reutilizar</text>
+    <text x="28" y="160" class="note-text">a mesma autenticacao dentro desse periodo.</text>
+
+    <text x="28" y="214" class="note-text">Para jornadas sensíveis, o fluxo pede</text>
+    <text x="28" y="238" class="note-text">nova autenticacao apenas quando necessario.</text>
+
+    <text x="28" y="292" class="note-text">Existe dependencia de um endpoint que</text>
+    <text x="28" y="316" class="note-text">informa se o corretor já está autenticado</text>
+    <text x="28" y="340" class="note-text">ou se precisa iniciar o processo novamente.</text>
+  </g>
+
+  <g transform="translate(1340 590)" filter="url(#shadow)">
+    <rect width="390" height="300" rx="24" fill="#FFFFFF" stroke="#D8DEE9" stroke-width="2"/>
+    <text x="28" y="42" class="note-title">Legenda Visual</text>
+    <g transform="translate(28 76)">
+      <use href="#green-card"/>
+      <text x="140" y="25" class="note-text">Ações do fluxo ou entrada do usuário</text>
+    </g>
+    <g transform="translate(28 142)">
+      <use href="#blue-card"/>
+      <text x="140" y="25" class="note-text">Mensagens, estados e etapas de retorno</text>
+    </g>
+    <g transform="translate(28 208)">
+      <use href="#service-card"/>
+      <text x="150" y="25" class="note-text">Serviços e integrações chamadas pelo bot</text>
+    </g>
+  </g>
+
+  <text x="70" y="1295" class="note-text muted">Arquivo vetorial em SVG. Pode ser importado ou arrastado diretamente para o Miro sem perder definição.</text>
+</svg>

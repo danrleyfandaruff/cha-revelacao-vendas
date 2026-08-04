@@ -96,6 +96,9 @@ export class LoginPage implements OnInit {
         this.analytics.loginError('cadastrar', this.errorReason(error.message, error.code));
         this.showToast(this.friendlyError(error.message, error.code), 'danger');
       } else {
+        if (data.session) {
+          await this.supa.syncCurrentUserProfile(this.telefoneCompleto());
+        }
         this.analytics.signupSuccess();
         this.router.navigate(['/configurar'], { replaceUrl: true });
       }
@@ -112,6 +115,14 @@ export class LoginPage implements OnInit {
 
   onPhoneChange(value: string) {
     this.phone = this.formatPhone(value);
+  }
+
+  podeEnviar(): boolean {
+    if (this.loading()) return false;
+    if (this.tab() === 'cadastrar') {
+      return !!this.email.trim() && !!this.password && this.telefoneValido();
+    }
+    return !!this.email.trim() && !!this.password;
   }
 
   private digitsFromPhone(): string {
