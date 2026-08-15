@@ -35,6 +35,11 @@
                 "input": "src",
                 "output": "/"
               },
+              {
+                "glob": "google8bdbd77f1f3f2166.html",
+                "input": "src",
+                "output": "/"
+              },
               "src/manifest.webmanifest"
             ],
             "styles": [
