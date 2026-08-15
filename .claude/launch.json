@@ -6,6 +6,15 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start"],
       "port": 4200
+    },
+    {
+      "name": "diagnostico-imob-serve",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd '/Users/DanrleyFandaruff/dan/groomerlab360/diagnostico-imob' && export PATH=\"/Users/DanrleyFandaruff/.nvm/versions/node/v22.12.0/bin:$PATH\" && npx ng serve --port 4300"
+      ],
+      "port": 4300
     }
   ]
 }

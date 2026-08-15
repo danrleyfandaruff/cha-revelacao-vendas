@@ -31,7 +31,7 @@ ion-content { --background: var(--cream); }
 }
 
 .top-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   color: #fff; font-size: 1.1rem; font-weight: 700;
 }
 
@@ -59,7 +59,7 @@ ion-content { --background: var(--cream); }
 }
 
 .form-h {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   color: var(--brown);
   font-size: 1.1rem;
   margin-bottom: 18px;
@@ -222,7 +222,7 @@ ion-content { --background: var(--cream); }
 }
 
 .share-heading {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 6vw, 2.2rem);
   color: #fff;
   font-weight: 700;

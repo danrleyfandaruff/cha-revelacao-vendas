@@ -110,10 +110,18 @@ export class SupabaseService {
     });
   }
 
-  signInWithGoogle() {
+  signInWithGoogle(
+    mode: 'entrar' | 'cadastrar' = 'cadastrar',
+    next = '/configurar'
+  ) {
+    const redirectUrl = new URL('/login', window.location.origin);
+    redirectUrl.searchParams.set('mode', mode);
+    redirectUrl.searchParams.set('oauth', 'google');
+    redirectUrl.searchParams.set('next', next);
+
     return this.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/configurar` },
+      options: { redirectTo: redirectUrl.toString() },
     });
   }
 

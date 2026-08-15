@@ -106,6 +106,30 @@ export class ConfigurarPage implements OnInit {
   currentItems = computed(() =>
     this.activeTab() === 'fraldas' ? this.fraldas() : this.presentes()
   );
+  selectedItemsCount = computed(() =>
+    this.fraldas().filter(i => i.checked).length +
+    this.presentes().filter(i => i.checked).length
+  );
+  reservedItemsCount = computed(() =>
+    [...this.fraldas(), ...this.presentes()].reduce(
+      (sum, item) => sum + (item.reserved ?? 0),
+      0
+    )
+  );
+  completionPercent = computed(() => {
+    const checklist = [
+      !!this.name1.trim(),
+      this.eventType() === 'bebe' ? !!this.babySex() : !!this.name2.trim(),
+      !!this.eventAddress().trim(),
+      !!this.eventDatetime(),
+      this.selectedItemsCount() > 0,
+      !!this.event(),
+      this.isPaid(),
+    ];
+
+    const done = checklist.filter(Boolean).length;
+    return Math.round((done / checklist.length) * 100);
+  });
 
   // Custom item add
   newName  = '';
@@ -207,6 +231,7 @@ export class ConfigurarPage implements OnInit {
   toastOpen = signal(false);
   showActivationSheet = signal(false);
   showSuccessModal = signal(false);
+  showPostSaveSheet = signal(false);
   highlightLink = signal(false);
   highlightPreview = signal(false);
   showQrModal = signal(false);
@@ -514,6 +539,7 @@ export class ConfigurarPage implements OnInit {
 
   async save() {
     this.analytics.configSaveClick();
+    const wasFirstSave = !this.event();
     const isBebe = this.eventType() === 'bebe';
     if (!this.name1) {
       this.analytics.configSaveValidationError('nome_vazio');
@@ -603,6 +629,11 @@ export class ConfigurarPage implements OnInit {
       this.savedSnapshot = this.buildSnapshot();
       if (protectedItems.length) {
         this.showToast(`${protectedItems.length} item(ns) já reservado(s) por convidados foi(ram) mantido(s) para não cancelar reservas.`);
+      } else if (!ev.paid && wasFirstSave) {
+        // Primeira vez que salva: não deixa o usuário largado na própria tela
+        // torcendo pra ele notar o destaque — mostra um próximo passo claro.
+        this.analytics.configPostSaveSheetView();
+        this.showPostSaveSheet.set(true);
       } else if (!ev.paid) {
         this.showToast('Lista salva! Veja como seus convidados vão ver 👀');
         this.highlightPreviewCard();
@@ -638,6 +669,25 @@ export class ConfigurarPage implements OnInit {
   openActivation() {
     this.analytics.configActivationOpen();
     this.showActivationSheet.set(true);
+  }
+
+  // ── Sheet de próximo passo, logo após o primeiro "Salvar e gerar link" ──────
+  postSavePreview() {
+    this.analytics.configPostSaveSheetAction('preview');
+    this.showPostSaveSheet.set(false);
+    this.openPreview();
+  }
+
+  postSaveActivate() {
+    this.analytics.configPostSaveSheetAction('activate');
+    this.showPostSaveSheet.set(false);
+    this.openActivation();
+  }
+
+  dismissPostSaveSheet() {
+    this.analytics.configPostSaveSheetAction('dismiss');
+    this.showPostSaveSheet.set(false);
+    this.highlightPreviewCard();
   }
 
   // ── Wizard de primeiro cadastro ────────────────────────────────────────────
@@ -773,7 +823,7 @@ export class ConfigurarPage implements OnInit {
   async logout() {
     this.analytics.configLogout();
     await this.supa.signOut();
-    this.router.navigate(['/login'], { replaceUrl: true });
+    this.router.navigate(['/landing'], { replaceUrl: true });
   }
 
   async showToast(msg: string) {

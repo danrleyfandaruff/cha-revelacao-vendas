@@ -1,67 +1,123 @@
 <ion-content>
-  <!-- NAV -->
-  <div class="lp-nav">
-    <div class="lp-logo">🍼 Chá de Bebê &amp; Revelação</div>
-    <div class="lp-nav-actions">
-      <ion-button fill="outline" size="small" (click)="goLogin()">Entrar</ion-button>
-      <ion-button size="small" (click)="goCadastro()">Criar conta</ion-button>
-    </div>
-  </div>
-
-  <!-- HERO -->
-  <div class="lp-hero">
-    <div class="hero-emoji">🍼✨</div>
-    <h1 class="playfair">A lista de presentes do seu <span class="text-gold">chá de bebê</span> ou <span class="text-gold">chá revelação</span></h1>
-    <p>Crie uma lista online de fraldas e mimos para o seu bebê. Compartilhe o link com os convidados e veja as reservas em tempo real.</p>
-    <ion-button expand="block" class="btn-hero" (click)="goCadastro()">
-      Criar minha lista grátis &nbsp;→
-    </ion-button>
-  </div>
-
-  <!-- DEMO CARDS -->
-  <div class="lp-demo-wrap">
-    <div class="demo-grid">
-      <div class="demo-card chosen">
-        <div class="de">🧷</div>
-        <div class="dn">Huggies M</div>
-        <div class="dq">18 disponíveis</div>
-        <div class="db chosen">✓ Escolhido</div>
-      </div>
-      <div class="demo-card">
-        <div class="de">🧷</div>
-        <div class="dn">Huggies G</div>
-        <div class="dq">20 disponíveis</div>
-        <div class="db add">Quero presentear!</div>
-      </div>
-      <div class="demo-card">
-        <div class="de">🌡️</div>
-        <div class="dn">Termômetro</div>
-        <div class="dq">1 disponível</div>
-        <div class="db add">Quero presentear!</div>
-      </div>
-      <div class="demo-card">
-        <div class="de">🧴</div>
-        <div class="dn">Shampoo</div>
-        <div class="dq">3 de 10 disp.</div>
-        <div class="db add">Quero presentear!</div>
-      </div>
-      <div class="demo-card chosen">
-        <div class="de">🧸</div>
-        <div class="dn">Cueiro</div>
-        <div class="dq">2 de 3 disp.</div>
-        <div class="db chosen">✓ Escolhido</div>
-      </div>
-      <div class="demo-card esgotado">
-        <div class="de">🛁</div>
-        <div class="dn">Term. banheira</div>
-        <div class="dq">Esgotado</div>
-        <div class="db out">Esgotado</div>
+  <div class="landing-shell">
+    <div class="lp-nav">
+      <button class="lp-logo" type="button" (click)="scrollTo('topo')">
+        <span>🍼</span>
+        <div>
+          <strong>Chá de Bebê &amp; Revelação</strong>
+          <small>Lista de presentes com link único</small>
+        </div>
+      </button>
+      <div class="lp-nav-actions">
+        <ion-button fill="clear" size="small" (click)="scrollTo('como-funciona')">
+          Como funciona
+        </ion-button>
+        <ion-button fill="outline" size="small" (click)="goLogin('entrar')">
+          Já tenho conta
+        </ion-button>
+        <ion-button size="small" (click)="continueWithGoogle()" [disabled]="googleLoading()">
+          {{ googleLoading() ? 'Abrindo Google...' : 'Criar agora' }}
+        </ion-button>
       </div>
     </div>
-  </div>
+
+    <div class="lp-hero" id="topo">
+      <div class="hero-copy">
+        <div class="hero-kicker">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          Criado para celular e WhatsApp
+        </div>
+
+        <h1 class="playfair">
+          A lista de presentes do seu <span class="text-gold">chá de bebê</span>
+          ou <span class="text-gold">chá revelação</span>
+        </h1>
+        <p>
+          Crie em minutos, compartilhe o link e acompanhe as reservas em tempo real
+          sem presente repetido, sem planilha e sem fazer seus convidados criarem conta.
+        </p>
+
+        <div class="hero-entry-card">
+          <div class="hero-entry-copy">
+            <strong>Comece em menos de 1 minuto</strong>
+            <span>Entre com Google ou e-mail. Seus convidados acessam o convite direto pelo link.</span>
+          </div>
+
+          <ion-button
+            expand="block"
+            class="btn-hero"
+            (click)="continueWithGoogle()"
+            [disabled]="googleLoading()"
+          >
+            <span class="google-g">G</span>
+            {{ googleLoading() ? 'Abrindo Google...' : 'Continuar com Google' }}
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" class="btn-secondary" (click)="goCadastro()">
+            Criar com e-mail
+          </ion-button>
+
+          <div class="hero-inline-actions">
+            <button class="hero-account-link" type="button" (click)="goLogin('entrar')">
+              ( já tenho conta )
+            </button>
+            <button class="hero-text-link" type="button" (click)="scrollTo('preco')">
+              Ver preço
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-points">
+          <span><ion-icon name="checkmark-circle-outline"></ion-icon> Cadastro rápido no celular</span>
+          <span><ion-icon name="checkmark-circle-outline"></ion-icon> Convidados sem login</span>
+          <span><ion-icon name="checkmark-circle-outline"></ion-icon> Reservas automáticas</span>
+        </div>
+      </div>
+
+      <div class="lp-demo-wrap">
+        <div class="demo-grid">
+          <div class="demo-card chosen">
+            <div class="de">🧷</div>
+            <div class="dn">Huggies M</div>
+            <div class="dq">18 disponíveis</div>
+            <div class="db chosen">✓ Escolhido</div>
+          </div>
+          <div class="demo-card">
+            <div class="de">🧷</div>
+            <div class="dn">Huggies G</div>
+            <div class="dq">20 disponíveis</div>
+            <div class="db add">Quero presentear!</div>
+          </div>
+          <div class="demo-card">
+            <div class="de">🌡️</div>
+            <div class="dn">Termômetro</div>
+            <div class="dq">1 disponível</div>
+            <div class="db add">Quero presentear!</div>
+          </div>
+          <div class="demo-card">
+            <div class="de">🧴</div>
+            <div class="dn">Shampoo</div>
+            <div class="dq">3 de 10 disp.</div>
+            <div class="db add">Quero presentear!</div>
+          </div>
+          <div class="demo-card chosen">
+            <div class="de">🧸</div>
+            <div class="dn">Cueiro</div>
+            <div class="dq">2 de 3 disp.</div>
+            <div class="db chosen">✓ Escolhido</div>
+          </div>
+          <div class="demo-card esgotado">
+            <div class="de">🛁</div>
+            <div class="dn">Term. banheira</div>
+            <div class="dq">Esgotado</div>
+            <div class="db out">Esgotado</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   <!-- HOW IT WORKS -->
-  <div class="lp-section">
+  <div class="lp-section" id="como-funciona">
     <h2 class="playfair lp-section-title">Como funciona</h2>
     <p class="lp-section-sub">Em 3 passos simples você tem tudo pronto</p>
     <div class="steps-grid">
@@ -103,7 +159,7 @@
   </div>
 
   <!-- PRICE -->
-  <div class="lp-price-wrap">
+  <div class="lp-price-wrap" id="preco">
     <div class="lp-section" style="max-width:440px">
       <h2 class="playfair lp-section-title">Preço único</h2>
       <p class="lp-section-sub">Sem mensalidade. Sem surpresa.</p>
@@ -146,10 +202,11 @@
   <div class="lp-footer">
     <p>🍼 Chá de Bebê &amp; Revelação · Feito com amor para mamães e papais</p>
     <p>
-      <span class="text-gold" style="cursor:pointer" (click)="goLogin()">Entrar</span> ·
+      <span class="text-gold" style="cursor:pointer" (click)="goLogin('entrar')">Entrar</span> ·
       <span class="text-gold" style="cursor:pointer" (click)="goCadastro()">Criar conta</span> ·
       <span class="text-gold" style="cursor:pointer" (click)="goDicas()">Dicas</span> ·
       <span class="text-gold" style="cursor:pointer" (click)="goConvite()">Convite</span>
     </p>
   </div>
+</div>
 </ion-content>

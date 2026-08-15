@@ -36,10 +36,10 @@ ion-content {
 
   .cp-card {
     background: #fff;
-    border-radius: 24px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--brand-beige);
-    box-shadow: 0 8px 32px rgba(74,55,40,.1);
-    padding: 36px 28px;
+    box-shadow: var(--shadow-md);
+    padding: 24px 20px;
     max-width: 380px;
     width: 100%;
     text-align: center;
@@ -47,30 +47,30 @@ ion-content {
   }
 
   .cp-emoji {
-    font-size: 3rem;
-    margin-bottom: 12px;
+    font-size: 2.6rem;
+    margin-bottom: 10px;
   }
 
   .cp-title {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: var(--brand-brown);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   .cp-subtitle {
     color: var(--brand-brown-light);
-    font-size: 0.95rem;
-    margin-bottom: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
   }
 
   .cp-details {
     background: var(--brand-cream);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 20px;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     text-align: left;
 
     .cp-detail-item {
@@ -87,25 +87,25 @@ ion-content {
 
   .cp-name-field {
     text-align: left;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
     .cp-name-label {
       display: block;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--brand-brown-light);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
     }
 
     .cp-name-input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border: 1.5px solid var(--brand-beige);
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-family: 'Lato', sans-serif;
+      border-radius: var(--radius-sm);
+      font-size: 0.93rem;
+      font-family: var(--font-display);
       color: var(--brand-brown);
       background: #fafafa;
       box-sizing: border-box;
@@ -118,20 +118,20 @@ ion-content {
   }
 
   .cp-hint {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--brand-brown-light);
     background: #fffbf0;
     border: 1px dashed var(--brand-gold-light);
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-bottom: 20px;
-    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    line-height: 1.4;
   }
 
   .cp-btn {
-    --border-radius: 14px;
+    --border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.96rem;
   }
 }
 
@@ -147,24 +147,24 @@ ion-content {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 28px;
+  padding: 48px 20px;
   min-height: 60vh;
 
-  .state-emoji { font-size: 3.5rem; margin-bottom: 16px; }
-  h2 { font-size: 1.7rem; margin-bottom: 10px; }
-  p  { color: var(--brand-brown-light); font-size: 0.92rem; line-height: 1.6; max-width: 320px; }
-  ion-spinner { width: 40px; height: 40px; margin-bottom: 16px; }
+  .state-emoji { font-size: 3rem; margin-bottom: 12px; }
+  h2 { font-size: 1.4rem; margin-bottom: 8px; }
+  p  { color: var(--brand-brown-light); font-size: 0.9rem; line-height: 1.5; max-width: 320px; }
+  ion-spinner { width: 36px; height: 36px; margin-bottom: 12px; }
 
   &.done {
     h2 { color: var(--brand-brown); }
     .done-card {
       background: #fff;
-      border-radius: 20px;
+      border-radius: var(--radius-lg);
       border: 1px solid var(--brand-beige);
-      padding: 36px 28px;
+      padding: 24px 20px;
       max-width: 360px;
       width: 100%;
-      box-shadow: 0 8px 32px rgba(74,55,40,.1);
+      box-shadow: var(--shadow-md);
       margin-top: 8px;
     }
   }
@@ -174,7 +174,7 @@ ion-content {
 .cha-header {
   background: #fff;
   text-align: center;
-  padding: 28px 20px 20px;
+  padding: 18px 16px 14px;
   position: relative;
 
   &::before {
@@ -186,26 +186,26 @@ ion-content {
   }
 
   .cha-header-emoji {
-    font-size: 2.4rem;
-    margin-bottom: 8px;
+    font-size: 2rem;
+    margin-bottom: 6px;
     display: block;
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     color: var(--brand-brown);
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
   .cha-subtitle {
     color: var(--brand-brown-light);
-    font-size: 1.1rem;
-    margin-top: 6px;
+    font-size: 0.95rem;
+    margin-top: 4px;
     font-style: italic;
   }
 
   .cha-event-details {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -282,10 +282,10 @@ ion-content {
 
   .stab {
     flex: 1;
-    padding: 14px 8px;
+    padding: 11px 8px;
     border: none;
     background: transparent;
-    font-family: 'Lato', sans-serif;
+    font-family: var(--font-display);
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--brand-brown-light);
@@ -346,7 +346,7 @@ ion-content {
 
 // ── Body ──────────────────────────────────────────────────────────────────────
 .cha-body {
-  padding: 20px 16px 130px;
+  padding: 14px 12px 120px;
   animation: fadeIn 0.3s ease;
 }
 
@@ -359,9 +359,9 @@ ion-content {
 .cart-summary {
   background: #fff;
   border: 1px solid var(--brand-beige);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 20px;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -384,9 +384,9 @@ ion-content {
 
 // ── Section title ─────────────────────────────────────────────────────────────
 .grid-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  margin-bottom: 16px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
   color: var(--brand-brown);
   display: flex;
   align-items: center;
@@ -394,7 +394,7 @@ ion-content {
 
   .grid-count {
     font-size: 0.72rem;
-    font-family: 'Lato', sans-serif;
+    font-family: var(--font-display);
     background: var(--brand-beige);
     color: var(--brand-brown-light);
     padding: 2px 10px;
@@ -406,33 +406,33 @@ ion-content {
 // ── Gift grid ─────────────────────────────────────────────────────────────────
 .gift-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
 }
 
 .gift-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
   border: 2px solid var(--brand-beige);
-  padding: 18px 14px 14px;
+  padding: 14px 10px 10px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   transition: all 0.2s;
   cursor: pointer;
 
   &:not(.esgotado):not(.chosen):hover {
     border-color: var(--brand-gold);
-    box-shadow: 0 6px 20px rgba(201,168,76,.2);
-    transform: translateY(-3px);
+    box-shadow: 0 4px 14px rgba(188,143,58,.18);
+    transform: translateY(-2px);
   }
 
   &.chosen {
     border-color: var(--brand-green);
     background: linear-gradient(135deg, #f4faf4, #edf7ed);
-    box-shadow: 0 4px 16px rgba(74,122,74,.15);
+    box-shadow: 0 3px 12px rgba(74,122,74,.14);
   }
 
   &.esgotado {
@@ -443,9 +443,9 @@ ion-content {
   }
 
   .card-emoji {
-    font-size: 2.2rem;
+    font-size: 1.9rem;
     line-height: 1;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
 
   .card-name {
@@ -486,7 +486,7 @@ ion-content {
     background: none;
     border: none;
     cursor: pointer;
-    font-family: 'Lato', sans-serif;
+    font-family: var(--font-display);
     margin-top: 2px;
     opacity: 0.7;
     &:hover { opacity: 1; text-decoration: underline; }
@@ -495,11 +495,11 @@ ion-content {
 
 // ── Already card ──────────────────────────────────────────────────────────────
 .already-card {
-  margin: 16px 16px 0;
+  margin: 12px 12px 0;
   background: #fff;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--brand-beige);
-  box-shadow: 0 4px 24px rgba(74, 55, 40, 0.09);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
@@ -533,30 +533,30 @@ ion-content {
 .already-card-top {
   background: linear-gradient(135deg, #fffbf2 0%, #fff8eb 100%);
   border-bottom: 1px solid var(--brand-beige);
-  padding: 22px 20px 18px;
+  padding: 16px 16px 12px;
   text-align: center;
 }
 
 .already-confetti {
-  font-size: 2.2rem;
-  margin-bottom: 8px;
+  font-size: 2rem;
+  margin-bottom: 6px;
   line-height: 1;
 }
 
 .already-card-title {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   color: var(--brand-brown);
-  margin: 0 0 4px;
+  margin: 0 0 3px;
 }
 
 .already-card-desc {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--brand-brown-light);
   margin: 0;
 }
 
 .already-card-body {
-  padding: 16px 20px;
+  padding: 12px 16px;
 }
 
 .already-label {
@@ -589,7 +589,7 @@ ion-content {
 
 .already-card-footer {
   border-top: 1px solid var(--brand-beige);
-  padding: 14px 20px 18px;
+  padding: 12px 16px 14px;
   text-align: center;
 }
 
@@ -608,7 +608,7 @@ ion-content {
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-display);
   transition: background 0.15s, color 0.15s;
 
   &:hover {
@@ -624,7 +624,7 @@ ion-content {
   z-index: 200;
   background: #fff;
   border-top: 2px solid var(--brand-beige);
-  padding: 14px 18px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -675,16 +675,16 @@ ion-content {
 
 .modal-box {
   background: #fff;
-  border-radius: 24px 24px 0 0;
-  padding: 32px 24px 36px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 20px 18px 24px;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 -8px 40px rgba(74,55,40,.2);
+  box-shadow: 0 -6px 28px rgba(67,48,31,.16);
   text-align: center;
   animation: slideUp 0.3s cubic-bezier(.34,1.56,.64,1);
 
   @media (min-width: 500px) {
-    border-radius: 24px;
+    border-radius: var(--radius-lg);
     animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
   }
 
@@ -692,30 +692,30 @@ ion-content {
     width: 40px; height: 4px;
     background: var(--brand-beige);
     border-radius: 2px;
-    margin: 0 auto 20px;
+    margin: 0 auto 14px;
   }
 
-  h2 { font-size: 1.5rem; margin-bottom: 6px; }
-  p  { color: var(--brand-brown-light); font-size: 0.88rem; margin-bottom: 20px; }
+  h2 { font-size: 1.3rem; margin-bottom: 5px; }
+  p  { color: var(--brand-brown-light); font-size: 0.86rem; margin-bottom: 14px; }
 
   .modal-input {
     width: 100%;
-    padding: 13px 16px;
+    padding: 11px 14px;
     border: 2px solid var(--brand-beige);
-    border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: 0.98rem;
     color: var(--brand-brown);
     background: var(--brand-cream);
     outline: none;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     transition: border-color 0.2s;
     text-align: center;
 
     &:focus { border-color: var(--brand-gold); }
   }
 
-  ion-button { --border-radius: 12px; }
+  ion-button { --border-radius: var(--radius-sm); }
 }
 
 @keyframes slideUp {

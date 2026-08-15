@@ -1,0 +1,50 @@
+<ion-content>
+  <div class="rs-wrap">
+
+    <div class="rs-logo">
+      <span>🍼</span>
+      <h1 class="playfair">Chá Revelação</h1>
+    </div>
+
+    <div class="rs-card">
+      @if (!sessaoValida()) {
+        <div class="rs-state">
+          <div class="rs-emoji">⚠️</div>
+          <h2 class="playfair">Link expirado</h2>
+          <p>Esse link de redefinição não é mais válido. Solicite um novo na tela de login.</p>
+          <ion-button expand="block" (click)="goLogin()">Voltar para o login</ion-button>
+        </div>
+      } @else if (success()) {
+        <div class="rs-state">
+          <div class="rs-emoji">✅</div>
+          <h2 class="playfair">Senha atualizada!</h2>
+          <p>Sua senha foi redefinida com sucesso.</p>
+          <ion-button expand="block" (click)="goConfigurar()">Continuar →</ion-button>
+        </div>
+      } @else {
+        <h2 class="playfair">Crie uma nova senha</h2>
+        <p class="rs-sub">Escolha uma senha com pelo menos 6 caracteres.</p>
+
+        <div class="field-group">
+          <label class="label-small">Nova senha</label>
+          <input class="text-input" type="password" [(ngModel)]="senha"
+            placeholder="••••••••" autocomplete="new-password"/>
+        </div>
+        <div class="field-group">
+          <label class="label-small">Confirmar senha</label>
+          <input class="text-input" type="password" [(ngModel)]="confirmarSenha"
+            placeholder="••••••••" autocomplete="new-password" (keydown.enter)="salvar()"/>
+        </div>
+
+        <ion-button expand="block" (click)="salvar()" [disabled]="!podeEnviar()">
+          @if (loading()) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            Salvar nova senha
+          }
+        </ion-button>
+      }
+    </div>
+
+  </div>
+</ion-content>

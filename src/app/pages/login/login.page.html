@@ -1,74 +1,200 @@
 <ion-content>
-  <div class="login-wrap">
+  <div class="login-shell">
+    <button class="back-link" type="button" (click)="goHome()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      Voltar para a página inicial
+    </button>
 
-    <div class="login-logo">
-      <span>🍼</span>
-      <h1 class="playfair">Chá Revelação</h1>
-      <p>Plataforma de listas de presentes</p>
-    </div>
+    <div class="login-layout">
+      <section class="login-panel">
+        @if (awaitingConfirmation()) {
+          <div class="login-card confirm-card">
+            <div class="confirm-emoji">📧</div>
+            <h2 class="playfair">Confirme seu e-mail</h2>
+            <p>
+              Enviamos um link de confirmação para
+              <strong>{{ email }}</strong>
+            </p>
 
-    <!-- ── FORMULÁRIO ── -->
-    <div class="login-card">
-
-        <!-- Google -->
-        <div class="google-wrap">
-          <button class="google-btn" (click)="googleLogin()">
-            <span class="google-g">G</span> Continuar com Google
-          </button>
-          <div class="divider">ou continue com e-mail</div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="login-tabs">
-          <button class="ltab" [class.active]="tab() === 'entrar'" (click)="setTab('entrar')">
-            Entrar
-          </button>
-          <button class="ltab" [class.active]="tab() === 'cadastrar'" (click)="setTab('cadastrar')">
-            Criar conta
-          </button>
-        </div>
-
-        <!-- Form -->
-        <div class="login-form">
-          <div class="field-group">
-            <label class="label-small">E-mail</label>
-            <input class="text-input" type="email" [(ngModel)]="email"
-              placeholder="seu@email.com" autocomplete="email" (blur)="onEmailBlur()"/>
-          </div>
-          @if (tab() === 'cadastrar') {
-            <div class="field-group">
-              <label class="label-small">Telefone *</label>
-              <div class="phone-input-wrap">
-                <span class="phone-prefix">+55</span>
-                <input class="text-input phone-input" type="tel" [ngModel]="phone"
-                  (ngModelChange)="onPhoneChange($event)"
-                  placeholder="(48) 99159-3331" autocomplete="tel" required/>
+            <div class="confirm-steps">
+              <div class="cstep">
+                <span class="cstep-num">1</span>
+                Abra o e-mail e confirme seu cadastro
               </div>
-              <span class="field-hint">Obrigatório para criar a conta</span>
+              <div class="cstep">
+                <span class="cstep-num">2</span>
+                Volte aqui e clique em “Já confirmei”
+              </div>
             </div>
-          }
-          <div class="field-group">
-            <label class="label-small">Senha</label>
-            <input class="text-input" type="password" [(ngModel)]="password"
-              placeholder="••••••••" (keydown.enter)="submit()"/>
-            @if (tab() === 'cadastrar') {
-              <span class="field-hint">Mínimo 6 caracteres</span>
-            }
+
+            <ion-button expand="block" (click)="setTab('entrar')">
+              Já confirmei, entrar
+            </ion-button>
+            <ion-button
+              expand="block"
+              fill="clear"
+              color="medium"
+              (click)="awaitingConfirmation.set(false)"
+            >
+              Usar outro e-mail
+            </ion-button>
           </div>
+        } @else {
+          <div class="login-card">
+            <div class="login-mobile-copy">
+              <div class="showcase-kicker">
+                <ion-icon name="sparkles-outline"></ion-icon>
+                Acesso rápido
+              </div>
 
-          <ion-button expand="block" (click)="submit()" [disabled]="!podeEnviar()">
-            @if (loading()) {
-              <ion-spinner name="dots"></ion-spinner>
-            } @else {
-              {{ tab() === 'entrar' ? 'Entrar' : 'Criar conta' }}
-            }
-          </ion-button>
+              <h1 class="playfair">Entre ou crie sua conta sem perder tempo</h1>
+              <p>Use Google em um toque ou e-mail logo abaixo.</p>
+            </div>
 
+            <div class="login-tabs">
+              <button
+                class="ltab"
+                [class.active]="tab() === 'entrar'"
+                (click)="setTab('entrar')"
+              >
+                Entrar
+              </button>
+              <button
+                class="ltab"
+                [class.active]="tab() === 'cadastrar'"
+                (click)="setTab('cadastrar')"
+              >
+                Criar conta
+              </button>
+            </div>
+
+            <div class="login-form">
+              @if (oauthPending()) {
+                <div class="oauth-banner">
+                  <ion-spinner name="dots"></ion-spinner>
+                  <div>
+                    <strong>Conectando com Google</strong>
+                    <span>Você não precisa clicar de novo. Estamos finalizando sua entrada.</span>
+                  </div>
+                </div>
+              }
+
+              <div class="form-header">
+                <h2 class="playfair">
+                  {{ tab() === 'entrar' ? 'Bem-vindo de volta' : 'Crie sua conta' }}
+                </h2>
+                <p>
+                  {{
+                    tab() === 'entrar'
+                      ? 'Acesse sua área para editar o evento e acompanhar as respostas.'
+                      : 'Cadastre-se para começar a montar a lista do seu evento.'
+                  }}
+                </p>
+              </div>
+
+              <ion-button
+                expand="block"
+                fill="outline"
+                (click)="googleLogin()"
+                [disabled]="loading()"
+              >
+                <span class="google-g">G</span>
+                Continuar com Google
+              </ion-button>
+
+              <div class="divider"><span>ou usar e-mail</span></div>
+
+              <div class="field-group">
+                <label class="label-small">E-mail</label>
+                <input
+                  class="text-input"
+                  type="email"
+                  [(ngModel)]="email"
+                  placeholder="seu@email.com"
+                  autocomplete="email"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  (blur)="onEmailBlur()"
+                />
+              </div>
+
+              @if (tab() === 'cadastrar') {
+                <div class="field-group">
+                  <label class="label-small">Telefone *</label>
+                  <div class="phone-input-wrap">
+                    <span class="phone-prefix">+55</span>
+                    <input
+                      class="text-input phone-input"
+                      type="tel"
+                      [ngModel]="phone"
+                      (ngModelChange)="onPhoneChange($event)"
+                      placeholder="(48) 99159-3331"
+                      autocomplete="tel"
+                      required
+                    />
+                  </div>
+                  <span class="field-hint">Obrigatório para criar a conta</span>
+                </div>
+              }
+
+              <div class="field-group">
+                <label class="label-small">Senha</label>
+                <div class="password-wrap">
+                  <input
+                    class="text-input"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    [(ngModel)]="password"
+                    placeholder="••••••••"
+                    [attr.autocomplete]="tab() === 'entrar' ? 'current-password' : 'new-password'"
+                    (keydown.enter)="submit()"
+                  />
+                  <button class="password-toggle" type="button" (click)="togglePassword()">
+                    <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                  </button>
+                </div>
+                @if (tab() === 'cadastrar') {
+                  <span class="field-hint">Mínimo de 6 caracteres</span>
+                }
+              </div>
+
+              @if (errorMsg()) {
+                <div class="error-msg">⚠️ {{ errorMsg() }}</div>
+              }
+
+              <ion-button expand="block" (click)="submit()" [disabled]="!podeEnviar()">
+                @if (loading()) {
+                  <ion-spinner name="dots"></ion-spinner>
+                } @else {
+                  {{ tab() === 'entrar' ? 'Entrar' : 'Criar conta' }}
+                }
+              </ion-button>
+
+              <button class="home-shortcut" type="button" (click)="goHome()">
+                Voltar para a página inicial
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+
+      <section class="login-showcase">
+        <div class="showcase-kicker">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          Área de organização do evento
         </div>
 
-      </div>
+        <h1 class="playfair">Entre para montar e ativar o seu evento</h1>
+        <p>
+          Configure a lista, publique o link e acompanhe as reservas em uma
+          experiência mais organizada do que improvisar no WhatsApp.
+        </p>
 
+        <div class="showcase-list">
+          @for (highlight of highlights; track highlight) {
+            <div class="showcase-item">{{ highlight }}</div>
+          }
+        </div>
+      </section>
+    </div>
   </div>
-
-
 </ion-content>

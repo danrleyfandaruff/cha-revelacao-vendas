@@ -1,0 +1,53 @@
+flowchart TB
+
+classDef user fill:#cfe7b3,stroke:#7ea45c,color:#24323f,stroke-width:1.5px;
+classDef state fill:#86c5f3,stroke:#4a8dc1,color:#24323f,stroke-width:1.5px;
+classDef service fill:#e9c7ef,stroke:#a770b6,color:#24323f,stroke-width:1.5px;
+classDef note fill:#fff7dd,stroke:#d1b45a,color:#4b5563,stroke-width:1.2px;
+
+subgraph A["Jornada inicial (autenticacao primaria)"]
+direction LR
+  A0((Inicio)) --> A1["Nova mensagem"]:::user
+  A1 --> A2["Nunca se autenticou"]:::state
+  A2 --> A3["Mensagem solicitando informacoes (flow)"]:::state
+  A3 --> A4["Enviar informacoes"]:::user
+  A4 --> A5["Corretor autenticado"]:::state
+  A5 --> A6["Listar corretoras e selecionar"]:::state
+  A6 --> A7["Corretor autenticado (final)"]:::state
+  A4 -.-> SA1["AUTHN"]:::service
+  A4 -.-> SA2["CONTEXTOS"]:::service
+end
+
+subgraph B["Trocar vinculo (autenticacao primaria)"]
+direction LR
+  B0((Inicio)) --> B1["Menu inicial"]:::user
+  B1 --> B2["Trocar vinculo (corretora)"]:::state
+  B2 --> B3["Listar corretoras"]:::user
+  B3 --> B4["Mensagem: troca efetuada com sucesso"]:::state
+  B3 -.-> SB1["CONTEXTOS"]:::service
+end
+
+subgraph C["Deslogar (autenticacao primaria)"]
+direction LR
+  C0((Inicio)) --> C1["Menu inicial"]:::user
+  C1 --> C2["Opcao deslogar corretor"]:::state
+  C2 --> C3["Chamada servico"]:::user
+  C3 --> C4["Mensagem: corretor deslogado com sucesso e direcionar para novo login"]:::state
+  C3 -.-> SC1["LOGOUT"]:::service
+end
+
+subgraph D["Autenticacao (jornadas sensiveis)"]
+direction LR
+  D0((Inicio)) --> D1["Para continuar e necessario se autenticar"]:::user
+  D1 --> D2["Mensagem solicitando informacoes (flow)"]:::state
+  D2 --> D3["Enviar informacoes"]:::user
+  D3 --> D4["Corretor autenticado"]:::state
+  D4 --> D5["Continuar jornada"]:::state
+  D3 -.-> SD1["AUTHN"]:::service
+end
+
+N1["Corretor fica logado por 120 minutos, entao novas jornadas podem reutilizar a mesma autenticacao dentro desse periodo."]:::note
+N2["Existe dependencia de um endpoint que informa se o corretor ja esta autenticado ou se precisa iniciar o processo novamente."]:::note
+
+A7 --- N1
+D5 --- N2

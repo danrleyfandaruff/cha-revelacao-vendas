@@ -48,6 +48,8 @@ export class AnalyticsService {
   configSaved(type: string): void           { this.send('config_saved', { type }); }
   configSaveError(): void                   { this.send('config_save_error'); }
   configActivationOpen(): void              { this.send('config_activation_open'); }
+  configPostSaveSheetView(): void           { this.send('config_post_save_sheet_view'); }
+  configPostSaveSheetAction(action: string): void { this.send('config_post_save_sheet_action', { action }); }
   configGoPagar(): void                     { this.send('config_go_pagar'); }
   configCopyLink(): void                    { this.send('config_copy_link'); }
   configShareWhatsApp(): void               { this.send('config_share_whatsapp'); }

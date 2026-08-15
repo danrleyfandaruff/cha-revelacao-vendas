@@ -1,64 +1,79 @@
 // ── Ionic default overrides ──────────────────────────────────────────────────
+// Direção visual "Nuvem": fundo azul-claro frio, tinta slate-navy, acento coral
+// único, tipografia única (Familjen Grotesk) em todos os pesos.
 :root {
   // Brand palette
-  --brand-cream:       #faf7f2;
-  --brand-beige:       #e8ddd0;
-  --brand-beige-dark:  #d4c4b0;
-  --brand-gold:        #c9a84c;
-  --brand-gold-light:  #e8d5a3;
-  --brand-brown:       #4a3728;
-  --brand-brown-light: #8a6a5a;
-  --brand-green:       #4a7a4a;
-  --brand-red:         #a05050;
+  --brand-cream:       #f2f5fb;
+  --brand-beige:       #e1e6f2;
+  --brand-beige-dark:  #c7d0e8;
+  --brand-gold:        #ff5d3a;
+  --brand-gold-light:  #ffcab9;
+  --brand-brown:       #1e2a3d;
+  --brand-brown-light: #6b7690;
+  --brand-green:       #22a878;
+  --brand-red:         #e0483a;
+
+  // Acentos secundários da direção Nuvem
+  --brand-sun:      #ffb627;
+  --brand-lavender: #c9d4ff;
+
+  // Escala de espaçamento/raio/sombra — usar nas páginas em vez de
+  // valores soltos, pra manter a linguagem visual consistente.
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --shadow-sm: 0 6px 18px rgba(30, 42, 61, 0.07);
+  --shadow-md: 0 14px 32px rgba(30, 42, 61, 0.1);
 
   // Map to Ionic color system
   --ion-color-primary:          var(--brand-gold);
-  --ion-color-primary-rgb:      201, 168, 76;
+  --ion-color-primary-rgb:      255, 93, 58;
   --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-shade:    #b09340;
-  --ion-color-primary-tint:     #d4b565;
+  --ion-color-primary-shade:    #de5132;
+  --ion-color-primary-tint:     #ff7254;
 
   --ion-color-secondary:          var(--brand-brown);
-  --ion-color-secondary-rgb:      74, 55, 40;
+  --ion-color-secondary-rgb:      30, 42, 61;
   --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-shade:    #3a2c20;
-  --ion-color-secondary-tint:     #5c4536;
+  --ion-color-secondary-shade:    #1a2434;
+  --ion-color-secondary-tint:     #404b5a;
 
   --ion-color-tertiary:          var(--brand-brown-light);
-  --ion-color-tertiary-rgb:      138, 106, 90;
+  --ion-color-tertiary-rgb:      107, 118, 144;
   --ion-color-tertiary-contrast: #ffffff;
-  --ion-color-tertiary-shade:    #7a5f51;
-  --ion-color-tertiary-tint:     #997a6c;
+  --ion-color-tertiary-shade:    #5e6880;
+  --ion-color-tertiary-tint:     #7a849c;
 
   --ion-color-success:          var(--brand-green);
-  --ion-color-success-rgb:      74, 122, 74;
+  --ion-color-success-rgb:      34, 168, 120;
   --ion-color-success-contrast: #ffffff;
 
   --ion-color-danger:           var(--brand-red);
-  --ion-color-danger-rgb:       160, 80, 80;
+  --ion-color-danger-rgb:       224, 72, 58;
   --ion-color-danger-contrast:  #ffffff;
 
   --ion-background-color:       var(--brand-cream);
-  --ion-background-color-rgb:   250, 247, 242;
+  --ion-background-color-rgb:   242, 245, 251;
 
   --ion-text-color:             var(--brand-brown);
-  --ion-text-color-rgb:         74, 55, 40;
+  --ion-text-color-rgb:         30, 42, 61;
 
   --ion-card-background:        #ffffff;
   --ion-item-background:        #ffffff;
   --ion-toolbar-background:     #ffffff;
 
-  --ion-font-family: 'Lato', sans-serif;
+  --font-display: 'Familjen Grotesk', -apple-system, sans-serif;
+  --ion-font-family: 'Familjen Grotesk', -apple-system, sans-serif;
 
   // Border radius
-  --border-radius-card: 14px;
+  --border-radius-card: var(--radius-md);
 }
 
-// Gold bar on toolbars
+// Barra de destaque nas toolbars
 ion-header ion-toolbar:first-of-type {
   --background: #ffffff;
   border-top: 4px solid transparent;
-  border-image: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light), var(--brand-gold)) 1;
+  border-image: linear-gradient(90deg, var(--brand-gold), var(--brand-sun), var(--brand-gold)) 1;
 }
 
 ion-toolbar {
@@ -67,8 +82,9 @@ ion-toolbar {
 }
 
 ion-title {
-  font-family: 'Playfair Display', serif !important;
-  font-size: 1.15rem !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
   color: var(--brand-brown);
 }
 
@@ -78,36 +94,38 @@ ion-back-button {
 
 ion-card {
   border-radius: var(--border-radius-card) !important;
-  box-shadow: 0 4px 24px rgba(74, 55, 40, 0.1) !important;
-  border: 1px solid var(--brand-beige);
+  box-shadow: var(--shadow-md) !important;
+  border: none;
 }
 
 ion-button {
-  --border-radius: 10px;
+  --border-radius: var(--radius-sm);
   font-weight: 700;
-  font-family: 'Lato', sans-serif;
-  letter-spacing: 0.3px;
+  font-family: var(--font-display);
+  letter-spacing: 0.1px;
 }
 
 ion-input,
 ion-textarea {
-  --background: var(--brand-cream);
+  --background: #ffffff;
   --border-color: var(--brand-beige);
-  --border-radius: 10px;
+  --border-radius: var(--radius-sm);
   --padding-start: 14px;
   --padding-end: 14px;
-  border: 2px solid var(--brand-beige);
-  border-radius: 10px;
+  border: none;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 2px var(--brand-beige);
 
   &.has-focus {
-    border-color: var(--brand-gold);
+    box-shadow: inset 0 0 0 2px var(--brand-gold);
   }
 }
 
 ion-segment {
-  --background: transparent;
-  border: 2px solid var(--brand-beige);
-  border-radius: 10px;
+  --background: var(--brand-cream);
+  border: none;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -116,7 +134,7 @@ ion-segment-button {
   --color-checked:  #ffffff;
   --background-checked: var(--brand-brown);
   --indicator-color: transparent;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.82rem;
   text-transform: uppercase;

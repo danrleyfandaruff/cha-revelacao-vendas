@@ -1,12 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent, IonButton, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import {
+  arrowForwardOutline,
+  checkmarkCircleOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SupabaseService } from '../../services/supabase.service';
+
+type AuthMode = 'entrar' | 'cadastrar';
 
 @Component({
   selector: 'app-landing',
@@ -16,6 +22,8 @@ import { SupabaseService } from '../../services/supabase.service';
   imports: [IonContent, IonButton, IonIcon],
 })
 export class LandingPage implements OnInit {
+  googleLoading = signal(false);
+
   features = [
     { icon: '🧷', title: 'Fraldas + presentes', desc: 'Organize dois tipos de lista: fraldas por tamanho e mimos personalizados.' },
     { icon: '🔒', title: 'Sem duplicação', desc: 'O sistema reserva automaticamente. Dois convidados não pegam o mesmo item.' },
@@ -26,7 +34,11 @@ export class LandingPage implements OnInit {
   ];
 
   constructor(private router: Router, private analytics: AnalyticsService, private supa: SupabaseService) {
-    addIcons({ arrowForwardOutline, checkmarkCircleOutline });
+    addIcons({
+      arrowForwardOutline,
+      checkmarkCircleOutline,
+      sparklesOutline,
+    });
   }
 
   async ngOnInit() {
@@ -46,8 +58,39 @@ export class LandingPage implements OnInit {
     this.analytics.landingView();
   }
 
-  goLogin()    { this.router.navigate(['/login']); }
-  goCadastro() { this.router.navigate(['/login'], { queryParams: { tab: 'cadastrar' } }); }
+  goLogin(mode: AuthMode = 'entrar') {
+    this.router.navigate(['/login'], {
+      queryParams: {
+        mode,
+        next: '/configurar',
+      },
+    });
+  }
+
+  goCadastro() {
+    this.goLogin('cadastrar');
+  }
+
+  async continueWithGoogle() {
+    this.googleLoading.set(true);
+    sessionStorage.setItem('pending_google_login', '1');
+
+    const { error } = await this.supa.signInWithGoogle('cadastrar', '/configurar');
+
+    if (error) {
+      this.googleLoading.set(false);
+      sessionStorage.removeItem('pending_google_login');
+      this.goCadastro();
+    }
+  }
+
+  scrollTo(sectionId: string) {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   goDicas()    { this.router.navigate(['/dicas']); }
   goConvite()  { this.router.navigate(['/convite']); }
 }

@@ -16,213 +16,325 @@
       <p>Carregando…</p>
     </div>
   } @else {
+    <div class="cfg-shell">
+      <section class="cfg-hero">
+        <div class="cfg-hero-copy">
+          <div
+            class="cfg-status-pill"
+            [class.paid]="isPaid()"
+            [class.ready]="!!event() && !isPaid()"
+          >
+            {{
+              isPaid()
+                ? 'Evento ativo e pronto para compartilhar'
+                : event()
+                  ? 'Sua lista está salva. Falta ativar para enviar'
+                  : 'Montando seu evento no celular'
+            }}
+          </div>
 
-    <!-- STEP INDICATOR — mostra o passo atual -->
-    @if (!isPaid()) {
-      <div class="steps-bar">
-        <div class="step" [class.done]="!!event()">
-          <div class="step-num">{{ event() ? '✓' : '1' }}</div>
-          <span>Configurar</span>
+          <h1 class="playfair">
+            {{
+              isPaid()
+                ? 'Seu link já pode ir para o WhatsApp das convidadas'
+                : event()
+                  ? 'Seu evento está quase pronto'
+                  : 'Vamos deixar seu chá lindo, claro e fácil de usar'
+            }}
+          </h1>
+
+          <p>
+            Organize os dados principais, monte a lista com carinho e deixe tudo
+            simples para quem chega pelo celular.
+          </p>
         </div>
-        <div class="step-line" [class.done]="!!event()"></div>
-        <div class="step" [class.active]="!!event() && !isPaid()" [class.clickable]="!!event()" (click)="event() && openActivation()">
-          <div class="step-num">2</div>
-          <span>Ativar</span>
+
+        <div class="cfg-hero-metrics">
+          <div class="hero-metric-card">
+            <strong>{{ selectedItemsCount() }}</strong>
+            <span>itens na lista</span>
+          </div>
+          <div class="hero-metric-card">
+            <strong>{{ completionPercent() }}%</strong>
+            <span>evento preenchido</span>
+          </div>
+          <div class="hero-metric-card">
+            <strong>{{ reservedItemsCount() }}</strong>
+            <span>reservas protegidas</span>
+          </div>
         </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <span>Compartilhar</span>
-        </div>
-      </div>
-    }
 
-    <div class="cfg-content">
-
-      <!-- CONFIGURAÇÕES (recolhível) -->
-      <div class="cfg-card cfg-card-collapsible"
-        [class.tut-spotlight]="tutorialCurrent()?.highlight === 'config'">
-        <button class="cfg-collapse-header" (click)="configOpen.set(!configOpen())">
-          <span class="cfg-card-title playfair">🎀 Configurações</span>
-          <span class="cfg-collapse-icon" [class.open]="configOpen()">▾</span>
-        </button>
-
-        @if (!configOpen() && configSummary()) {
-          <div class="cfg-summary-line">{{ configSummary() }}</div>
-        }
-
-        @if (configOpen()) {
-          <div class="cfg-card-body cfg-body-compact">
-
-            <!-- Tipo -->
-            <div class="compact-row">
-              <button class="chip-btn" [class.active]="eventType() === 'revelacao'" (click)="setEventType('revelacao')">🎊 Chá Revelação</button>
-              <button class="chip-btn" [class.active]="eventType() === 'bebe'" (click)="setEventType('bebe')">🍼 Chá de Bebê</button>
+        @if (!isPaid()) {
+          <div class="steps-bar">
+            <div class="step" [class.done]="!!event()">
+              <div class="step-num">{{ event() ? '✓' : '1' }}</div>
+              <span>Configurar</span>
             </div>
-
-            <!-- Sexo (só se bebê) -->
-            @if (eventType() === 'bebe') {
-              <div class="compact-row">
-                <button class="chip-btn menino" [class.active]="babySex() === 'menino'" (click)="setBabySex('menino')">👦 Menino</button>
-                <button class="chip-btn menina" [class.active]="babySex() === 'menina'" (click)="setBabySex('menina')">👧 Menina</button>
-              </div>
-            }
-
-            <!-- Nomes -->
-            @if (eventType() === 'revelacao') {
-              <div class="names-grid compact-names">
-                <input class="text-input" [(ngModel)]="name1" placeholder="Nome 1" maxlength="30"/>
-                <div class="names-sep">ou</div>
-                <input class="text-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
-              </div>
-            } @else {
-              <input class="text-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
-            }
-
-            <!-- Endereço + Data -->
-            <input class="text-input" style="margin-top:10px" [ngModel]="eventAddress()"
-              (ngModelChange)="eventAddress.set($event); saveMeta()"
-              placeholder="📍 Endereço do evento" maxlength="120"/>
-
-            <div class="datetime-field">
-              <label class="datetime-label">📅 Data e horário do evento</label>
-              <input class="text-input datetime-input" type="datetime-local" [ngModel]="eventDatetime()"
-                (ngModelChange)="eventDatetime.set($event); saveMeta()"/>
+            <div class="step-line" [class.done]="!!event()"></div>
+            <div
+              class="step"
+              [class.active]="!!event() && !isPaid()"
+              [class.clickable]="!!event()"
+              (click)="event() && openActivation()"
+            >
+              <div class="step-num">2</div>
+              <span>Ativar</span>
             </div>
-
+            <div class="step-line"></div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <span>Compartilhar</span>
+            </div>
           </div>
         }
-      </div>
+      </section>
 
-      <!-- PREVIEW — aparece quando evento existe mas ainda não foi pago -->
-      @if (!isPaid() && eventLink()) {
-        <div #previewCard class="preview-card" [class.preview-highlight]="highlightPreview()" (click)="openPreview()">
-          <div class="preview-left">
-            <div class="preview-icon">👁️</div>
-            <div>
-              <div class="preview-title">Ver como seus convidados vão ver</div>
-              <div class="preview-sub">Pré-visualize antes de ativar — sem pagar agora</div>
+      <div class="cfg-content">
+        @if (!isPaid() && eventLink()) {
+          <div #previewCard class="preview-card" [class.preview-highlight]="highlightPreview()" (click)="openPreview()">
+            <div class="preview-left">
+              <div class="preview-icon">👁️</div>
+              <div>
+                <div class="preview-title">Veja como suas convidadas vão enxergar o convite</div>
+                <div class="preview-sub">Confirme o visual antes de ativar. Tudo pensado para tela pequena.</div>
+              </div>
             </div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
-        </div>
-
-        <button class="preview-activate-cta" (click)="openActivation()">
-          Gostou? Ative por R$19,90 e libere o compartilhamento →
-        </button>
-      }
-
-      <!-- LINK + RESPOSTAS (only if paid + event exists) -->
-      @if (isPaid() && eventLink()) {
-        <div #linkCard class="cfg-card link-card" [class.link-highlight]="highlightLink()">
-          @if (highlightLink()) {
-            <div class="link-highlight-banner">👆 Copie e compartilhe este link com seus convidados!</div>
-          }
-          <div class="link-card-inner">
-            <div class="link-top-row">
-              <div class="link-label">🔗 Link do evento</div>
-              <ion-button size="small" (click)="copyLink()">
-                <ion-icon name="copy-outline" slot="start"></ion-icon>
-                Copiar
-              </ion-button>
-            </div>
-            <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
-
-            <!-- Ações de compartilhamento -->
-            <div class="share-actions">
-              <button class="share-btn whatsapp" (click)="shareWhatsApp()">
-                <span class="share-icon">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </span>
-                Compartilhar no WhatsApp
-              </button>
-              <button class="share-btn qr" (click)="openQrModal()">
-                <span class="share-icon">⬛</span>
-                Ver QR Code
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="respostas-card" (click)="goResultados()">
-          <div class="respostas-left">
-            <div class="respostas-icon">📊</div>
-            <div>
-              <div class="respostas-title">Acompanhar respostas</div>
-              <div class="respostas-sub">Veja em tempo real o que os convidados escolheram</div>
-            </div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
-        </div>
-      }
-
-      <!-- ITEMS SECTION -->
-      <div class="cfg-card"
-        [class.tut-spotlight]="tutorialCurrent()?.highlight === 'items'">
-        <div class="cfg-card-header">
-          <span class="cfg-card-title playfair">🎁 Lista de itens</span>
-        </div>
-        <div class="cfg-card-body">
-
-          <!-- Tabs -->
-          <div class="cfg-tabs">
-            <button class="cfg-tab" [class.active]="activeTab() === 'fraldas'" (click)="setTab('fraldas')">
-              🧷 Fraldas
-              <span class="cfg-tab-badge">{{ totalChecked('fraldas') }}</span>
-            </button>
-            <button class="cfg-tab" [class.active]="activeTab() === 'presentes'" (click)="setTab('presentes')">
-              🎁 Presentes
-              <span class="cfg-tab-badge">{{ totalChecked('presentes') }}</span>
-            </button>
+            <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
           </div>
 
-          <!-- Items list -->
-          <div class="items-list">
-            @for (item of currentItems(); track item.name + item.category) {
-              <div class="item-row" [class.unchecked]="!item.checked">
-                <div class="item-check" (click)="toggleItem(item)">
-                  <div class="checkbox" [class.on]="item.checked">
-                    @if (item.checked) { ✓ }
-                  </div>
+          <button class="preview-activate-cta" (click)="openActivation()">
+            Ativar por R$19,90 e liberar o compartilhamento →
+          </button>
+        }
+
+        @if (isPaid() && eventLink()) {
+          <div #linkCard class="cfg-card link-card" [class.link-highlight]="highlightLink()">
+            @if (highlightLink()) {
+              <div class="link-highlight-banner">👆 Copie e compartilhe este link com seus convidados!</div>
+            }
+            <div class="link-card-inner">
+              <div class="link-top-row">
+                <div>
+                  <div class="link-label">🔗 Link do evento</div>
+                  <div class="link-caption">A informação mais importante já fica acessível aqui no topo.</div>
                 </div>
-                <div class="item-emoji">{{ item.emoji }}</div>
-                <div class="item-info">
-                  <input class="item-name-input" [(ngModel)]="item.name" maxlength="50"/>
-                </div>
-                <div class="item-qty">
-                  <button class="qty-btn" (click)="item.qty = Math.max(1, item.qty - 1)">−</button>
-                  <span class="qty-val">{{ item.qty }}</span>
-                  <button class="qty-btn" (click)="item.qty = item.qty + 1">+</button>
-                </div>
-                <ion-button fill="clear" size="small" color="danger" (click)="askRemoveItem(item)">
-                  <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                <ion-button size="small" (click)="copyLink()">
+                  <ion-icon name="copy-outline" slot="start"></ion-icon>
+                  Copiar
                 </ion-button>
               </div>
-            }
-          </div>
+              <a [href]="eventLink()" target="_blank" class="link-url">{{ eventLink() }}</a>
 
-          <!-- Add custom item -->
-          <div class="add-item-form">
-            <p class="label-small" style="margin-bottom:10px">Adicionar item personalizado:</p>
-            <div class="add-row">
-              <input class="text-input emoji-input" [(ngModel)]="newEmoji" placeholder="🎁" maxlength="2"/>
-              <input class="text-input flex-1" [(ngModel)]="newName" placeholder="Nome do item" maxlength="50"/>
-              <div class="qty-ctrl">
-                <button class="qty-btn" (click)="newQty = Math.max(1, newQty - 1)">−</button>
-                <span class="qty-val">{{ newQty }}</span>
-                <button class="qty-btn" (click)="newQty = newQty + 1">+</button>
+              <div class="share-actions">
+                <button class="share-btn whatsapp" (click)="shareWhatsApp()">
+                  <span class="share-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                  </span>
+                  Compartilhar no WhatsApp
+                </button>
+                <button class="share-btn qr" (click)="openQrModal()">
+                  <span class="share-icon">⬛</span>
+                  Ver QR Code
+                </button>
               </div>
-              <ion-button size="small" (click)="addCustomItem()">
-                <ion-icon name="add-outline" slot="icon-only"></ion-icon>
-              </ion-button>
             </div>
           </div>
 
+          <div class="respostas-card" (click)="goResultados()">
+            <div class="respostas-left">
+              <div class="respostas-icon">📊</div>
+              <div>
+                <div class="respostas-title">Acompanhar respostas</div>
+                <div class="respostas-sub">Veja em tempo real o que os convidados escolheram e quem já confirmou.</div>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="respostas-arrow"></ion-icon>
+          </div>
+        }
+
+        <div
+          class="cfg-card cfg-card-collapsible"
+          [class.tut-spotlight]="tutorialCurrent()?.highlight === 'config'"
+        >
+          <button class="cfg-collapse-header" (click)="configOpen.set(!configOpen())">
+            <span class="cfg-collapse-copy">
+              <span class="cfg-card-title playfair">Dados principais do evento</span>
+              <small>Nome, tipo, local e data em um bloco enxuto</small>
+            </span>
+            <span class="cfg-collapse-icon" [class.open]="configOpen()">▾</span>
+          </button>
+
+          @if (!configOpen() && configSummary()) {
+            <div class="cfg-summary-line">{{ configSummary() }}</div>
+          }
+
+          @if (configOpen()) {
+            <div class="cfg-card-body cfg-body-compact">
+              <div class="cfg-group">
+                <span class="cfg-group-label">Tipo do evento</span>
+                <div class="compact-row">
+                  <button class="chip-btn" [class.active]="eventType() === 'revelacao'" (click)="setEventType('revelacao')">
+                    🎊 Chá Revelação
+                  </button>
+                  <button class="chip-btn" [class.active]="eventType() === 'bebe'" (click)="setEventType('bebe')">
+                    🍼 Chá de Bebê
+                  </button>
+                </div>
+              </div>
+
+              @if (eventType() === 'bebe') {
+                <div class="cfg-group">
+                  <span class="cfg-group-label">Sexo do bebê</span>
+                  <div class="compact-row">
+                    <button class="chip-btn menino" [class.active]="babySex() === 'menino'" (click)="setBabySex('menino')">
+                      👦 Menino
+                    </button>
+                    <button class="chip-btn menina" [class.active]="babySex() === 'menina'" (click)="setBabySex('menina')">
+                      👧 Menina
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="cfg-group">
+                <span class="cfg-group-label">
+                  {{ eventType() === 'revelacao' ? 'Nomes para o reveal' : 'Nome do bebê' }}
+                </span>
+
+                @if (eventType() === 'revelacao') {
+                  <div class="names-grid compact-names">
+                    <input class="text-input" [(ngModel)]="name1" placeholder="Nome 1" maxlength="30"/>
+                    <div class="names-sep">ou</div>
+                    <input class="text-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
+                  </div>
+                } @else {
+                  <input class="text-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
+                }
+              </div>
+
+              <div class="field-grid">
+                <div class="field-stack field-stack-wide">
+                  <label class="cfg-group-label">Local do evento</label>
+                  <input
+                    class="text-input"
+                    [ngModel]="eventAddress()"
+                    (ngModelChange)="eventAddress.set($event); saveMeta()"
+                    placeholder="📍 Endereço do evento"
+                    maxlength="120"
+                  />
+                </div>
+
+                <div class="field-stack">
+                  <label class="cfg-group-label">Data e horário</label>
+                  <div class="datetime-field">
+                    <input
+                      class="text-input datetime-input"
+                      type="datetime-local"
+                      [ngModel]="eventDatetime()"
+                      (ngModelChange)="eventDatetime.set($event); saveMeta()"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div
+          class="cfg-card items-card"
+          [class.tut-spotlight]="tutorialCurrent()?.highlight === 'items'"
+        >
+          <div class="cfg-card-header cfg-header-stack">
+            <div>
+              <span class="cfg-card-title playfair">Lista de presentes</span>
+              <p class="cfg-card-sub">Deixe só o que importa e ajuste as quantidades sem apertar a tela.</p>
+            </div>
+            <div class="items-counter">{{ selectedItemsCount() }} itens</div>
+          </div>
+
+          <div class="cfg-card-body">
+            <div class="cfg-tabs">
+              <button class="cfg-tab" [class.active]="activeTab() === 'fraldas'" (click)="setTab('fraldas')">
+                🧷 Fraldas
+                <span class="cfg-tab-badge">{{ totalChecked('fraldas') }}</span>
+              </button>
+              <button class="cfg-tab" [class.active]="activeTab() === 'presentes'" (click)="setTab('presentes')">
+                🎁 Presentes
+                <span class="cfg-tab-badge">{{ totalChecked('presentes') }}</span>
+              </button>
+            </div>
+
+            <div class="items-list">
+              @for (item of currentItems(); track item.name + item.category) {
+                <div class="item-row" [class.unchecked]="!item.checked">
+                  <button class="item-check" type="button" (click)="toggleItem(item)">
+                    <div class="checkbox" [class.on]="item.checked">
+                      @if (item.checked) { ✓ }
+                    </div>
+                  </button>
+
+                  <div class="item-main">
+                    <div class="item-main-top">
+                      <div class="item-emoji">{{ item.emoji }}</div>
+
+                      <div class="item-info">
+                        <input class="item-name-input" [(ngModel)]="item.name" maxlength="50"/>
+                        <div class="item-meta">
+                          <span class="item-status-pill" [class.on]="item.checked">
+                            {{ item.checked ? 'na lista' : 'desmarcado' }}
+                          </span>
+                          @if ((item.reserved ?? 0) > 0) {
+                            <span class="item-status-pill reserved">
+                              {{ item.reserved }} reservado(s)
+                            </span>
+                          }
+                        </div>
+                      </div>
+
+                      <button class="item-delete-btn" type="button" (click)="askRemoveItem(item)">
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </div>
+
+                    <div class="item-controls">
+                      <span class="item-qty-label">Quantidade</span>
+                      <div class="item-qty">
+                        <button class="qty-btn" type="button" (click)="item.qty = Math.max(1, item.qty - 1)">−</button>
+                        <span class="qty-val">{{ item.qty }}</span>
+                        <button class="qty-btn" type="button" (click)="item.qty = item.qty + 1">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="add-item-form">
+              <div class="add-item-copy">
+                <p class="label-small">Adicionar item personalizado</p>
+                <span>Inclua qualquer mimo que ainda faltou na lista.</span>
+              </div>
+
+              <div class="add-row">
+                <input class="text-input emoji-input" [(ngModel)]="newEmoji" placeholder="🎁" maxlength="2"/>
+                <input class="text-input flex-1" [(ngModel)]="newName" placeholder="Nome do item" maxlength="50"/>
+                <div class="qty-ctrl">
+                  <button class="qty-btn" type="button" (click)="newQty = Math.max(1, newQty - 1)">−</button>
+                  <span class="qty-val">{{ newQty }}</span>
+                  <button class="qty-btn" type="button" (click)="newQty = newQty + 1">+</button>
+                </div>
+              </div>
+
+              <ion-button expand="block" class="add-item-button" (click)="addCustomItem()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                Adicionar item
+              </ion-button>
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
   }
 
@@ -245,6 +357,47 @@
       <ion-button expand="block" (click)="verMeuLink()">
         Ver meu link →
       </ion-button>
+    </div>
+  }
+
+  <!-- PRÓXIMO PASSO — aparece uma vez, logo após o primeiro "Salvar e gerar link" -->
+  @if (showPostSaveSheet()) {
+    <div class="sheet-backdrop" (click)="dismissPostSaveSheet()"></div>
+    <div class="activation-sheet post-save-sheet">
+      <div class="sheet-handle"></div>
+
+      <div class="success-confetti">🎉</div>
+      <h2 class="playfair sheet-title">Sua lista está pronta!</h2>
+      <p class="sheet-sub">Falta só um passo pra poder compartilhar com os convidados.</p>
+
+      <div class="post-save-steps">
+        <div class="ps-step done">
+          <div class="ps-step-num">✓</div>
+          <span>Configurar</span>
+        </div>
+        <div class="ps-step-line done"></div>
+        <div class="ps-step active">
+          <div class="ps-step-num">2</div>
+          <span>Ativar</span>
+        </div>
+        <div class="ps-step-line"></div>
+        <div class="ps-step">
+          <div class="ps-step-num">3</div>
+          <span>Compartilhar</span>
+        </div>
+      </div>
+
+      <ion-button expand="block" (click)="postSavePreview()">
+        Ver como o convidado vai ver →
+      </ion-button>
+
+      <button class="post-save-activate-link" (click)="postSaveActivate()">
+        Já decidi, ativar agora por R$19,90
+      </button>
+
+      <button class="sheet-dismiss" (click)="dismissPostSaveSheet()">
+        Continuar editando
+      </button>
     </div>
   }
 
