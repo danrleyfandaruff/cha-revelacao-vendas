@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, HostListener, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -7,7 +7,7 @@ import {
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 
-type Step = 'fraldas' | 'mimos';
+type Step = 'intro' | 'fraldas' | 'mimos';
 
 export interface CartItem {
   id: string;
@@ -20,13 +20,6 @@ interface SavedResponse {
   name: string;
   items: CartItem[];
   timestamp: number;
-}
-
-interface SavedConfirmation {
-  guestName: string;
-  address: string;
-  link: string;
-  confirmedAt: number;
 }
 
 @Component({
@@ -42,7 +35,6 @@ export class ChaPage implements OnInit {
   babySex       = signal<'menino' | 'menina' | null>(null);
   eventAddress  = signal('');
   eventDatetime = signal('');
-  confirmed     = signal(false);
 
   themeClass = computed(() => {
     if (this.eventType() !== 'bebe') return '';
@@ -94,10 +86,8 @@ export class ChaPage implements OnInit {
   event    = signal<ChaEvent | null>(null);
   allItems = signal<EventItem[]>([]);
   cart     = signal<CartItem[]>([]);
-  step     = signal<Step>('fraldas');
+  step     = signal<Step>('intro');
   guestName = '';
-  confirmingName = '';
-  confirmSubmitting = signal(false);
   submitting = signal(false);
   showModal  = signal(false);
   toastMsg   = signal('');
@@ -110,7 +100,6 @@ export class ChaPage implements OnInit {
   previousResponse = signal<SavedResponse | null>(null);
   showPreviousBanner = signal(false);
   private storageKey = '';
-  private confirmKey = '';     // chave de confirmação de presença, amarrada ao slug
 
   // Computed
   fraldas  = computed(() => this.sorted(this.allItems().filter(i => i.category === 'fraldas')));
@@ -127,9 +116,7 @@ export class ChaPage implements OnInit {
     return `${this.cartTotal()} iten${this.cartTotal() > 1 ? 's' : ''} no carrinho`;
   });
 
-  canFinalizar = computed(() =>
-    this.fraldasInCart().length > 0 && this.mimosInCart().length > 0
-  );
+  canFinalizar = computed(() => this.cartTotal() > 0);
 
   constructor(private route: ActivatedRoute, private supa: SupabaseService, private analytics: AnalyticsService) {}
 
@@ -174,20 +161,8 @@ export class ChaPage implements OnInit {
     const items = await this.supa.getItems(ev.id);
     this.allItems.set(items);
 
-    // Chaves de localStorage amarradas ao slug do evento
+    // Chave de localStorage amarrada ao slug do evento
     this.storageKey = `cha_done_${slug}`;
-    this.confirmKey = `cha_confirmed_${slug}`;
-
-    // Verifica se o convidado já confirmou presença neste evento
-    const savedConfirm = localStorage.getItem(this.confirmKey);
-    if (savedConfirm) {
-      try {
-        const parsed: SavedConfirmation = JSON.parse(savedConfirm);
-        this.confirmingName = parsed.guestName;
-        this.guestName      = parsed.guestName;
-        this.confirmed.set(true);   // pula tela de confirmação
-      } catch { /* ignora JSON inválido */ }
-    }
 
     // Verifica se o convidado já escolheu presentes antes
     const savedDone = localStorage.getItem(this.storageKey);
@@ -200,6 +175,17 @@ export class ChaPage implements OnInit {
     }
 
     this.state.set('ready');
+  }
+
+  // Convidado escolheu presentes mas ainda não clicou em "Finalizar" →
+  // "Confirmar": nada foi salvo no banco ainda. Se ele tentar sair da
+  // página assim, o navegador avisa antes de perder a seleção.
+  @HostListener('window:beforeunload', ['$event'])
+  warnUnsavedSelection(event: BeforeUnloadEvent) {
+    if (this.state() === 'ready' && !this.isPreview() && this.cartTotal() > 0) {
+      event.preventDefault();
+      event.returnValue = true;
+    }
   }
 
   private sorted(items: EventItem[]): EventItem[] {
@@ -230,41 +216,6 @@ export class ChaPage implements OnInit {
     }
   }
 
-  async confirmPresence() {
-    if (!this.confirmingName.trim()) {
-      this.showToast('Digite seu nome para confirmar! 😊');
-      return;
-    }
-    // Em preview, simula a confirmação sem gravar no banco
-    if (this.isPreview()) {
-      this.guestName = this.confirmingName.trim();
-      this.confirmed.set(true);
-      return;
-    }
-    this.confirmSubmitting.set(true);
-    const ev = this.event();
-    if (ev) {
-      await this.supa.saveConfirmation(ev.id, this.confirmingName.trim());
-    }
-    // Pré-preenche o nome no modal de presentes
-    this.guestName = this.confirmingName.trim();
-
-    // Persiste a confirmação no dispositivo do convidado, amarrada ao slug
-    if (this.confirmKey) {
-      const confirmation: SavedConfirmation = {
-        guestName:   this.confirmingName.trim(),
-        address:     this.eventAddress(),
-        link:        window.location.href,
-        confirmedAt: Date.now(),
-      };
-      localStorage.setItem(this.confirmKey, JSON.stringify(confirmation));
-    }
-
-    this.analytics.guestConfirmedPresence();
-    this.confirmed.set(true);
-    this.confirmSubmitting.set(false);
-  }
-
   removeFromCart(id: string) {
     this.cart.update(arr => arr.filter(i => i.id !== id));
   }
@@ -291,13 +242,20 @@ export class ChaPage implements OnInit {
   }
 
   openModal() { this.showModal.set(true); }
-  closeModal() { this.showModal.set(false); this.guestName = ''; }
+  closeModal() { this.showModal.set(false); }
 
+  // Uma única ação: grava a confirmação de presença e as reservas dos itens
+  // do carrinho, sempre com o mesmo nome — não existe mais um segundo campo
+  // de nome em outra tela que possa divergir deste aqui. Reserva primeiro,
+  // confirmação só é gravada depois que todos os itens foram reservados com
+  // sucesso: só confirma quem realmente conseguiu escolher os presentes.
   async confirmFinalizar() {
     if (!this.guestName.trim()) return;
+    const name = this.guestName.trim();
+
     // Em preview, simula a finalização sem gravar no banco
     if (this.isPreview()) {
-      this.doneName = this.guestName.trim();
+      this.doneName = name;
       this.closeModal();
       this.state.set('done');
       return;
@@ -305,7 +263,7 @@ export class ChaPage implements OnInit {
     this.submitting.set(true);
 
     for (const item of this.cart()) {
-      const result = await this.supa.reserveEventItem(item.id, this.guestName.trim());
+      const result = await this.supa.reserveEventItem(item.id, name);
       if (!result.success) {
         this.showToast(result.message || 'Erro ao reservar. Tente novamente.');
         this.submitting.set(false);
@@ -319,7 +277,12 @@ export class ChaPage implements OnInit {
       ));
     }
 
-    this.doneName = this.guestName.trim();
+    const ev = this.event();
+    if (ev) {
+      await this.supa.saveConfirmation(ev.id, name);
+    }
+
+    this.doneName = name;
 
     // Salva resposta no localStorage do celular
     const saved: SavedResponse = {
@@ -331,6 +294,7 @@ export class ChaPage implements OnInit {
       localStorage.setItem(this.storageKey, JSON.stringify(saved));
     }
 
+    this.analytics.guestConfirmedPresence();
     this.analytics.guestFinalized();
     this.closeModal();
     this.state.set('done');

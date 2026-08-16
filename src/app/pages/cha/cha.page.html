@@ -101,54 +101,18 @@
       }
     </div>
 
-    <!-- TELA DE CONFIRMAÇÃO DE PRESENÇA -->
-    @if (!confirmed()) {
+    <!-- TELA DE INTRODUÇÃO — sem pedir nome, só mostra o evento e o guia rápido -->
+    @if (step() === 'intro') {
       <div class="confirm-presence">
         <div class="cp-card">
-          <div class="cp-emoji">🎉</div>
-          <h2 class="playfair cp-title">Você foi convidado!</h2>
-          <p class="cp-subtitle">
-            {{ eventType() === 'bebe' ? 'Chá de Bebê de' : 'Chá Revelação de' }}
-            <strong>{{ event()?.baby_name_1 }}{{ eventType() === 'revelacao' ? ' ou ' + event()?.baby_name_2 : '' }}</strong>
-          </p>
-
-          @if (formattedDatetime() || eventAddress()) {
-            <div class="cp-details">
-              @if (formattedDatetime()) {
-                <div class="cp-detail-item">
-                  <span class="cp-detail-icon">📅</span>
-                  <span>{{ formattedDatetime() }}</span>
-                </div>
-              }
-              @if (eventAddress()) {
-                <div class="cp-detail-item">
-                  <span class="cp-detail-icon">📍</span>
-                  <span>{{ eventAddress() }}</span>
-                </div>
-              }
-            </div>
-          }
-
-          <div class="cp-name-field">
-            <label class="cp-name-label">Seu nome</label>
-            <input class="cp-name-input" type="text" [(ngModel)]="confirmingName"
-              placeholder="Como posso te chamar?"
-              maxlength="60"
-              (keydown.enter)="confirmPresence()"/>
-          </div>
+          <h2 class="playfair cp-title">Você foi convidado! 🎉</h2>
 
           <div class="cp-hint">
-            Após confirmar, você poderá escolher um presente para o bebê 🎁
+            🧷 Escolha uma fralda e 🎁 um mimo — no final, é só digitar seu nome pra confirmar tudo de uma vez.
           </div>
 
-          <ion-button expand="block" class="cp-btn"
-            [disabled]="confirmSubmitting() || !confirmingName.trim()"
-            (click)="confirmPresence()">
-            @if (confirmSubmitting()) {
-              <ion-spinner name="dots"></ion-spinner>
-            } @else {
-              Confirmar presença 🎉
-            }
+          <ion-button expand="block" class="cp-btn" (click)="step.set('fraldas')">
+            Ver a lista de presentes →
           </ion-button>
         </div>
       </div>
@@ -182,8 +146,8 @@
       </div>
     }
 
-    <!-- LISTA (só aparece após confirmar presença) -->
-    @if (confirmed()) {
+    <!-- LISTA (só aparece depois da tela de introdução) -->
+    @if (step() !== 'intro') {
 
     <!-- STEP TABS -->
     <div class="step-tabs">
@@ -275,10 +239,10 @@
 
     </div>
 
-    } <!-- fim @if confirmed() -->
+    } <!-- fim @if step() !== 'intro' -->
 
     <!-- FINALIZAR BAR -->
-    @if (confirmed()) {
+    @if (step() !== 'intro') {
     <div class="finalizar-bar">
       <div class="bar-info">
         @if (fraldasInCart().length === 0) {
@@ -293,7 +257,7 @@
         Finalizar
       </ion-button>
     </div>
-    } <!-- fim @if confirmed() finalizar bar -->
+    } <!-- fim @if step() !== 'intro' finalizar bar -->
 
     <!-- MODAL (bottom sheet) -->
     @if (showModal()) {
@@ -301,14 +265,14 @@
         <div class="modal-box">
           <div class="modal-handle"></div>
           <h2 class="playfair">✨ Quase lá!</h2>
-          <p>Digite seu nome para confirmar as reservas</p>
+          <p>Digite seu nome pra confirmar sua presença e reservar os presentes</p>
           <input class="modal-input" type="text" [(ngModel)]="guestName"
             placeholder="Seu nome completo"
             maxlength="60"
             (keydown.enter)="confirmFinalizar()"/>
           <ion-button expand="block" [disabled]="!guestName.trim() || submitting()" (click)="confirmFinalizar()">
             @if (submitting()) { <ion-spinner name="dots"></ion-spinner> }
-            @else { Confirmar reserva 🎉 }
+            @else { Confirmar 🎉 }
           </ion-button>
           <ion-button expand="block" fill="clear" color="medium" (click)="closeModal()">Voltar</ion-button>
         </div>

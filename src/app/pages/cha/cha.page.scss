@@ -26,104 +26,38 @@ ion-content {
   }
 }
 
-// ── Confirmação de presença ────────────────────────────────────────────────────
+// ── Introdução (tela "Você foi convidado!") ────────────────────────────────────
+// Nome do bebê, data e endereço já aparecem no .cha-header logo acima — aqui é
+// só o convite + o guia rápido, sem repetir informação.
 .confirm-presence {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  padding: 24px 20px;
+  padding: 14px 16px 4px;
 
   .cp-card {
     background: #fff;
     border-radius: var(--radius-lg);
     border: 1px solid var(--brand-beige);
-    box-shadow: var(--shadow-md);
-    padding: 24px 20px;
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
     max-width: 380px;
     width: 100%;
+    margin: 0 auto;
     text-align: center;
-    animation: fade-up 0.4s ease;
-  }
-
-  .cp-emoji {
-    font-size: 2.6rem;
-    margin-bottom: 10px;
+    animation: fade-up 0.3s ease;
   }
 
   .cp-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--brand-brown);
-    margin-bottom: 5px;
-  }
-
-  .cp-subtitle {
-    color: var(--brand-brown-light);
-    font-size: 0.9rem;
-    margin-bottom: 14px;
-  }
-
-  .cp-details {
-    background: var(--brand-cream);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    margin-bottom: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    text-align: left;
-
-    .cp-detail-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 0.88rem;
-      color: var(--brand-brown);
-      line-height: 1.5;
-
-      .cp-detail-icon { font-size: 1.1rem; flex-shrink: 0; }
-    }
-  }
-
-  .cp-name-field {
-    text-align: left;
-    margin-bottom: 12px;
-
-    .cp-name-label {
-      display: block;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--brand-brown-light);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 5px;
-    }
-
-    .cp-name-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--brand-beige);
-      border-radius: var(--radius-sm);
-      font-size: 0.93rem;
-      font-family: var(--font-display);
-      color: var(--brand-brown);
-      background: #fafafa;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-      outline: none;
-
-      &:focus { border-color: var(--brand-gold); background: #fff; }
-      &::placeholder { color: #bbb; }
-    }
+    margin-bottom: 10px;
   }
 
   .cp-hint {
-    font-size: 0.78rem;
+    font-size: 0.83rem;
     color: var(--brand-brown-light);
     background: #fffbf0;
     border: 1px dashed var(--brand-gold-light);
     border-radius: var(--radius-sm);
-    padding: 8px 12px;
+    padding: 10px 12px;
     margin-bottom: 14px;
     line-height: 1.4;
   }
@@ -131,7 +65,7 @@ ion-content {
   .cp-btn {
     --border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 0.96rem;
+    font-size: 0.94rem;
   }
 }
 
@@ -714,6 +648,7 @@ ion-content {
 
     &:focus { border-color: var(--brand-gold); }
   }
+
 
   ion-button { --border-radius: var(--radius-sm); }
 }
