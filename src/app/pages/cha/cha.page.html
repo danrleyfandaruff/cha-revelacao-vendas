@@ -15,7 +15,7 @@
   @if (state() === 'loading') {
     <div class="center-state">
       <ion-spinner color="primary"></ion-spinner>
-      <p>Carregando o chá…</p>
+      <p>Carregando o evento…</p>
     </div>
   }
 
@@ -33,7 +33,7 @@
     <div class="center-state">
       <div class="state-emoji">🕐</div>
       <h2 class="playfair">Evento encerrado</h2>
-      <p>O período de reservas deste chá revelação já encerrou. Obrigado pela participação!</p>
+      <p>O período de reservas deste evento já encerrou. Obrigado pela participação!</p>
     </div>
   }
 
@@ -45,11 +45,7 @@
         <h2 class="playfair">Obrigado, {{ doneName }}!</h2>
         <p style="margin-top:8px;color:var(--brand-brown-light);font-size:.9rem;line-height:1.6">
           Suas reservas foram confirmadas com sucesso.<br>
-          @if (eventType() === 'bebe') {
-            Até o chá de <strong>{{ event()?.baby_name_1 }}</strong>! 🍼
-          } @else {
-            Até o chá de <strong>{{ event()?.baby_name_1 }}</strong> ou <strong>{{ event()?.baby_name_2 }}</strong>! 🍼
-          }
+          Até a comemoração de <strong>{{ names() }}</strong>!
         </p>
       </div>
     </div>
@@ -63,19 +59,17 @@
       <span class="cha-header-emoji">
         @if (eventType() === 'bebe') {
           {{ babySex() === 'menino' ? '👦' : babySex() === 'menina' ? '👧' : '🍼' }}
-        } @else {
+        } @else if (eventType() === 'revelacao') {
           🍼
+        } @else {
+          🎁
         }
       </span>
       <h1 class="playfair">
-        {{ eventType() === 'bebe' ? 'Chá de Bebê' : 'Chá Revelação' }}
+        {{ definition().label }}
       </h1>
       <div class="cha-subtitle">
-        @if (eventType() === 'bebe') {
-          {{ event()?.baby_name_1 }}
-        } @else {
-          {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
-        }
+        {{ names() }}{{ eventType() === 'revelacao' ? '?' : '' }}
       </div>
 
 
@@ -108,10 +102,11 @@
           <h2 class="playfair cp-title">Você foi convidado! 🎉</h2>
 
           <div class="cp-hint">
-            🧷 Escolha uma fralda e 🎁 um mimo — no final, é só digitar seu nome pra confirmar tudo de uma vez.
+            {{ hasDiapers() ? 'Escolha uma fralda e um presente.' : 'Escolha os presentes que você quer dar.' }}
+            No final, digite seu nome para confirmar suas escolhas.
           </div>
 
-          <ion-button expand="block" class="cp-btn" (click)="step.set('fraldas')">
+          <ion-button expand="block" class="cp-btn" (click)="startChoosing()">
             Ver a lista de presentes →
           </ion-button>
         </div>
@@ -127,7 +122,7 @@
           <div class="already-confetti">🎉</div>
           <h3 class="already-card-title playfair">Olá, {{ previousResponse()!.name }}!</h3>
           <p class="already-card-desc">
-            {{ eventType() === 'bebe' ? 'Você já participou deste chá de bebê.' : 'Você já participou deste chá revelação.' }}
+            Você já participou desta lista de presentes.
           </p>
         </div>
 
@@ -151,6 +146,7 @@
 
     <!-- STEP TABS -->
     <div class="step-tabs">
+      @if (hasDiapers()) {
       <button class="stab"
         [class.active]="step() === 'fraldas'"
         [class.done]="fraldasInCart().length > 0 && step() !== 'fraldas'"
@@ -158,11 +154,12 @@
         <span class="stab-dot">{{ fraldasInCart().length > 0 && step() !== 'fraldas' ? '✓' : '1' }}</span>
         🧷 Fraldas
       </button>
+      }
       <button class="stab"
         [class.active]="step() === 'mimos'"
-        [class.locked]="fraldasInCart().length === 0"
+        [class.locked]="diapersRequired() && fraldasInCart().length === 0"
         (click)="goStep('mimos')">
-        <span class="stab-dot">2</span>
+        <span class="stab-dot">{{ hasDiapers() ? '2' : '1' }}</span>
         🎁 Presentes
       </button>
     </div>
@@ -245,7 +242,7 @@
     @if (step() !== 'intro') {
     <div class="finalizar-bar">
       <div class="bar-info">
-        @if (fraldasInCart().length === 0) {
+        @if (diapersRequired() && fraldasInCart().length === 0) {
           Escolha uma <strong>fralda</strong> para começar 🧷
         } @else if (mimosInCart().length === 0) {
           Agora escolha os <strong>presentes</strong> 🎁
@@ -267,6 +264,7 @@
           <h2 class="playfair">✨ Quase lá!</h2>
           <p>Digite seu nome pra confirmar sua presença e reservar os presentes</p>
           <input class="modal-input" type="text" [(ngModel)]="guestName"
+            [disabled]="submitting() || committedItems().length > 0"
             placeholder="Seu nome completo"
             maxlength="60"
             (keydown.enter)="confirmFinalizar()"/>

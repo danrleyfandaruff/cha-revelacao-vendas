@@ -25,12 +25,12 @@ export class LandingPage implements OnInit {
   googleLoading = signal(false);
 
   features = [
-    { icon: '🧷', title: 'Fraldas + presentes', desc: 'Organize dois tipos de lista: fraldas por tamanho e mimos personalizados.' },
+    { icon: '🎁', title: 'Para cada ocasião', desc: 'Chás, casamento, casa nova e aniversário, com presentes que combinam com seu evento.' },
     { icon: '🔒', title: 'Sem duplicação', desc: 'O sistema reserva automaticamente. Dois convidados não pegam o mesmo item.' },
     { icon: '📱', title: 'Funciona no celular', desc: 'Convidados acessam pelo link, sem precisar instalar nada.' },
     { icon: '📊', title: 'Painel em tempo real', desc: 'Você vê quem reservou o quê, com data e hora, a qualquer momento.' },
-    { icon: '✏️', title: 'Sugestões prontas', desc: 'Fraldas Huggies, lenços, shampoo e muito mais: só marcar o que quer.' },
-    { icon: '🔗', title: 'Link personalizado', desc: 'Seu evento tem um link único com o nome do bebê.' },
+    { icon: '✏️', title: 'Sugestões prontas', desc: 'Itens para o bebê, a casa ou o aniversariante: selecione e personalize sua lista.' },
+    { icon: '🔗', title: 'Link personalizado', desc: 'Cada evento tem seu próprio link para compartilhar com os convidados.' },
   ];
 
   constructor(private router: Router, private analytics: AnalyticsService, private supa: SupabaseService) {

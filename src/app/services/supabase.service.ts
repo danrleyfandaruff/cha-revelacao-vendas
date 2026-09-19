@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { EventType, BabySex } from '../models/event-types';
 import {
   createClient,
   SupabaseClient,
@@ -19,6 +20,9 @@ export interface ChaEvent {
   created_at: string;
   address: string | null;
   event_datetime: string | null;
+  event_type?: EventType | null;
+  baby_sex?: BabySex | null;
+  archived_at?: string | null;
 }
 
 export interface EventItem {
@@ -173,12 +177,26 @@ export class SupabaseService {
   // ── Events ────────────────────────────────────────────────────────────────
 
   async getMyEvent(userId: string): Promise<ChaEvent | null> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('events')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .is('archived_at', null)
+      .maybeSingle();
+    if (error) throw error;
     return data;
+  }
+
+  async getMyEvents(userId: string): Promise<ChaEvent[]> {
+    const { data, error } = await this.supabase.from('events').select('*')
+      .eq('user_id', userId).order('created_at', { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  }
+
+  async archiveExpiredEvent(eventId: string): Promise<void> {
+    const { error } = await this.supabase.rpc('archive_expired_event', { p_event_id: eventId });
+    if (error) throw error;
   }
 
   async getEventBySlug(slug: string): Promise<ChaEvent | null> {
@@ -202,11 +220,12 @@ export class SupabaseService {
   }
 
   async upsertEvent(payload: Partial<ChaEvent>): Promise<ChaEvent | null> {
-    const { data } = await this.supabase
-      .from('events')
-      .upsert(payload, { onConflict: 'user_id' })
-      .select()
-      .single();
+    const { id, paid, expires_at, archived_at, ...details } = payload;
+    const query = id
+      ? this.supabase.from('events').update(details).eq('id', id).is('archived_at', null)
+      : this.supabase.from('events').insert({ ...details, paid: false, expires_at: null });
+    const { data, error } = await query.select().single();
+    if (error) throw error;
     return data;
   }
 
@@ -252,10 +271,11 @@ export class SupabaseService {
   // ── Confirmations ─────────────────────────────────────────────────────────
 
   async saveConfirmation(eventId: string, guestName: string): Promise<void> {
-    await this.supabase.from('event_confirmations').insert({
+    const { error } = await this.supabase.from('event_confirmations').insert({
       event_id: eventId,
       guest_name: guestName,
     });
+    if (error) throw error;
   }
 
   async getConfirmations(eventId: string): Promise<EventConfirmation[]> {
@@ -278,13 +298,6 @@ export class SupabaseService {
       p_guest_name: guestName,
     });
     if (error) return { success: false, message: error.message };
-    return data ?? { success: false };
-  }
-
-  async activateEvent(userId: string): Promise<{ success: boolean }> {
-    const { data } = await this.supabase.rpc('activate_event', {
-      p_user_id: userId,
-    });
     return data ?? { success: false };
   }
 

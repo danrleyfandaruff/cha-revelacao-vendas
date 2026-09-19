@@ -10,6 +10,7 @@ import { addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, 
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import {ToastController} from "@ionic/angular";
+import { EventType, BabySex, EVENT_TYPES, eventDefinition, eventNames, giftSuggestions, isBabyEvent, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
 
 // ── Suggestions data ──────────────────────────────────────────────────────────
 const SUGESTOES: Record<string, Array<{ name: string; emoji: string; qty: number }>> = {
@@ -46,9 +47,6 @@ export interface DraftItem {
   reserved?: number; // quantos convidados já reservaram esse item (protege contra remoção)
 }
 
-export type EventType = 'revelacao' | 'bebe';
-export type BabySex   = 'menino' | 'menina';
-
 @Component({
   selector: 'app-configurar',
   templateUrl: 'configurar.page.html',
@@ -65,23 +63,20 @@ export class ConfigurarPage implements OnInit {
   // Auth / Event
   userId   = '';
   event    = signal<ChaEvent | null>(null);
-  isPaid   = computed(() => this.event()?.paid ?? false);
+  expired = () => isEventExpired(this.event());
+  isPaid = () => !!this.event()?.paid && !this.expired();
+  history = signal<ChaEvent[]>([]);
+  creatingNew = signal(false);
+  loadError = signal(false);
+  readonly eventTypes = EVENT_TYPES;
+  readonly eventNames = eventNames;
+  definition = computed(() => eventDefinition(this.eventType()));
+  babyEvent = computed(() => isBabyEvent(this.eventType()));
   eventSlug = computed(() => this.event()?.slug ?? '');
   eventLink = computed(() => {
     const slug = this.eventSlug();
     if (!slug) return '';
-    const type    = this.eventType();
-    const sex     = this.babySex();
-    const address = this.eventAddress();
-    const dt      = this.eventDatetime();
-    let url = `${window.location.origin}/cha?e=${slug}`;
-    if (type === 'bebe') {
-      url += `&t=bebe`;
-      if (sex) url += `&s=${sex}`;
-    }
-    if (address) url += `&a=${encodeURIComponent(address)}`;
-    if (dt)      url += `&d=${encodeURIComponent(dt)}`;
-    return url;
+    return `${window.location.origin}/cha?e=${encodeURIComponent(slug)}`;
   });
 
   // Tipo do evento e sexo
@@ -119,7 +114,7 @@ export class ConfigurarPage implements OnInit {
   completionPercent = computed(() => {
     const checklist = [
       !!this.name1.trim(),
-      this.eventType() === 'bebe' ? !!this.babySex() : !!this.name2.trim(),
+      this.eventType() === 'bebe' ? !!this.babySex() : this.eventType() !== 'revelacao' || !!this.name2.trim(),
       !!this.eventAddress().trim(),
       !!this.eventDatetime(),
       this.selectedItemsCount() > 0,
@@ -150,13 +145,13 @@ export class ConfigurarPage implements OnInit {
     {
       emoji: '🎀',
       title: 'Configure seu evento',
-      desc: 'Escolha o tipo (Revelação ou Bebê), informe o nome, endereço e data do chá.',
+      desc: 'Escolha a ocasião e informe os nomes, endereço e data do evento.',
       highlight: 'config',
     },
     {
       emoji: '🎁',
       title: 'Monte a lista de presentes',
-      desc: 'Selecione as fraldas e os mimos que seus convidados poderão reservar. Ajuste as quantidades à vontade.',
+      desc: 'Selecione os presentes que seus convidados poderão reservar e ajuste as quantidades.',
       highlight: 'items',
     },
     {
@@ -213,10 +208,13 @@ export class ConfigurarPage implements OnInit {
       if (sex === 'menino') parts.push('👦 Menino');
       else if (sex === 'menina') parts.push('👧 Menina');
       if (n1) parts.push(n1);
-    } else {
+    } else if (type === 'revelacao') {
       parts.push('🎊 Chá Revelação');
       if (n1 && n2) parts.push(`${n1} ou ${n2}`);
       else if (n1) parts.push(n1);
+    } else {
+      parts.push(eventDefinition(type).label);
+      if (n1) parts.push(n1);
     }
     if (dt) {
       const d = new Date(dt.length === 16 ? dt + ':00' : dt);
@@ -302,6 +300,8 @@ export class ConfigurarPage implements OnInit {
 
   async ngOnInit() {
     this.loading.set(true);
+    this.loadError.set(false);
+    try {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
@@ -328,24 +328,32 @@ export class ConfigurarPage implements OnInit {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'success') {
       window.history.replaceState({}, '', '/configurar');
-      // Pequeno delay para garantir que o evento já foi ativado pelo webhook
-      setTimeout(() => this.showSuccessModal.set(true), 800);
+      // Payment status is confirmed by the webhook, never by a URL parameter.
     }
 
-    const ev = await this.supa.getMyEvent(this.userId);
+    const events = await this.supa.getMyEvents(this.userId);
+    const ev = events.find(item => !item.archived_at) ?? null;
+    this.history.set(events.filter(item => !!item.archived_at));
     this.event.set(ev);
+    if (params.get('status') === 'success') {
+      if (ev?.paid && !isEventExpired(ev)) this.showSuccessModal.set(true);
+      else this.showToast('Aguardando a confirmação do pagamento. Atualize a página em instantes.');
+    }
 
     if (ev) {
+      this.eventType.set(resolveEventType(ev));
+      this.babySex.set(ev.baby_sex ?? this.babySex());
       this.configOpen.set(false);   // já configurado — começa compacto
       this.name1 = ev.baby_name_1;
       // Se for revelação, name2 vem do banco; se for bebê, ignora
       if (this.eventType() === 'revelacao') {
         this.name2 = ev.baby_name_2;
       }
-      // Banco tem prioridade sobre o localStorage; se ainda não tiver sido salvo
-      // no banco (evento criado antes desta coluna existir), mantém o valor local.
-      if (ev.address)        this.eventAddress.set(ev.address);
-      if (ev.event_datetime) this.eventDatetime.set(this.isoToDatetimeLocal(ev.event_datetime));
+      // Keep legacy local details until their first save to the database.
+      const legacy = !ev.event_type;
+      this.eventAddress.set(ev.address ?? (legacy ? this.eventAddress() : ''));
+      this.eventDatetime.set(ev.event_datetime ? this.isoToDatetimeLocal(ev.event_datetime) : (legacy ? this.eventDatetime() : ''));
+      this.activeTab.set(this.babyEvent() ? 'fraldas' : 'presentes');
       // Load existing items
       const items = await this.supa.getItems(ev.id);
       if (items.length) {
@@ -387,13 +395,52 @@ export class ConfigurarPage implements OnInit {
     } else {
       startOnboarding();
     }
+    } catch {
+      this.loadError.set(true);
+      this.showToast('Não foi possível carregar seus eventos. Tente novamente.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async startNewEvent() {
+    const previous = this.event();
+    if (!previous || !this.expired() || this.creatingNew()) return;
+    this.creatingNew.set(true);
+    try {
+      await this.supa.archiveExpiredEvent(previous.id);
+      this.history.update(events => [{ ...previous, archived_at: new Date().toISOString() }, ...events]);
+      this.event.set(null);
+      this.name1 = '';
+      this.name2 = '';
+      this.eventType.set('revelacao');
+      this.babySex.set(null);
+      this.eventAddress.set('');
+      this.eventDatetime.set('');
+      this.activeTab.set('fraldas');
+      this.newName = '';
+      this.newEmoji = '';
+      this.newQty = 1;
+      this.initSuggestions();
+      this.saveMeta();
+      this.savedSnapshot = '';
+      this.configOpen.set(true);
+      this.wizardStep.set(0);
+      this.wizardActive.set(true);
+    } catch {
+      this.showToast('Não foi possível iniciar outra lista. Atualize a página e tente novamente.');
+    } finally {
+      this.creatingNew.set(false);
+    }
   }
 
   private pendingOnboarding: (() => void) | null = null;
 
   private initSuggestions() {
-    this.fraldas.set(SUGESTOES['fraldas'].map(s => ({ ...s, category: 'fraldas', checked: true })));
-    this.presentes.set(SUGESTOES['presentes'].map(s => ({ ...s, category: 'presentes', checked: true })));
+    this.activeTab.set(this.babyEvent() ? 'fraldas' : 'presentes');
+    this.fraldas.set(this.babyEvent() ? SUGESTOES['fraldas'].map(s => ({ ...s, category: 'fraldas', checked: true })) : []);
+    const gifts = this.babyEvent() ? SUGESTOES['presentes'] : giftSuggestions(this.eventType());
+    this.presentes.set(gifts.map(s => ({ ...s, category: 'presentes', checked: true })));
   }
 
   setTab(t: 'fraldas' | 'presentes') {
@@ -407,6 +454,8 @@ export class ConfigurarPage implements OnInit {
       return;
     }
     item.checked = !item.checked;
+    if (item.category === 'fraldas') this.fraldas.update(items => [...items]);
+    else this.presentes.update(items => [...items]);
     this.analytics.configItemToggle(item.category, item.checked);
   }
 
@@ -466,8 +515,11 @@ export class ConfigurarPage implements OnInit {
   }
 
   setEventType(t: EventType) {
+    if (this.event() || this.eventType() === t) return;
     this.eventType.set(t);
-    if (t === 'revelacao') this.babySex.set(null);
+    if (t !== 'bebe') this.babySex.set(null);
+    this.activeTab.set(this.babyEvent() ? 'fraldas' : 'presentes');
+    this.initSuggestions();
     this.saveMeta();
     this.analytics.configTipoChange(t);
   }
@@ -495,7 +547,7 @@ export class ConfigurarPage implements OnInit {
       const raw = localStorage.getItem(this.metaKey());
       if (raw) {
         const meta = JSON.parse(raw);
-        if (meta.eventType)     this.eventType.set(meta.eventType);
+        if (isEventType(meta.eventType)) this.eventType.set(meta.eventType);
         if (meta.babySex)       this.babySex.set(meta.babySex);
         if (meta.eventAddress)  this.eventAddress.set(meta.eventAddress);
         if (meta.eventDatetime) this.eventDatetime.set(meta.eventDatetime);
@@ -538,15 +590,16 @@ export class ConfigurarPage implements OnInit {
   }
 
   async save() {
+    if (this.saving() || this.expired() || this.loading() || this.loadError()) return;
     this.analytics.configSaveClick();
     const wasFirstSave = !this.event();
     const isBebe = this.eventType() === 'bebe';
-    if (!this.name1) {
+    if (!this.name1.trim()) {
       this.analytics.configSaveValidationError('nome_vazio');
-      this.showToast('Digite o nome do bebê.');
+      this.showToast(this.definition().nameLabel);
       return;
     }
-    if (!isBebe && !this.name2) {
+    if (this.eventType() === 'revelacao' && !this.name2.trim()) {
       this.analytics.configSaveValidationError('segundo_nome_vazio');
       this.showToast('Digite os dois nomes para revelação.');
       return;
@@ -556,20 +609,25 @@ export class ConfigurarPage implements OnInit {
       this.showToast('Selecione o sexo do bebê.');
       return;
     }
+    if (!this.selectedItemsCount()) {
+      this.showToast('Adicione pelo menos um presente à lista.');
+      return;
+    }
     this.saving.set(true);
-
-    const n2   = isBebe ? this.name1 : this.name2;
-    const slug = this.supa.slugify(
-      isBebe ? this.name1 : `${this.name1}-ou-${this.name2}`,
-      this.userId
+    try {
+    const n2 = this.eventType() === 'revelacao' ? this.name2.trim() : this.name1.trim();
+    const slug = this.event()?.slug ?? this.supa.slugify(
+      this.eventType() === 'revelacao' ? `${this.name1}-ou-${this.name2}` : this.name1,
+      crypto.randomUUID()
     );
     const ev = await this.supa.upsertEvent({
+      id:             this.event()?.id,
       user_id:        this.userId,
       slug,
-      baby_name_1:    this.name1,
+      baby_name_1:    this.name1.trim(),
       baby_name_2:    n2,
-      paid:           this.event()?.paid ?? false,
-      expires_at:     this.event()?.expires_at ?? null,
+      event_type:     this.eventType(),
+      baby_sex:       isBebe ? this.babySex() : null,
       address:        this.eventAddress() || null,
       event_datetime: this.toIsoOrNull(this.eventDatetime()),
     });
@@ -644,7 +702,11 @@ export class ConfigurarPage implements OnInit {
       this.analytics.configSaveError();
       this.showToast('Erro ao salvar. Tente novamente.');
     }
-    this.saving.set(false);
+    } catch {
+      this.showToast('Não foi possível salvar. Seus dados continuam na tela; tente novamente.');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   verMeuLink() {
@@ -667,6 +729,7 @@ export class ConfigurarPage implements OnInit {
 
   // Ativação é sempre uma escolha explícita do usuário — nunca abre sozinha
   openActivation() {
+    if (this.expired()) return;
     this.analytics.configActivationOpen();
     this.showActivationSheet.set(true);
   }
@@ -726,7 +789,7 @@ export class ConfigurarPage implements OnInit {
   }
 
   wizardCanContinueNome(): boolean {
-    if (this.eventType() === 'bebe') return !!this.name1.trim();
+    if (this.eventType() !== 'revelacao') return !!this.name1.trim();
     return !!this.name1.trim() && !!this.name2.trim();
   }
 
@@ -772,10 +835,8 @@ export class ConfigurarPage implements OnInit {
     const link = this.eventLink();
     if (!link) return;
     this.analytics.configShareWhatsApp();
-    const name = ev?.baby_name_1 && ev?.baby_name_2 && ev.baby_name_1 !== ev.baby_name_2
-      ? `${ev.baby_name_1} ou ${ev.baby_name_2}`
-      : ev?.baby_name_1 ?? 'o bebê';
-    const msg = `Oi! 🎀 Criei a listinha de presentes do chá de ${name}.\n\nEscolha o que você vai dar aqui 👇\n${link}`;
+    const name = ev ? eventNames(ev) : '';
+    const msg = `Oi! Veja a lista de presentes: ${this.definition().label} de ${name}.\n\nEscolha seu presente aqui:\n${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
@@ -812,12 +873,12 @@ export class ConfigurarPage implements OnInit {
     if (!canvas) return;
     this.analytics.configQrDownload();
     const a = document.createElement('a');
-    a.download = 'qrcode-cha.png';
+    a.download = 'qrcode-evento.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
   }
 
-  goResultados() { this.analytics.configGoResultados(); this.router.navigate(['/resultados']); }
+  goResultados(eventId = this.event()?.id) { this.analytics.configGoResultados(); this.router.navigate(['/resultados'], { queryParams: { event: eventId } }); }
   goPagar()      { this.analytics.configGoPagar();      this.router.navigate(['/pagar']); }
 
   async logout() {

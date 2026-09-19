@@ -73,29 +73,32 @@ Deno.serve(async (req: Request) => {
   console.log(`Evento recebido: ${event.type}`);
 
   // Só processa pagamentos confirmados
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
     const session = event.data.object;
+    if (session.payment_status !== 'paid') {
+      return new Response(JSON.stringify({ received: true }), { status: 200 });
+    }
 
-    // O client_reference_id é o userId que passamos no link do Stripe
-    const userId = session.client_reference_id as string;
+    // New links identify the exact event; legacy links still contain the user ID.
+    const reference = session.client_reference_id as string;
 
-    if (!userId) {
+    if (!reference) {
       console.error('client_reference_id ausente na sessão do Stripe');
       return new Response('user_id ausente', { status: 400 });
     }
 
     // Ativa o evento no Supabase usando a service role key (bypassa RLS)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data, error } = await supabase.rpc('activate_event', {
-      p_user_id: userId,
-    });
+    const { data, error } = reference.startsWith('event_')
+      ? await supabase.rpc('activate_event_by_id', { p_event_id: reference.slice(6) })
+      : await supabase.rpc('activate_event', { p_user_id: reference });
 
-    if (error) {
-      console.error('Erro ao ativar evento:', error.message);
-      return new Response(`Erro: ${error.message}`, { status: 500 });
+    if (error || !data?.success) {
+      console.error('Erro ao ativar evento:', error?.message ?? data?.reason);
+      return new Response('Erro ao ativar evento', { status: 500 });
     }
 
-    console.log(`Evento ativado para user ${userId}:`, data);
+    console.log(`Evento ativado para referência ${reference}:`, data);
   }
 
   // Retorna 200 para o Stripe saber que recebeu

@@ -6,6 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { EventType, eventDefinition, eventNames, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
 
 type Step = 'intro' | 'fraldas' | 'mimos';
 
@@ -31,13 +32,16 @@ interface SavedResponse {
 })
 export class ChaPage implements OnInit {
   // Tipo do evento (lido da URL: ?t=bebe&s=menino&a=...&d=...)
-  eventType     = signal<'revelacao' | 'bebe'>('revelacao');
+  eventType     = signal<EventType>('revelacao');
+  definition = computed(() => eventDefinition(this.eventType()));
+  names = computed(() => this.event() ? eventNames(this.event()!) : '');
+  hasDiapers = computed(() => this.fraldas().length > 0);
   babySex       = signal<'menino' | 'menina' | null>(null);
   eventAddress  = signal('');
   eventDatetime = signal('');
 
   themeClass = computed(() => {
-    if (this.eventType() !== 'bebe') return '';
+    if (this.eventType() !== 'bebe') return this.eventType() === 'revelacao' ? '' : 'theme-celebration';
     return this.babySex() === 'menino' ? 'theme-menino'
          : this.babySex() === 'menina' ? 'theme-menina' : '';
   });
@@ -86,6 +90,8 @@ export class ChaPage implements OnInit {
   event    = signal<ChaEvent | null>(null);
   allItems = signal<EventItem[]>([]);
   cart     = signal<CartItem[]>([]);
+  committedItems = signal<CartItem[]>([]);
+  private reservationName = '';
   step     = signal<Step>('intro');
   guestName = '';
   submitting = signal(false);
@@ -111,7 +117,7 @@ export class ChaPage implements OnInit {
   barInfo = computed(() => {
     const nF = this.fraldasInCart().length;
     const nM = this.mimosInCart().length;
-    if (nF === 0) return 'Escolha uma fralda para começar';
+    if (this.hasDiapers() && nF === 0) return 'Escolha uma fralda para começar';
     if (nM === 0) return 'Agora escolha um presente 🎁';
     return `${this.cartTotal()} iten${this.cartTotal() > 1 ? 's' : ''} no carrinho`;
   });
@@ -127,7 +133,7 @@ export class ChaPage implements OnInit {
     // Lê tipo e sexo da URL
     const t = this.route.snapshot.queryParamMap.get('t');
     const s = this.route.snapshot.queryParamMap.get('s');
-    if (t === 'bebe') this.eventType.set('bebe');
+    if (isEventType(t)) this.eventType.set(t);
     if (s === 'menino' || s === 'menina') this.babySex.set(s);
     if (this.route.snapshot.queryParamMap.get('preview') === '1') {
       this.isPreview.set(true);
@@ -148,16 +154,16 @@ export class ChaPage implements OnInit {
       this.isPreview.set(false);
     }
 
-    if (!this.isPreview() && ev.expires_at && new Date(ev.expires_at) < new Date()) {
+    if (isEventExpired(ev)) {
       this.state.set('expired'); return;
     }
 
     this.event.set(ev);
 
-    // Detecção automática de tipo: se os dois nomes são iguais, é chá de bebê
-    if (ev.baby_name_1 === ev.baby_name_2) {
-      this.eventType.set('bebe');
-    }
+    this.eventType.set(resolveEventType(ev));
+    if (ev.baby_sex) this.babySex.set(ev.baby_sex);
+    if (ev.address !== null) this.eventAddress.set(ev.address);
+    if (ev.event_datetime !== null) this.eventDatetime.set(ev.event_datetime);
     const items = await this.supa.getItems(ev.id);
     this.allItems.set(items);
 
@@ -217,16 +223,26 @@ export class ChaPage implements OnInit {
   }
 
   removeFromCart(id: string) {
+    if (this.committedItems().some(item => item.id === id)) {
+      this.showToast('Este presente já foi reservado. Conclua a confirmação dos demais itens.');
+      return;
+    }
     this.cart.update(arr => arr.filter(i => i.id !== id));
   }
 
   goStep(s: Step) {
-    if (s === 'mimos' && this.fraldasInCart().length === 0) {
+    if (s === 'mimos' && this.hasDiapers() && this.fraldasInCart().length === 0 && this.fraldas().some(i => i.quantity_available > 0)) {
       this.showToast('Escolha uma fralda primeiro! 🧷');
       return;
     }
     this.step.set(s);
   }
+
+  startChoosing() {
+    this.step.set(this.hasDiapers() ? 'fraldas' : 'mimos');
+  }
+
+  diapersRequired = computed(() => this.hasDiapers() && this.fraldas().some(i => i.quantity_available > 0));
 
   dismissPreviousBanner() {
     this.showPreviousBanner.set(false);
@@ -238,7 +254,7 @@ export class ChaPage implements OnInit {
     this.previousResponse.set(null);
     this.showPreviousBanner.set(false);
     this.cart.set([]);
-    this.step.set('fraldas');
+    this.startChoosing();
   }
 
   openModal() { this.showModal.set(true); }
@@ -250,8 +266,9 @@ export class ChaPage implements OnInit {
   // confirmação só é gravada depois que todos os itens foram reservados com
   // sucesso: só confirma quem realmente conseguiu escolher os presentes.
   async confirmFinalizar() {
-    if (!this.guestName.trim()) return;
-    const name = this.guestName.trim();
+    if (!this.guestName.trim() || this.submitting() || !this.cartTotal()) return;
+    if (isEventExpired(this.event())) { this.closeModal(); this.state.set('expired'); return; }
+    const name = this.reservationName || this.guestName.trim();
 
     // Em preview, simula a finalização sem gravar no banco
     if (this.isPreview()) {
@@ -261,14 +278,17 @@ export class ChaPage implements OnInit {
       return;
     }
     this.submitting.set(true);
-
+    try {
     for (const item of this.cart()) {
+      if (this.committedItems().some(saved => saved.id === item.id)) continue;
       const result = await this.supa.reserveEventItem(item.id, name);
       if (!result.success) {
         this.showToast(result.message || 'Erro ao reservar. Tente novamente.');
         this.submitting.set(false);
         return;
       }
+      this.reservationName = name;
+      this.committedItems.update(items => [...items, item]);
       // Update local quantity
       this.allItems.update(items => items.map(i =>
         i.id === item.id
@@ -298,7 +318,11 @@ export class ChaPage implements OnInit {
     this.analytics.guestFinalized();
     this.closeModal();
     this.state.set('done');
-    this.submitting.set(false);
+    } catch {
+      this.showToast('Não foi possível concluir. As reservas já confirmadas foram mantidas. Tente novamente.');
+    } finally {
+      this.submitting.set(false);
+    }
   }
 
   private showToast(msg: string) {

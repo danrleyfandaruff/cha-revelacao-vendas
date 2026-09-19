@@ -15,8 +15,31 @@
       <ion-spinner color="primary"></ion-spinner>
       <p>Carregando…</p>
     </div>
+  } @else if (loadError()) {
+    <div class="loading-state" role="alert">
+      <p>Não foi possível carregar seus eventos.</p>
+      <ion-button (click)="ngOnInit()">Tentar novamente</ion-button>
+    </div>
   } @else {
     <div class="cfg-shell">
+      @if (expired()) {
+        <section class="cfg-card lifecycle-card">
+          <h2 class="playfair">Sua lista foi encerrada</h2>
+          <p>O prazo de reservas terminou. Você pode consultar as respostas e criar uma lista para a próxima comemoração.</p>
+          <p>A lista anterior fica no histórico. Cada novo evento tem sua própria ativação de R$19,90, válida por 60 dias.</p>
+          <ion-button [disabled]="creatingNew()" (click)="startNewEvent()">{{ creatingNew() ? 'Preparando...' : 'Criar outro evento' }}</ion-button>
+          <ion-button fill="outline" (click)="goResultados()">Ver respostas anteriores</ion-button>
+        </section>
+      }
+      @if (history().length) {
+        <section class="cfg-card lifecycle-card">
+          <h2 class="playfair">Eventos anteriores</h2>
+          @for (past of history(); track past.id) {
+            <button class="history-event" (click)="goResultados(past.id)">{{ eventNames(past) }} · Ver respostas</button>
+          }
+        </section>
+      }
+      @if (!expired()) {
       <section class="cfg-hero">
         <div class="cfg-hero-copy">
           <div
@@ -39,7 +62,7 @@
                 ? 'Seu link já pode ir para o WhatsApp das convidadas'
                 : event()
                   ? 'Seu evento está quase pronto'
-                  : 'Vamos deixar seu chá lindo, claro e fácil de usar'
+                  : 'Vamos preparar a lista da sua próxima comemoração'
             }}
           </h1>
 
@@ -175,13 +198,13 @@
               <div class="cfg-group">
                 <span class="cfg-group-label">Tipo do evento</span>
                 <div class="compact-row">
-                  <button class="chip-btn" [class.active]="eventType() === 'revelacao'" (click)="setEventType('revelacao')">
-                    🎊 Chá Revelação
-                  </button>
-                  <button class="chip-btn" [class.active]="eventType() === 'bebe'" (click)="setEventType('bebe')">
-                    🍼 Chá de Bebê
-                  </button>
+                  @for (type of eventTypes; track type.id) {
+                    <button class="chip-btn" [class.active]="eventType() === type.id" [disabled]="!!event()" (click)="setEventType(type.id)">
+                      {{ type.label }}
+                    </button>
+                  }
                 </div>
+                @if (event()) { <p>O tipo fica definido ao salvar a lista.</p> }
               </div>
 
               @if (eventType() === 'bebe') {
@@ -200,7 +223,7 @@
 
               <div class="cfg-group">
                 <span class="cfg-group-label">
-                  {{ eventType() === 'revelacao' ? 'Nomes para o reveal' : 'Nome do bebê' }}
+                  {{ definition().nameLabel }}
                 </span>
 
                 @if (eventType() === 'revelacao') {
@@ -210,7 +233,7 @@
                     <input class="text-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
                   </div>
                 } @else {
-                  <input class="text-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
+                  <input class="text-input" [(ngModel)]="name1" [placeholder]="definition().placeholder" maxlength="60"/>
                 }
               </div>
 
@@ -256,10 +279,12 @@
 
           <div class="cfg-card-body">
             <div class="cfg-tabs">
+              @if (babyEvent()) {
               <button class="cfg-tab" [class.active]="activeTab() === 'fraldas'" (click)="setTab('fraldas')">
                 🧷 Fraldas
                 <span class="cfg-tab-badge">{{ totalChecked('fraldas') }}</span>
               </button>
+              }
               <button class="cfg-tab" [class.active]="activeTab() === 'presentes'" (click)="setTab('presentes')">
                 🎁 Presentes
                 <span class="cfg-tab-badge">{{ totalChecked('presentes') }}</span>
@@ -335,6 +360,7 @@
           </div>
         </div>
       </div>
+      }
     </div>
   }
 
@@ -350,7 +376,7 @@
 
       <div class="success-features">
         <div class="sf-item">✅ Link exclusivo gerado</div>
-        <div class="sf-item">✅ Reservas abertas por 30 dias</div>
+        <div class="sf-item">✅ Reservas abertas por 60 dias</div>
         <div class="sf-item">✅ Resultados em tempo real</div>
       </div>
 
@@ -443,11 +469,11 @@
 
       <div class="sheet-price-box">
         <div class="sheet-price-val"><sup>R$</sup>19,90</div>
-        <div class="sheet-price-info">pagamento único · 30 dias de acesso</div>
+        <div class="sheet-price-info">pagamento único · 60 dias de acesso</div>
       </div>
 
       <ul class="sheet-features">
-        <li>✅ Link exclusivo do seu chá revelação</li>
+        <li>✅ Link exclusivo do seu evento</li>
         <li>✅ Resultados em tempo real</li>
         <li>✅ Sem mensalidade — pague uma vez</li>
         <li>✅ Pagamento seguro via Stripe</li>
@@ -530,7 +556,7 @@
             @case ('intro') {
               <div class="wizard-step wizard-step-intro">
                 <div class="wizard-emoji">🎀</div>
-                <h2 class="playfair wizard-title">Vamos criar seu chá!</h2>
+                <h2 class="playfair wizard-title">Vamos criar sua lista!</h2>
                 <p class="wizard-sub">Só algumas perguntinhas rápidas e sua página já fica pronta.</p>
                 <button class="wizard-btn-primary" (click)="wizardNext()">Começar →</button>
               </div>
@@ -539,15 +565,12 @@
             @case ('tipo') {
               <div class="wizard-step">
                 <p class="wizard-question">Qual o tipo do seu evento?</p>
-                <div class="wizard-options">
-                  <button class="wizard-option" [class.active]="eventType() === 'revelacao'" (click)="selectWizardType('revelacao')">
-                    <span class="wizard-option-emoji">🎊</span>
-                    <span class="wizard-option-label">Chá Revelação</span>
-                  </button>
-                  <button class="wizard-option" [class.active]="eventType() === 'bebe'" (click)="selectWizardType('bebe')">
-                    <span class="wizard-option-emoji">🍼</span>
-                    <span class="wizard-option-label">Chá de Bebê</span>
-                  </button>
+                <div class="wizard-options event-type-options">
+                  @for (type of eventTypes; track type.id) {
+                    <button class="wizard-option" [class.active]="eventType() === type.id" (click)="selectWizardType(type.id)">
+                      <span class="wizard-option-label">{{ type.label }}</span>
+                    </button>
+                  }
                 </div>
               </div>
             }
@@ -570,13 +593,13 @@
 
             @case ('nome') {
               <div class="wizard-step">
-                <p class="wizard-question">{{ eventType() === 'bebe' ? 'Qual o nome do bebê?' : 'Quais são os dois nomes possíveis?' }}</p>
+                <p class="wizard-question">{{ definition().nameLabel }}</p>
                 @if (eventType() === 'revelacao') {
                   <input class="wizard-input" [(ngModel)]="name1" placeholder="Nome 1" maxlength="30"/>
                   <div class="wizard-input-sep">ou</div>
                   <input class="wizard-input" [(ngModel)]="name2" placeholder="Nome 2" maxlength="30"/>
                 } @else {
-                  <input class="wizard-input" [(ngModel)]="name1" placeholder="Nome do bebê" maxlength="30"/>
+                  <input class="wizard-input" [(ngModel)]="name1" [placeholder]="definition().placeholder" maxlength="60"/>
                 }
                 <button class="wizard-btn-primary" [disabled]="!wizardCanContinueNome()" (click)="wizardNext()">Continuar →</button>
               </div>
@@ -593,7 +616,7 @@
 
             @case ('data') {
               <div class="wizard-step">
-                <p class="wizard-question">Data e horário do chá?</p>
+                <p class="wizard-question">Data e horário do evento?</p>
                 <label class="wizard-date-btn">
                   <ion-icon name="calendar-outline"></ion-icon>
                   <input class="wizard-date-input" type="datetime-local" [ngModel]="eventDatetime()" (ngModelChange)="eventDatetime.set($event)"/>
@@ -642,6 +665,7 @@
   }
 
   <!-- SAVE BAR -->
+  @if (!expired() && !loading() && !loadError()) {
   <div class="save-bar" [class.needs-save]="needsSave()" [class.tut-spotlight]="tutorialCurrent()?.highlight === 'save'">
     <span class="bar-info">
       @if (needsSave()) {
@@ -654,11 +678,12 @@
         {{ totalChecked('fraldas') + totalChecked('presentes') }} itens selecionados
       }
     </span>
-    <ion-button (click)="save()" >
+    <ion-button (click)="save()" [disabled]="saving()">
       @if (saving()) { <ion-spinner name="dots"></ion-spinner> }
       @else { Salvar e gerar link }
     </ion-button>
   </div>
+  }
 
 </ion-content>
 

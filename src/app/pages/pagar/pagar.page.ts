@@ -8,6 +8,7 @@ import { addIcons } from 'ionicons';
 import { arrowBackOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { SupabaseService } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { isEventExpired } from '../../models/event-types';
 
 @Component({
   selector: 'app-pagar',
@@ -26,14 +27,18 @@ export class PagarPage implements OnInit {
 
   userId   = '';
   success  = signal(false);
+  eventId = '';
+  ready = signal(false);
+  checking = signal(false);
+  message = signal('');
 
   features = [
     'Link personalizado do evento',
-    'Listas de fraldas e presentes ilimitadas',
+    'Itens de presentes ilimitados na sua lista',
     'Painel de resultados em tempo real',
     'Reservas automáticas sem duplicação',
     'Controle de quantidade por item',
-    '30 dias com reservas abertas aos convidados',
+    '60 dias com reservas abertas aos convidados',
   ];
 
   constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService) {
@@ -45,32 +50,47 @@ export class PagarPage implements OnInit {
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
 
-    // Check if returning from Stripe with ?status=success
+    // Only the webhook activates an event after verifying the payment.
     const params = new URLSearchParams(window.location.search);
-    if (params.get('status') === 'success') {
-      await this.activate();
-      return;
-    }
-
-    // If already paid, redirect
-    const ev = await this.supa.getMyEvent(this.userId);
-    if (ev?.paid) { this.router.navigate(['/configurar']); }
+    this.checking.set(params.get('status') === 'success');
+    await this.checkPayment();
   }
 
-  goToStripe() {
+  async goToStripe() {
+    if (!this.ready() || !this.eventId) return;
+    this.ready.set(false);
+    try {
+      const ev = await this.supa.getMyEvent(this.userId);
+      if (!ev || ev.id !== this.eventId || ev.paid || isEventExpired(ev)) {
+        this.router.navigate(['/configurar']);
+        return;
+      }
     this.analytics.goToStripe();
     // Stripe Payment Links não aceitam success_url por parâmetro —
     // a URL de retorno deve ser configurada no Dashboard do Stripe.
-    // Passamos apenas o client_reference_id para identificar o usuário.
-    window.location.href = `${this.STRIPE_LINK}?client_reference_id=${this.userId}`;
+    window.location.href = `${this.STRIPE_LINK}?client_reference_id=event_${this.eventId}`;
+    } catch {
+      this.message.set('Não foi possível abrir o pagamento. Tente novamente.');
+      this.ready.set(true);
+    }
   }
 
-  private async activate() {
-    const result = await this.supa.activateEvent(this.userId);
-    if (result.success) {
-      this.success.set(true);
-    } else {
-      this.router.navigate(['/configurar']);
+  async checkPayment() {
+    this.ready.set(false);
+    try {
+      const ev = await this.supa.getMyEvent(this.userId);
+      if (!ev || isEventExpired(ev)) {
+        this.router.navigate(['/configurar']);
+        return;
+      }
+      this.eventId = ev.id;
+      this.success.set(ev.paid);
+      if (this.checking() && !ev.paid) {
+        this.message.set('Aguardando confirmação do pagamento. Consulte novamente em instantes.');
+      }
+      this.ready.set(true);
+    } catch {
+      this.message.set('Não foi possível consultar seu evento. Tente novamente.');
     }
   }
 

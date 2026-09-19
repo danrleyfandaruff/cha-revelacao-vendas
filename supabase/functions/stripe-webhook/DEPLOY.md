@@ -66,11 +66,16 @@ Stripe POST → supabase.co/functions/v1/stripe-webhook
         ↓
 Edge Function verifica assinatura HMAC
         ↓
-Chama activate_event(user_id) no PostgreSQL
+Chama activate_event_by_id(event_id) no PostgreSQL (links antigos: activate_event(user_id))
         ↓
-events.paid = true, expires_at = hoje + 30 dias ✅
+events.paid = true, expires_at = now() + 60 dias ✅
         ↓
 (Stripe também redireciona cliente para /pagar?status=success)
 ```
 
 Com isso o evento é ativado **mesmo se o cliente fechar o browser** após o pagamento.
+# Atualizacao para varios eventos por conta
+
+Antes de publicar esta versao, siga a ordem de migracao, webhook e frontend em
+[EVENTS_DEPLOY.md](../../sql/EVENTS_DEPLOY.md). Referencias novas de pagamento usam
+`event_<uuid>`; referencias antigas por usuario continuam sendo aceitas.

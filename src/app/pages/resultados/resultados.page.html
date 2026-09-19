@@ -15,7 +15,9 @@
 </ion-header>
 
 <ion-content>
-  @if (loading() && allRes().length === 0) {
+  @if (loadError()) {
+    <div class="res-sub" role="alert">Não foi possível carregar as respostas. Volte e tente novamente.</div>
+  } @else if (loading() && allRes().length === 0) {
     <div style="text-align:center;padding:60px 20px">
       <ion-spinner color="primary"></ion-spinner>
       <p style="margin-top:10px;color:var(--brand-brown-light)">Carregando…</p>
@@ -24,7 +26,8 @@
 
     <!-- Event subtitle -->
     <div class="res-sub">
-      {{ event()?.baby_name_1 }} ou {{ event()?.baby_name_2 }}?
+      {{ names() }}
+      @if (expired()) { <p>Evento encerrado · Histórico de respostas</p> }
     </div>
 
     <!-- Event link -->
@@ -48,13 +51,15 @@
         <div class="stat-num" style="color:var(--brand-gold)">{{ statPessoas() }}</div>
         <div class="stat-label">Presentes</div>
       </div>
+      @if (babyEvent()) {
       <div class="stat-card">
         <div class="stat-num">{{ statFraldas() }}</div>
         <div class="stat-label">Fraldas</div>
       </div>
+      }
       <div class="stat-card">
         <div class="stat-num">{{ statMimos() }}</div>
-        <div class="stat-label">Mimos</div>
+        <div class="stat-label">Presentes reservados</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" style="color:var(--brand-green)">{{ statTotal() }}</div>
@@ -66,6 +71,7 @@
     <div class="res-content">
 
       <!-- FRALDAS -->
+      @if (babyEvent()) {
       <div class="res-section">
         <div class="res-section-title">🧷 Fraldas</div>
         @if (fraldasProgress().length === 0) {
@@ -90,8 +96,9 @@
       </div>
 
       <!-- MIMOS -->
+      }
       <div class="res-section">
-        <div class="res-section-title">🎁 Mimos</div>
+        <div class="res-section-title">🎁 Presentes</div>
         @if (mimosProgress().length === 0) {
           <div class="empty-state">Nenhum item cadastrado.</div>
         } @else {

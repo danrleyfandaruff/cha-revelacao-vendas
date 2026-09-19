@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { eventNames, isBabyEvent, resolveEventType, isEventExpired } from '../../models/event-types';
 import { DatePipe } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
@@ -36,6 +37,10 @@ export interface ItemProgress {
 })
 export class ResultadosPage implements OnInit, OnDestroy {
   event       = signal<ChaEvent | null>(null);
+  names = computed(() => this.event() ? eventNames(this.event()!) : '');
+  babyEvent = computed(() => !this.event() || isBabyEvent(resolveEventType(this.event()!)));
+  expired = computed(() => isEventExpired(this.event()));
+  loadError = signal(false);
   allItems         = signal<EventItem[]>([]);
   allRes           = signal<EventReservation[]>([]);
   allConfirmations = signal<EventConfirmation[]>([]);
@@ -49,7 +54,7 @@ export class ResultadosPage implements OnInit, OnDestroy {
 
   eventLink = computed(() => {
     const ev = this.event();
-    return ev ? `${window.location.origin}/cha?e=${ev.slug}` : '';
+    return ev && ev.paid && !isEventExpired(ev) ? `${window.location.origin}/cha?e=${ev.slug}` : '';
   });
 
   // Stats
@@ -134,7 +139,7 @@ export class ResultadosPage implements OnInit, OnDestroy {
     });
   });
 
-  constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService) {
+  constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService, private route: ActivatedRoute) {
     addIcons({ refreshOutline, arrowBackOutline, copyOutline });
   }
 
@@ -143,12 +148,19 @@ export class ResultadosPage implements OnInit, OnDestroy {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
 
-    const ev = await this.supa.getMyEvent(session.user.id);
+    try {
+    const requested = this.route.snapshot.queryParamMap.get('event');
+    const events = await this.supa.getMyEvents(session.user.id);
+    const ev = requested ? events.find(item => item.id === requested) : events.find(item => !item.archived_at);
     if (!ev) { this.router.navigate(['/configurar']); return; }
     this.event.set(ev);
 
     await this.loadAll();
-    this.refreshInterval = setInterval(() => this.loadAll(), 60000);
+    if (!isEventExpired(ev)) this.refreshInterval = setInterval(() => this.loadAll(), 60000);
+    } catch {
+      this.loadError.set(true);
+      this.loading.set(false);
+    }
   }
 
   ngOnDestroy() {

@@ -1793,4 +1793,34 @@ ion-content {
   padding: 6px;
   font-family: var(--font-display);
 }
+.lifecycle-card {
+  padding: 24px;
+  margin-bottom: 20px;
+  p { line-height: 1.6; }
+}
 
+.history-event {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  text-align: left;
+  background: transparent;
+  color: var(--brand-brown);
+  border-bottom: 1px solid var(--brand-gold);
+}
+
+.wizard-options.event-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  .wizard-option { min-width: 0; padding: 18px 10px; }
+}
+
+@media (max-height: 600px) {
+  .wizard-card {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding-top: 48px;
+  }
+}
