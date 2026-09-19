@@ -38,6 +38,9 @@
         </p>
 
         <div class="hero-entry-card">
+          @if (auth.error()) {
+            <p role="alert" class="auth-error">{{ auth.error() }}</p>
+          }
           <div class="hero-entry-copy">
             <strong>Comece em menos de 1 minuto</strong>
             <span>Entre com Google ou e-mail. Seus convidados acessam o convite direto pelo link.</span>
@@ -49,7 +52,7 @@
             (click)="continueWithGoogle()"
             [disabled]="googleLoading()"
           >
-            <span class="google-g">G</span>
+            <span class="google-g" aria-hidden="true">G</span>
             {{ googleLoading() ? 'Abrindo Google...' : 'Continuar com Google' }}
           </ion-button>
 

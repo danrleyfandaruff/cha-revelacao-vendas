@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
@@ -20,7 +20,7 @@ import { isEventExpired } from '../../models/event-types';
     IonButtons, IonIcon,
   ],
 })
-export class PagarPage implements OnInit {
+export class PagarPage {
   // ⚠️ Substitua pela URL real do Stripe Payment Link:
   // private STRIPE_LINK = 'https://buy.stripe.com/test_28E8wPdaWcLwedtaJrbjW00';
   private STRIPE_LINK = 'https://buy.stripe.com/5kQ14nfiKdivftlecS6kg02';
@@ -45,7 +45,11 @@ export class PagarPage implements OnInit {
     addIcons({ arrowBackOutline, checkmarkCircleOutline });
   }
 
-  async ngOnInit() {
+  async ionViewWillEnter() {
+    this.ready.set(false);
+    this.success.set(false);
+    this.message.set('');
+    try {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
     this.userId = session.user.id;
@@ -54,6 +58,7 @@ export class PagarPage implements OnInit {
     const params = new URLSearchParams(window.location.search);
     this.checking.set(params.get('status') === 'success');
     await this.checkPayment();
+    } catch { this.message.set('Não foi possível consultar seu evento. Tente novamente.'); }
   }
 
   async goToStripe() {

@@ -69,7 +69,7 @@
             </div>
 
             <div class="login-form">
-              @if (oauthPending()) {
+              @if (auth.googleLoading()) {
                 <div class="oauth-banner">
                   <ion-spinner name="dots"></ion-spinner>
                   <div>
@@ -96,10 +96,10 @@
                 expand="block"
                 fill="outline"
                 (click)="googleLogin()"
-                [disabled]="loading()"
+                [disabled]="loading() || auth.googleLoading()"
               >
-                <span class="google-g">G</span>
-                Continuar com Google
+                <span class="google-g" aria-hidden="true">G</span>
+                {{ auth.googleLoading() ? 'Abrindo Google...' : 'Continuar com Google' }}
               </ion-button>
 
               <div class="divider"><span>ou usar e-mail</span></div>
@@ -148,7 +148,7 @@
                     [attr.autocomplete]="tab() === 'entrar' ? 'current-password' : 'new-password'"
                     (keydown.enter)="submit()"
                   />
-                  <button class="password-toggle" type="button" (click)="togglePassword()">
+                  <button class="password-toggle" type="button" (click)="togglePassword()" [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'">
                     <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
                   </button>
                 </div>
@@ -157,8 +157,14 @@
                 }
               </div>
 
-              @if (errorMsg()) {
-                <div class="error-msg">⚠️ {{ errorMsg() }}</div>
+              @if (errorMsg() || auth.error()) {
+                <div class="error-msg" role="alert">{{ errorMsg() || auth.error() }}</div>
+              }
+              @if (resetSent()) {
+                <p role="status">Se houver uma conta com este e-mail, você receberá um link para redefinir a senha.</p>
+              }
+              @if (tab() === 'entrar') {
+                <button class="home-shortcut" type="button" [disabled]="loading()" (click)="forgotPassword()">Esqueci minha senha</button>
               }
 
               <ion-button expand="block" (click)="submit()" [disabled]="!podeEnviar()">

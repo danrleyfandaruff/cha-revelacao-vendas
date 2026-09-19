@@ -11,6 +11,8 @@ import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.se
 import { AnalyticsService } from '../../services/analytics.service';
 import {ToastController} from "@ionic/angular";
 import { EventType, BabySex, EVENT_TYPES, eventDefinition, eventNames, giftSuggestions, isBabyEvent, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
+import { formatPhone, phoneDigits } from '../../models/auth-flow';
+import { AuthFlowService } from '../../services/auth-flow.service';
 
 // ── Suggestions data ──────────────────────────────────────────────────────────
 const SUGESTOES: Record<string, Array<{ name: string; emoji: string; qty: number }>> = {
@@ -135,6 +137,7 @@ export class ConfigurarPage implements OnInit {
 
   // UI
   loading    = signal(false);
+  private initialized = false;
   saving     = signal(false);
   configOpen = signal(true);   // se já tem evento salvo, começa fechado (ajustado no ngOnInit)
 
@@ -237,6 +240,8 @@ export class ConfigurarPage implements OnInit {
   // ── Captura de telefone (login via Google, que não fornece telefone) ──────────
   showPhoneCaptureSheet = signal(false);
   phoneCapture = '';
+  savingPhone = signal(false);
+  phoneCaptureError = signal('');
 
   @ViewChild('linkCard',    { read: ElementRef }) linkCardRef?: ElementRef;
   @ViewChild('previewCard', { read: ElementRef }) previewCardRef?: ElementRef;
@@ -294,7 +299,7 @@ export class ConfigurarPage implements OnInit {
     };
   }
 
-  constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService) {
+  constructor(private supa: SupabaseService, private router: Router, private toastCtrl: ToastController, private analytics: AnalyticsService, private auth: AuthFlowService) {
     addIcons({ addOutline, trashOutline, logOutOutline, barChartOutline, copyOutline, chevronForwardOutline, arrowBackOutline, calendarOutline });
   }
 
@@ -397,10 +402,27 @@ export class ConfigurarPage implements OnInit {
     }
     } catch {
       this.loadError.set(true);
-      this.showToast('Não foi possível carregar seus eventos. Tente novamente.');
     } finally {
       this.loading.set(false);
+      this.initialized = !this.loadError();
     }
+  }
+
+  async ionViewWillEnter() {
+    if (!this.initialized || this.loading()) return;
+    try {
+      const session = await this.supa.getSession();
+      if (!session) return;
+      const current = await this.supa.getMyEvent(session.user.id);
+      if (session.user.id !== this.userId || current?.id !== this.event()?.id) {
+        await this.ngOnInit();
+        return;
+      }
+      // Refresh payment state on return without overwriting unsaved list edits.
+      if (current && this.event()) this.event.update(event => event ? {
+        ...event, paid: current.paid, expires_at: current.expires_at, archived_at: current.archived_at,
+      } : event);
+    } catch { this.showToast('Não foi possível atualizar o status do evento. Tente novamente.'); }
   }
 
   async startNewEvent() {
@@ -883,8 +905,8 @@ export class ConfigurarPage implements OnInit {
 
   async logout() {
     this.analytics.configLogout();
-    await this.supa.signOut();
-    this.router.navigate(['/landing'], { replaceUrl: true });
+    try { await this.auth.signOut(); }
+    catch { this.showToast('Não foi possível sair agora. Tente novamente.'); }
   }
 
   async showToast(msg: string) {
@@ -903,7 +925,8 @@ export class ConfigurarPage implements OnInit {
 
   // ── Captura de telefone (login via Google) ─────────────────────────────────
   onPhoneCaptureChange(value: string) {
-    this.phoneCapture = this.formatPhoneCapture(value);
+    this.phoneCapture = formatPhone(value);
+    this.phoneCaptureError.set('');
   }
 
   phoneCaptureValido(): boolean {
@@ -912,15 +935,23 @@ export class ConfigurarPage implements OnInit {
   }
 
   async savePhoneCapture() {
+    if (this.savingPhone()) return;
     if (!this.phoneCaptureValido()) {
       this.analytics.phoneCaptureValidationError();
       return;
     }
     const digits = this.digitsFromPhoneCapture();
-    await this.supa.syncCurrentUserProfile(`+55${digits}`);
+    this.phoneCaptureError.set('');
+    this.savingPhone.set(true);
+    try {
+    const profile = await this.supa.syncCurrentUserProfile(`+55${digits}`);
+    if (!profile) throw new Error('Profile not saved');
     this.analytics.phoneCaptureSubmit();
     this.showPhoneCaptureSheet.set(false);
     this.runPendingOnboarding();
+    } catch {
+      this.phoneCaptureError.set('Não foi possível salvar o telefone. Tente novamente.');
+    } finally { this.savingPhone.set(false); }
   }
 
   dismissPhoneCapture() {
@@ -936,14 +967,6 @@ export class ConfigurarPage implements OnInit {
   }
 
   private digitsFromPhoneCapture(): string {
-    return this.phoneCapture.replace(/\D/g, '').slice(0, 11);
-  }
-
-  private formatPhoneCapture(value: string): string {
-    const digits = value.replace(/\D/g, '').replace(/^55/, '').slice(0, 11);
-    if (digits.length <= 2) return digits ? `(${digits}` : '';
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    return phoneDigits(this.phoneCapture);
   }
 }

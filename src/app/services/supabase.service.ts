@@ -5,6 +5,7 @@ import {
   SupabaseClient,
   Session,
   User,
+  AuthChangeEvent,
 } from '@supabase/supabase-js';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -92,6 +93,10 @@ export class SupabaseService {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
+  initializeAuth() {
+    return this.supabase.auth.initialize();
+  }
+
   getSession(): Promise<Session | null> {
     return this.supabase.auth.getSession().then(({ data }) => data.session);
   }
@@ -110,6 +115,7 @@ export class SupabaseService {
       password,
       options: {
         data: phone ? { phone } : undefined,
+        emailRedirectTo: new URL('/login', window.location.origin).toString(),
       },
     });
   }
@@ -139,15 +145,12 @@ export class SupabaseService {
     const profilePayload = {
       id: user.id,
       email: user.email ?? null,
-      phone: phoneOverride ?? phoneFromMetadata,
       auth_provider: typeof user.app_metadata?.['provider'] === 'string'
         ? user.app_metadata['provider']
         : null,
-      phone_source: phoneOverride
-        ? 'manual'
-        : phoneFromMetadata
-          ? 'auth_metadata'
-          : null,
+      // Omitted fields stay untouched on conflict, preserving Google's manual phone.
+      ...(phoneOverride ? { phone: phoneOverride, phone_source: 'manual' }
+        : phoneFromMetadata ? { phone: phoneFromMetadata, phone_source: 'auth_metadata' } : {}),
     };
 
     const { data, error } = await this.supabase
@@ -168,10 +171,20 @@ export class SupabaseService {
     return this.supabase.auth.signOut();
   }
 
-  onAuthStateChange(callback: (session: Session | null) => void) {
-    return this.supabase.auth.onAuthStateChange((_event, session) =>
-      callback(session)
+  onAuthStateChange(callback: (session: Session | null, event: AuthChangeEvent) => void) {
+    return this.supabase.auth.onAuthStateChange((event, session) =>
+      callback(session, event)
     );
+  }
+
+  resetPassword(email: string) {
+    return this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: new URL('/redefinir-senha', window.location.origin).toString(),
+    });
+  }
+
+  updatePassword(password: string) {
+    return this.supabase.auth.updateUser({ password });
   }
 
   // ── Events ────────────────────────────────────────────────────────────────
@@ -200,22 +213,24 @@ export class SupabaseService {
   }
 
   async getEventBySlug(slug: string): Promise<ChaEvent | null> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('events')
       .select('*')
       .eq('slug', slug)
       .eq('paid', true)
-      .single();
+      .maybeSingle();
+    if (error) throw error;
     return data;
   }
 
   // Igual ao anterior, mas sem filtro de paid — usado no modo preview
   async getEventBySlugPreview(slug: string): Promise<ChaEvent | null> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('events')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
+    if (error) throw error;
     return data;
   }
 
@@ -232,11 +247,12 @@ export class SupabaseService {
   // ── Items ─────────────────────────────────────────────────────────────────
 
   async getItems(eventId: string): Promise<EventItem[]> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('event_items')
       .select('*')
       .eq('event_id', eventId)
       .order('sort_order');
+    if (error) throw error;
     return data ?? [];
   }
 
@@ -260,11 +276,12 @@ export class SupabaseService {
   // ── Reservations ──────────────────────────────────────────────────────────
 
   async getReservationsByEvent(eventId: string): Promise<EventReservation[]> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('event_reservations')
       .select('id, item_id, guest_name, created_at, event_items!inner(event_id, name, emoji, category)')
       .eq('event_items.event_id', eventId)
       .order('created_at', { ascending: false });
+    if (error) throw error;
     return (data as unknown as EventReservation[]) ?? [];
   }
 
@@ -279,11 +296,12 @@ export class SupabaseService {
   }
 
   async getConfirmations(eventId: string): Promise<EventConfirmation[]> {
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('event_confirmations')
       .select('*')
       .eq('event_id', eventId)
       .order('confirmed_at', { ascending: false });
+    if (error) throw error;
     return data ?? [];
   }
 

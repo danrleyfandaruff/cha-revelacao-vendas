@@ -20,6 +20,13 @@
   }
 
   <!-- NOT FOUND -->
+  @if (state() === 'error') {
+    <div class="center-state" role="alert">
+      <h2 class="playfair">Não foi possível carregar a lista</h2>
+      <p>Verifique sua conexão e tente novamente.</p>
+      <ion-button (click)="ngOnInit()">Tentar novamente</ion-button>
+    </div>
+  }
   @if (state() === 'notfound') {
     <div class="center-state">
       <div class="state-emoji">🔍</div>

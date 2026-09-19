@@ -40,6 +40,8 @@ Thumbs.db
 
 # Coverage (testes)
 coverage/
+test-results/
+playwright-report/
 
 # Arquivos gerados
 *.log

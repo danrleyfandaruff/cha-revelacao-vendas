@@ -85,7 +85,7 @@ export class ChaPage implements OnInit {
   });
 
   // State flags
-  state = signal<'loading' | 'notfound' | 'expired' | 'ready' | 'done'>('loading');
+  state = signal<'loading' | 'error' | 'notfound' | 'expired' | 'ready' | 'done'>('loading');
 
   event    = signal<ChaEvent | null>(null);
   allItems = signal<EventItem[]>([]);
@@ -127,6 +127,8 @@ export class ChaPage implements OnInit {
   constructor(private route: ActivatedRoute, private supa: SupabaseService, private analytics: AnalyticsService) {}
 
   async ngOnInit() {
+    this.state.set('loading');
+    try {
     const slug = this.route.snapshot.queryParamMap.get('e');
     if (!slug) { this.state.set('notfound'); return; }
 
@@ -181,6 +183,7 @@ export class ChaPage implements OnInit {
     }
 
     this.state.set('ready');
+    } catch { this.state.set('error'); }
   }
 
   // Convidado escolheu presentes mas ainda não clicou em "Finalizar" →

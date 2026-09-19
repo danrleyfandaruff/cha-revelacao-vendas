@@ -44,6 +44,9 @@ Para trocar de projeto Supabase, edite as constantes `SUPABASE_URL` e `SUPABASE_
 
 ## Build para produção
 
+Para os comandos de teste e detalhes do retorno do Google, consulte
+[Login e navegacao](docs/AUTH_FLOW.md).
+
 ```bash
 ionic build --prod
 ```

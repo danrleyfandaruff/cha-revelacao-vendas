@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="goBack()">
+      <ion-button fill="clear" (click)="goBack()" aria-label="Voltar ao evento">
         <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -16,7 +16,10 @@
 
 <ion-content>
   @if (loadError()) {
-    <div class="res-sub" role="alert">Não foi possível carregar as respostas. Volte e tente novamente.</div>
+    <div class="res-sub" role="alert">
+      Não foi possível carregar as respostas.
+      <ion-button (click)="ionViewWillEnter()">Tentar novamente</ion-button>
+    </div>
   } @else if (loading() && allRes().length === 0) {
     <div style="text-align:center;padding:60px 20px">
       <ion-spinner color="primary"></ion-spinner>

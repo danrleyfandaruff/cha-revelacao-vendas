@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
-import { AnalyticsService } from '../../services/analytics.service';
+import { AuthFlowService } from '../../services/auth-flow.service';
 
 @Component({
   selector: 'app-redefinir-senha',
@@ -24,13 +24,15 @@ export class RedefinirSenhaPage implements OnInit {
     private supa: SupabaseService,
     private router: Router,
     private toastCtrl: ToastController,
-    private analytics: AnalyticsService,
+    private auth: AuthFlowService,
   ) {}
 
   async ngOnInit() {
     // O Supabase estabelece uma sessão de recuperação a partir do token no link do e-mail.
-    const session = await this.supa.getSession();
-    if (!session) this.sessaoValida.set(false);
+    try {
+      const session = await this.supa.getSession();
+      this.sessaoValida.set(!!session);
+    } catch { this.sessaoValida.set(false); }
   }
 
   podeEnviar(): boolean {
@@ -38,6 +40,7 @@ export class RedefinirSenhaPage implements OnInit {
   }
 
   async salvar() {
+    if (this.loading() || !this.sessaoValida()) return;
     if (this.senha.length < 6) {
       this.showToast('A senha deve ter pelo menos 6 caracteres.', 'danger');
       return;
@@ -52,7 +55,6 @@ export class RedefinirSenhaPage implements OnInit {
       if (error) {
         this.showToast('Não foi possível redefinir a senha. Solicite um novo link.', 'danger');
       } else {
-        this.analytics.resetPasswordSuccess();
         this.success.set(true);
       }
     } catch (e) {
@@ -62,7 +64,7 @@ export class RedefinirSenhaPage implements OnInit {
     }
   }
 
-  goConfigurar() { this.router.navigate(['/configurar'], { replaceUrl: true }); }
+  goConfigurar() { this.auth.finishRecovery(); }
   goLogin() { this.router.navigate(['/login'], { replaceUrl: true }); }
 
   private async showToast(msg: string, color: 'dark' | 'success' | 'danger' = 'dark') {

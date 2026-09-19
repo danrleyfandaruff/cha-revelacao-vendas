@@ -9,6 +9,8 @@ import {
   IonSpinner,
 } from '@ionic/angular/standalone';
 import { SupabaseService } from '../../services/supabase.service';
+import { AuthFlowService } from '../../services/auth-flow.service';
+import { formatPhone, phoneDigits, safeNextUrl } from '../../models/auth-flow';
 import { AnalyticsService } from '../../services/analytics.service';
 import { addIcons } from 'ionicons';
 import {
@@ -29,7 +31,6 @@ type Tab = 'entrar' | 'cadastrar';
 })
 export class LoginPage {
   private destroyRef = inject(DestroyRef);
-  private authFlowToken = 0;
   private hasTrackedView = false;
   private emailEngaged = false;
 
@@ -38,7 +39,7 @@ export class LoginPage {
   errorMsg = signal('');
   awaitingConfirmation = signal(false);
   showPassword = signal(false);
-  oauthPending = signal(false);
+  resetSent = signal(false);
   nextUrl = signal('/configurar');
 
   email = '';
@@ -55,7 +56,8 @@ export class LoginPage {
     private supa: SupabaseService,
     private router: Router,
     private route: ActivatedRoute,
-    private analytics: AnalyticsService
+    private analytics: AnalyticsService,
+    public auth: AuthFlowService
   ) {
     addIcons({
       arrowBackOutline,
@@ -64,16 +66,6 @@ export class LoginPage {
       sparklesOutline,
     });
 
-    const {
-      data: { subscription },
-    } = this.supa.onAuthStateChange((session) => {
-      if (session) {
-        this.finishAuth();
-      }
-    });
-
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
-
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -81,11 +73,8 @@ export class LoginPage {
           | Tab
           | undefined;
         const requestedMode = params.get('mode') ?? params.get('tab') ?? defaultTab;
-        const fromGoogle = params.get('oauth') === 'google';
-
         this.tab.set(requestedMode === 'cadastrar' ? 'cadastrar' : 'entrar');
-        this.nextUrl.set(this.normalizeNext(params.get('next')));
-        this.oauthPending.set(fromGoogle);
+        this.nextUrl.set(safeNextUrl(params.get('next')));
         this.errorMsg.set('');
 
         if (!this.hasTrackedView) {
@@ -93,7 +82,6 @@ export class LoginPage {
           this.hasTrackedView = true;
         }
 
-        void this.syncSessionState(fromGoogle);
       });
   }
 
@@ -105,7 +93,8 @@ export class LoginPage {
     this.tab.set(tab);
     this.awaitingConfirmation.set(false);
     this.errorMsg.set('');
-    this.oauthPending.set(false);
+    this.auth.error.set('');
+    this.resetSent.set(false);
     this.analytics.loginTabSwitch(tab);
   }
 
@@ -120,11 +109,11 @@ export class LoginPage {
   }
 
   onPhoneChange(value: string) {
-    this.phone = this.formatPhone(value);
+    this.phone = formatPhone(value);
   }
 
   podeEnviar(): boolean {
-    if (this.loading()) return false;
+    if (this.loading() || this.auth.googleLoading()) return false;
     if (this.tab() === 'cadastrar') {
       return !!this.email.trim() && !!this.password && this.telefoneValido();
     }
@@ -133,7 +122,9 @@ export class LoginPage {
   }
 
   async submit() {
+    if (this.loading() || this.auth.googleLoading()) return;
     this.errorMsg.set('');
+    this.auth.error.set('');
     this.email = this.email.trim();
     this.analytics.loginSubmitClick(this.tab());
 
@@ -150,7 +141,7 @@ export class LoginPage {
     }
 
     this.loading.set(true);
-
+    try {
     if (this.tab() === 'entrar') {
       const { error } = await this.supa.signInWithEmail(this.email, this.password);
 
@@ -169,7 +160,7 @@ export class LoginPage {
         }
       } else {
         this.analytics.loginSuccess();
-        this.finishAuth();
+        await this.auth.completeLogin(this.nextUrl());
       }
     } else {
       const { data, error } = await this.supa.signUpWithEmail(
@@ -185,86 +176,47 @@ export class LoginPage {
         );
         this.errorMsg.set(this.friendlyError(error.message, error.code));
       } else if (data.session) {
-        await this.supa.syncCurrentUserProfile(this.telefoneCompleto());
         this.analytics.signupSuccess();
-        this.finishAuth();
+        await this.auth.completeLogin(this.nextUrl());
       } else {
         this.analytics.signupSuccess();
         this.awaitingConfirmation.set(true);
       }
     }
 
-    this.loading.set(false);
+    } catch {
+      this.errorMsg.set('Não foi possível conectar. Verifique sua conexão e tente novamente.');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async googleLogin() {
+    if (this.loading()) return;
     this.errorMsg.set('');
     this.analytics.loginGoogleClick();
-    sessionStorage.setItem('pending_google_login', '1');
-    this.loading.set(true);
-
-    const { error } = await this.supa.signInWithGoogle(this.tab(), this.nextUrl());
-
-    if (error) {
-      sessionStorage.removeItem('pending_google_login');
-      this.loading.set(false);
-      this.errorMsg.set('Nao foi possivel abrir o Google. Tente novamente.');
-    }
+    await this.auth.startGoogle(this.tab(), this.nextUrl());
   }
 
-  private async syncSessionState(fromGoogle: boolean) {
-    const currentFlow = ++this.authFlowToken;
-
-    if (fromGoogle) {
-      this.loading.set(true);
-    }
-
-    const session = await this.supa.getSession();
-    if (currentFlow !== this.authFlowToken) {
-      return;
-    }
-
-    if (session) {
-      this.finishAuth();
-      return;
-    }
-
-    if (!fromGoogle) {
-      this.loading.set(false);
-      return;
-    }
-
-    for (let attempt = 0; attempt < 6; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-
-      const restoredSession = await this.supa.getSession();
-      if (currentFlow !== this.authFlowToken) {
-        return;
-      }
-
-      if (restoredSession) {
-        this.finishAuth();
-        return;
-      }
-    }
-
-    sessionStorage.removeItem('pending_google_login');
-    this.loading.set(false);
-    this.oauthPending.set(false);
-    this.errorMsg.set(
-      'Nao conseguimos concluir a entrada com Google. Tente novamente.'
-    );
-  }
-
-  private finishAuth() {
-    this.loading.set(false);
-    this.oauthPending.set(false);
+  async forgotPassword() {
+    if (this.loading() || this.auth.googleLoading()) return;
     this.errorMsg.set('');
-    this.router.navigateByUrl(this.nextUrl(), { replaceUrl: true });
+    if (!this.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) {
+      this.errorMsg.set('Informe seu e-mail para receber o link de recuperação.');
+      return;
+    }
+    this.loading.set(true);
+    try {
+      const { error } = await this.supa.resetPassword(this.email.trim());
+      if (error) throw error;
+      this.resetSent.set(true);
+    } catch {
+      this.errorMsg.set('Não foi possível enviar o link. Tente novamente em instantes.');
+    } finally { this.loading.set(false); }
   }
 
   private digitsFromPhone(): string {
-    return this.phone.replace(/\D/g, '').slice(0, 11);
+    return phoneDigits(this.phone);
   }
 
   private telefoneValido(): boolean {
@@ -275,16 +227,6 @@ export class LoginPage {
   private telefoneCompleto(): string {
     const digits = this.digitsFromPhone();
     return digits ? `+55${digits}` : '';
-  }
-
-  private formatPhone(value: string): string {
-    const digits = value.replace(/\D/g, '').replace(/^55/, '').slice(0, 11);
-    if (digits.length <= 2) return digits ? `(${digits}` : '';
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    }
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   }
 
   private errorReason(msg: string, code?: string): string {
@@ -319,11 +261,4 @@ export class LoginPage {
     return msg;
   }
 
-  private normalizeNext(next: string | null): string {
-    if (!next || !next.startsWith('/') || next.startsWith('/login')) {
-      return '/configurar';
-    }
-
-    return next;
-  }
 }

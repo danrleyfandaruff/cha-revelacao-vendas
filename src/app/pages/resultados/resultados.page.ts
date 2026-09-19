@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnDestroy, signal, computed } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { eventNames, isBabyEvent, resolveEventType, isEventExpired } from '../../models/event-types';
 import { DatePipe } from '@angular/common';
@@ -35,7 +35,7 @@ export interface ItemProgress {
     IonButtons, IonSpinner, IonToast, IonIcon,
   ],
 })
-export class ResultadosPage implements OnInit, OnDestroy {
+export class ResultadosPage implements OnDestroy {
   event       = signal<ChaEvent | null>(null);
   names = computed(() => this.event() ? eventNames(this.event()!) : '');
   babyEvent = computed(() => !this.event() || isBabyEvent(resolveEventType(this.event()!)));
@@ -143,12 +143,15 @@ export class ResultadosPage implements OnInit, OnDestroy {
     addIcons({ refreshOutline, arrowBackOutline, copyOutline });
   }
 
-  async ngOnInit() {
+  async ionViewWillEnter() {
+    this.ionViewDidLeave();
+    this.loading.set(true);
+    this.loadError.set(false);
     this.analytics.resultadosView();
+    try {
     const session = await this.supa.getSession();
     if (!session) { this.router.navigate(['/login']); return; }
 
-    try {
     const requested = this.route.snapshot.queryParamMap.get('event');
     const events = await this.supa.getMyEvents(session.user.id);
     const ev = requested ? events.find(item => item.id === requested) : events.find(item => !item.archived_at);
@@ -164,11 +167,19 @@ export class ResultadosPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.ionViewDidLeave();
+  }
+
+  ionViewDidLeave() {
     if (this.refreshInterval) clearInterval(this.refreshInterval);
+    this.refreshInterval = undefined;
   }
 
   async loadAll() {
+    if (!this.event()) { await this.ionViewWillEnter(); return; }
     this.loading.set(true);
+    this.loadError.set(false);
+    try {
     const ev = this.event();
     if (!ev) return;
     const [items, res, confirmations] = await Promise.all([
@@ -180,7 +191,9 @@ export class ResultadosPage implements OnInit, OnDestroy {
     this.allRes.set(res);
     this.allConfirmations.set(confirmations);
     this.updatedAt = new Date().toLocaleTimeString('pt-BR');
-    this.loading.set(false);
+    } catch {
+      this.loadError.set(true);
+    } finally { this.loading.set(false); }
   }
 
   pct(prog: ItemProgress): number {

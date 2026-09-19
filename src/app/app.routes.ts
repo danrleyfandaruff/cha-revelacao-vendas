@@ -13,6 +13,11 @@ export const routes: Routes = [
       import('./pages/login/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'redefinir-senha',
+    loadComponent: () =>
+      import('./pages/redefinir-senha/redefinir-senha.page').then((m) => m.RedefinirSenhaPage),
+  },
+  {
     path: 'comece',
     loadComponent: () =>
       import('./pages/login/login.page').then((m) => m.LoginPage),
