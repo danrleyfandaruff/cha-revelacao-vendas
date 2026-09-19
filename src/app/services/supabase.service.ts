@@ -98,7 +98,10 @@ export class SupabaseService {
   }
 
   getSession(): Promise<Session | null> {
-    return this.supabase.auth.getSession().then(({ data }) => data.session);
+    return this.supabase.auth.getSession().then(({ data, error }) => {
+      if (error) throw error;
+      return data.session;
+    });
   }
 
   getUser(): Promise<User | null> {
@@ -120,14 +123,8 @@ export class SupabaseService {
     });
   }
 
-  signInWithGoogle(
-    mode: 'entrar' | 'cadastrar' = 'cadastrar',
-    next = '/configurar'
-  ) {
+  signInWithGoogle() {
     const redirectUrl = new URL('/login', window.location.origin);
-    redirectUrl.searchParams.set('mode', mode);
-    redirectUrl.searchParams.set('oauth', 'google');
-    redirectUrl.searchParams.set('next', next);
 
     return this.supabase.auth.signInWithOAuth({
       provider: 'google',

@@ -60,7 +60,7 @@ export class LandingPage implements OnInit {
 
   async continueWithGoogle() {
     this.analytics.loginGoogleClick();
-    await this.auth.startGoogle('cadastrar');
+    await this.auth.startGoogle();
   }
 
   scrollTo(sectionId: string) {

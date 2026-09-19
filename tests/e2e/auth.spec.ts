@@ -1,15 +1,41 @@
 import { test, expect } from '@playwright/test';
 import { mockSite, session, storageKey, eventId } from './fixtures';
 
-for (const oauthReturn of ['requested', 'root', 'landing'] as const) {
+for (const oauthReturn of ['requested', 'root', 'landing', 'landing-slash'] as const) {
   test(`Google from landing completes when callback returns to ${oauthReturn}`, async ({ page, context }) => {
-    await mockSite(context, { oauthReturn });
+    const state = await mockSite(context, { oauthReturn });
     await page.goto('/landing');
     await page.getByRole('button', { name: /Continuar com Google/ }).click();
     await expect(page).toHaveURL(/\/configurar$/);
     await expect(page.getByText('Evento ativo e pronto para compartilhar', { exact: true })).toBeVisible();
+    const request = state.requests.find(r => r.resource === 'authorize')!;
+    expect(new URL(request.url).searchParams.get('redirect_to')).toBe(new URL('/login', page.url()).href);
   });
 }
+
+test('restoring a cached landing rechecks the persisted session', async ({ page, context }) => {
+  await mockSite(context);
+  await page.goto('/landing');
+  await expect(page.getByRole('button', { name: /Continuar com Google/ })).toBeVisible();
+  await page.evaluate(({ key, auth }) => {
+    localStorage.setItem(key, JSON.stringify(auth));
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+  }, { key: storageKey, auth: session() });
+  await expect(page).toHaveURL(/\/configurar$/);
+  await expect(page.getByText('Evento ativo e pronto para compartilhar', { exact: true })).toBeVisible();
+});
+
+test('Google button uses a session saved after landing opened without another OAuth request', async ({ page, context }) => {
+  const state = await mockSite(context);
+  await page.goto('/landing');
+  await expect(page.getByRole('button', { name: /Continuar com Google/ })).toBeVisible();
+  await page.evaluate(({ key, auth }) => localStorage.setItem(key, JSON.stringify(auth)),
+    { key: storageKey, auth: session() });
+  await page.getByRole('button', { name: /Continuar com Google/ }).click();
+  await expect(page).toHaveURL(/\/configurar$/);
+  await expect(page.getByText('Evento ativo e pronto para compartilhar', { exact: true })).toBeVisible();
+  expect(state.requests.some(r => r.resource === 'authorize')).toBe(false);
+});
 
 test('protected destination survives a visit to landing before email login', async ({ page, context }) => {
   await mockSite(context);
@@ -53,6 +79,33 @@ test('Google preserves the protected destination even when sent back to root', a
   await expect(page).toHaveURL(/\/login\?/);
   await page.getByRole('button', { name: /Continuar com Google/ }).click();
   await expect(page).toHaveURL(`/resultados?event=${eventId}`);
+  expect(await page.evaluate(() => sessionStorage.getItem('auth_return_to'))).toBeNull();
+  await page.goto('/landing');
+  await expect(page).toHaveURL(/\/configurar$/);
+});
+
+for (const entry of ['/login', '/comece']) {
+  test(`authenticated visit to ${entry} goes straight to the requested private page`, async ({ page, context }) => {
+    await mockSite(context, { loggedIn: true });
+    await page.goto(`${entry}?next=${encodeURIComponent(`/resultados?event=${eventId}`)}`);
+    await expect(page).toHaveURL(`/resultados?event=${eventId}`);
+    await expect(page.locator('app-login')).toHaveCount(0);
+  });
+}
+
+test('optional login tracking storage cannot prevent Google authentication', async ({ page, context }) => {
+  await mockSite(context);
+  await page.goto('/landing');
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key: string, value: string) {
+      if (key === 'auth_return_to' || key === 'pending_google_login') throw new DOMException('Quota exceeded', 'QuotaExceededError');
+      original.call(this, key, value);
+    };
+  });
+  await page.getByRole('button', { name: /Continuar com Google/ }).click();
+  await expect(page).toHaveURL(/\/configurar$/);
+  await expect(page.getByText('Evento ativo e pronto para compartilhar', { exact: true })).toBeVisible();
 });
 
 test('email login errors release loading and permit retry', async ({ page, context }) => {

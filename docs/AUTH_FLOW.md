@@ -10,6 +10,12 @@ As notificacoes do Supabase agendam a navegacao fora do callback de autenticacao
 dentro da zona Angular. As paginas publicas dos convidados continuam publicas
 mesmo quando o organizador esta autenticado.
 
+`guestGuard` verifica a sessao antes de abrir `/landing`, `/login` ou `/comece`.
+Usuarios autenticados seguem para `/configurar` ou para o destino privado
+solicitado. O botao Google tambem navega diretamente se ja existir sessao.
+Ao restaurar uma pagina pelo cache de navegacao (`pageshow`) ou voltar a uma aba,
+o aplicativo consulta novamente a sessao nas paginas de entrada.
+
 ## Configuracao de publicacao
 
 Mantenha o Site URL do Supabase apontando para o dominio oficial do site. Os
@@ -17,6 +23,18 @@ destinos usados pelo frontend sao `/login` (Google e confirmacao de e-mail) e
 `/redefinir-senha` (recuperacao). Inclua as URLs completas desses destinos nas
 URLs de redirecionamento permitidas do projeto, nos dominios realmente usados.
 O fallback para a raiz tambem e tratado pelo aplicativo.
+
+O Google recebe uma URL fixa `/login`, sem query string, para permitir uma
+entrada exata na allow list. O destino privado fica no `sessionStorage` da aba
+e e descartado ao chegar ao painel. Falha nesse armazenamento opcional nao
+impede o login; nesse caso o destino padrao e `/configurar`.
+
+E necessario publicar o novo build para alterar o site em producao. Se o
+problema ocorrer apenas em um navegador antigo, compare com uma janela anonima:
+o service worker pode estar mantendo uma versao anterior. Nao apague sessoes
+dos usuarios como parte da publicacao. Se o Supabase devolver para outro dominio,
+a URL Configuration deve ser corrigida; o frontend so controla o dominio em que
+esta sendo executado.
 
 Esta refatoracao nao exige nova migracao SQL. As alteracoes anteriores de tipos
 de evento/historico continuam exigindo a migracao documentada em

@@ -23,7 +23,7 @@ export const event = {
 };
 
 export async function mockSite(context: BrowserContext, options: {
-  loggedIn?: boolean; oauthReturn?: 'requested' | 'root' | 'landing'; userDelay?: number;
+  loggedIn?: boolean; oauthReturn?: 'requested' | 'root' | 'landing' | 'landing-slash'; userDelay?: number;
   oauthError?: boolean; passwordError?: boolean; confirmEmail?: boolean; noProfilePhone?: boolean;
   events?: any[]; profileError?: boolean;
   failResources?: string[];
@@ -62,6 +62,7 @@ export async function mockSite(context: BrowserContext, options: {
     if (resource === 'authorize') {
       const target = options.oauthReturn === 'root' ? new URL('/', origin)
         : options.oauthReturn === 'landing' ? new URL('/landing', origin)
+        : options.oauthReturn === 'landing-slash' ? new URL('/landing/', origin)
         : new URL(url.searchParams.get('redirect_to')!);
       const auth = session();
       target.hash = options.oauthError ? 'error=access_denied&error_description=Cancelled'

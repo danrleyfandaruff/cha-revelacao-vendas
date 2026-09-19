@@ -195,7 +195,7 @@ export class LoginPage {
     if (this.loading()) return;
     this.errorMsg.set('');
     this.analytics.loginGoogleClick();
-    await this.auth.startGoogle(this.tab(), this.nextUrl());
+    await this.auth.startGoogle(this.nextUrl());
   }
 
   async forgotPassword() {

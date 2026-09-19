@@ -13,12 +13,22 @@ export class AuthFlowService {
   private recovery = false;
   private destination = '/configurar';
   private navigatingTo = '';
+  private navigation: Promise<boolean> | null = null;
+  private refreshingEntry = false;
   private signingOut = false;
 
   constructor(private supa: SupabaseService, private router: Router, private zone: NgZone) {}
 
   async initialize(): Promise<void> {
-    window.addEventListener('pageshow', () => this.zone.run(() => this.googleLoading.set(false)));
+    window.addEventListener('pageshow', () => this.zone.run(() => {
+      this.googleLoading.set(false);
+      void this.refreshEntrySession();
+    }));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.zone.run(() => { void this.refreshEntrySession(); });
+      }
+    });
     const callback = readAuthCallback(window.location.href);
     this.recovery = callback.recovery;
     this.destination = safeNextUrl(callback.next ?? this.readDestination());
@@ -32,7 +42,13 @@ export class AuthFlowService {
       }), 0);
     });
     this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) this.reconcile();
+      if (event instanceof NavigationEnd) {
+        if (isPrivatePage(new URL(event.urlAfterRedirects, window.location.origin).pathname)) {
+          this.destination = '/configurar';
+          try { sessionStorage.removeItem('auth_return_to'); } catch { /* storage unavailable */ }
+        }
+        this.reconcile();
+      }
     });
 
     try {
@@ -70,37 +86,77 @@ export class AuthFlowService {
     }
   }
 
-  private navigate(target: string) {
-    if (this.navigatingTo === target || this.router.url === target) return;
+  async entryDestination(next: string | null): Promise<string | null> {
+    if (this.signingOut) return null;
+    try {
+      this.session = await this.supa.getSession();
+      if (!this.session || this.signingOut) return null;
+      return this.recovery ? '/redefinir-senha' : safeNextUrl(next ?? this.destination);
+    } catch {
+      this.session = null;
+      this.error.set('Não foi possível verificar sua sessão. Confira sua conexão e tente novamente.');
+      return null;
+    }
+  }
+
+  private async refreshEntrySession(): Promise<void> {
+    if (!this.ready || this.signingOut || this.refreshingEntry) return;
+    const entryUrl = this.router.url;
+    const url = new URL(entryUrl, window.location.origin);
+    if (!isAuthPage(url.pathname)) return;
+    this.refreshingEntry = true;
+    try {
+      const target = await this.entryDestination(url.searchParams.get('next'));
+      // The user may have left the landing while session restoration was pending.
+      if (target && this.router.url === entryUrl && !this.signingOut) {
+        await this.navigate(target);
+      }
+    } finally { this.refreshingEntry = false; }
+  }
+
+  private navigate(target: string): Promise<boolean> {
+    if (this.navigatingTo === target && this.navigation) return this.navigation;
+    if (this.router.url === target) return Promise.resolve(true);
     this.navigatingTo = target;
-    void this.zone.run(() => this.router.navigateByUrl(target, { replaceUrl: true }))
+    this.navigation = this.zone.run(() => this.router.navigateByUrl(target, { replaceUrl: true }))
       .then(success => {
-        if (success && isPrivatePage(new URL(target, window.location.origin).pathname)) {
-          this.destination = '/configurar';
-          try { sessionStorage.removeItem('auth_return_to'); } catch { /* storage unavailable */ }
+        if (!success && isAuthPage(new URL(this.router.url, window.location.origin).pathname)) {
+          this.error.set('Não foi possível abrir seu evento. Tente novamente.');
         }
-      }).catch(() => this.error.set('Não foi possível abrir seu evento. Tente novamente.'))
-      .finally(() => { this.navigatingTo = ''; });
+        return success;
+      }).catch(() => {
+        this.error.set('Não foi possível abrir seu evento. Tente novamente.');
+        return false;
+      }).finally(() => {
+        if (this.navigatingTo === target) { this.navigatingTo = ''; this.navigation = null; }
+      });
+    return this.navigation;
   }
 
   async completeLogin(next: string) {
     this.session = await this.supa.getSession();
     if (!this.session) throw new Error('Session not available');
     this.destination = safeNextUrl(next);
-    this.reconcile();
+    await this.navigate(this.recovery ? '/redefinir-senha' : this.destination);
   }
 
-  async startGoogle(mode: 'entrar' | 'cadastrar', next = '/configurar') {
+  async startGoogle(next = '/configurar') {
     if (this.googleLoading()) return;
     this.error.set('');
     this.googleLoading.set(true);
     this.destination = safeNextUrl(next);
     try {
       this.session = await this.supa.getSession();
-      if (this.session) { this.googleLoading.set(false); this.reconcile(); return; }
-      sessionStorage.setItem('auth_return_to', this.destination);
-      sessionStorage.setItem('pending_google_login', '1');
-      const { error } = await this.supa.signInWithGoogle(mode, this.destination);
+      if (this.session) {
+        await this.navigate(this.recovery ? '/redefinir-senha' : this.destination);
+        this.googleLoading.set(false);
+        return;
+      }
+      try {
+        sessionStorage.setItem('auth_return_to', this.destination);
+        sessionStorage.setItem('pending_google_login', '1');
+      } catch { /* OAuth still works when optional tab storage is unavailable. */ }
+      const { error } = await this.supa.signInWithGoogle();
       if (error) throw error;
     } catch {
       try { sessionStorage.removeItem('pending_google_login'); } catch { /* storage unavailable */ }
