@@ -11,6 +11,7 @@ import {
 } from 'ionicons/icons';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthFlowService } from '../../services/auth-flow.service';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 
 type AuthMode = 'entrar' | 'cadastrar';
 
@@ -19,7 +20,7 @@ type AuthMode = 'entrar' | 'cadastrar';
   templateUrl: 'landing.page.html',
   styleUrls: ['landing.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButton, IonIcon],
+  imports: [IonContent, IonButton, IonIcon, WhatsAppSupportComponent],
 })
 export class LandingPage implements OnInit {
   googleLoading = this.auth.googleLoading;

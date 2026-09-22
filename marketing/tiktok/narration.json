@@ -1,0 +1,52 @@
+[
+  {
+    "key": "00-abertura",
+    "taskId": "1803c7e1-5cf6-4da0-8df8-3cabf71898d8",
+    "text": "Presente repetido e lista perdida nas mensagens? Organize tudo em um só link, com Listas para celebrar."
+  },
+  {
+    "key": "01-tipos",
+    "taskId": "a99d2188-246b-42c6-bb46-037606f7d2e7",
+    "text": "Chá revelação, chá de bebê, casamento, chá de panela, casa nova ou aniversário. Escolha a sua comemoração."
+  },
+  {
+    "key": "02-acesso",
+    "taskId": "e9830639-eba2-4fa9-885e-573b98ccda6e",
+    "text": "Primeiro, entre com Google ou crie sua conta com e-mail."
+  },
+  {
+    "key": "03-evento",
+    "taskId": "660c32e6-8ae4-41f2-8b7c-eeea233a0d2b",
+    "text": "Escolha o tipo de evento e preencha nome, local e data."
+  },
+  {
+    "key": "04-presentes",
+    "taskId": "87f8e0cd-bfb1-4a51-a13b-c7bf0aa859c0",
+    "text": "Selecione os presentes, ajuste as quantidades e salve sua lista. Nos chás de bebê e revelação, inclua também fraldas."
+  },
+  {
+    "key": "05-ativacao",
+    "taskId": "16ce29c8-f95c-4da1-aedc-067c3ed29631",
+    "text": "Ative por dezenove reais e noventa centavos por evento. Pagamento único, sem mensalidade. São sessenta dias de acesso após a ativação."
+  },
+  {
+    "key": "06-compartilhar",
+    "taskId": "22416dca-4a89-49f6-9621-b533bc5dec08",
+    "text": "Depois, compartilhe o link pelo WhatsApp."
+  },
+  {
+    "key": "07-convidado",
+    "taskId": "93fddb01-899f-4247-bd76-32a381c9b120",
+    "text": "O convidado abre sem criar conta, escolhe o presente e confirma a reserva. Isso ajuda a evitar presentes repetidos."
+  },
+  {
+    "key": "08-painel",
+    "taskId": "7f112e9c-7363-4a81-9bfe-6e09ae870185",
+    "text": "E você acompanha as reservas e confirmações no painel."
+  },
+  {
+    "key": "09-final",
+    "taskId": "ca24ad08-5345-4b24-8c92-8d6737f776de",
+    "text": "Menos mensagens para organizar. Mais tempo para celebrar. Crie sua lista no site."
+  }
+]

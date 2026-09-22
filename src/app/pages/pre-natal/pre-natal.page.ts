@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
+import { SitePromotionComponent } from '../../components/site-promotion/site-promotion.component';
+import { supportWhatsAppUrl } from '../../models/site-contact';
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import {
@@ -132,9 +134,10 @@ function slopeAt(yTop: number): number {
   templateUrl: 'pre-natal.page.html',
   styleUrls: ['pre-natal.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonContent, IonButton, IonSpinner],
+  imports: [FormsModule, IonContent, IonButton, IonSpinner, SitePromotionComponent],
 })
 export class PreNatalPage implements OnInit {
+  readonly supportUrl = supportWhatsAppUrl('Olá! Preciso de ajuda com meu acesso ao pré-natal.');
   readonly colorOptions = COLOR_OPTIONS;
   unlocked = signal(false);
   checking = signal(true); // true enquanto tenta liberar sozinho (token salvo ou retorno do Stripe)

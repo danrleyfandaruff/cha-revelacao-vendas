@@ -83,6 +83,7 @@ ion-content {
   text-align: center;
   padding: 48px 20px;
   min-height: 60vh;
+  &.terminal-state { min-height: auto; padding-bottom: 8px; }
 
   .state-emoji { font-size: 3rem; margin-bottom: 12px; }
   h2 { font-size: 1.4rem; margin-bottom: 8px; }
@@ -103,6 +104,9 @@ ion-content {
     }
   }
 }
+
+.guest-branding { max-width: 660px; margin: 20px auto; padding: 0 20px 20px; }
+.guest-branding.with-cart { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 
 // ── Header ────────────────────────────────────────────────────────────────────
 .cha-header {

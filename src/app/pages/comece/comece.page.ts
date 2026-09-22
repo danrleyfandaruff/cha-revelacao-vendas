@@ -2,9 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { AnalyticsService } from '../../services/analytics.service';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
+import { SUPPORT_WHATSAPP_NUMBER } from '../../models/site-contact';
 
 const KIT_POPUP_SESSION_KEY = 'comece_kit_popup_shown';
-const WA_NUMBER = '5548991593331';
+const WA_NUMBER = SUPPORT_WHATSAPP_NUMBER;
 const WA_MESSAGE = 'Oi! Acabei de me cadastrar na Lista de Presentes e quero resgatar o kit PDF de pré-natal 🎁';
 
 @Component({
@@ -12,7 +14,7 @@ const WA_MESSAGE = 'Oi! Acabei de me cadastrar na Lista de Presentes e quero res
   templateUrl: 'comece.page.html',
   styleUrls: ['comece.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButton],
+  imports: [IonContent, IonButton, WhatsAppSupportComponent],
 })
 export class ComecePage implements OnInit {
   dicas = [

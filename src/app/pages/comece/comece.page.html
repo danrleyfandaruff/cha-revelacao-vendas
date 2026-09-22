@@ -1,4 +1,7 @@
-<ion-content>
+<ion-content class="with-whatsapp-support">
+  @if (!showKitPopup()) {
+    <app-whatsapp-support slot="fixed" placement="comece" />
+  }
 
   <!-- NAV -->
   <div class="cm-nav">

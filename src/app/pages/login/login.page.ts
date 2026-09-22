@@ -10,6 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { SupabaseService } from '../../services/supabase.service';
 import { AuthFlowService } from '../../services/auth-flow.service';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 import { formatPhone, phoneDigits, safeNextUrl } from '../../models/auth-flow';
 import { AnalyticsService } from '../../services/analytics.service';
 import { addIcons } from 'ionicons';
@@ -27,7 +28,7 @@ type Tab = 'entrar' | 'cadastrar';
   templateUrl: 'login.page.html',
   styleUrls: ['login.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonButton, IonContent, IonIcon, IonSpinner],
+  imports: [FormsModule, IonButton, IonContent, IonIcon, IonSpinner, WhatsAppSupportComponent],
 })
 export class LoginPage {
   private destroyRef = inject(DestroyRef);

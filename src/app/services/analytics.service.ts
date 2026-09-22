@@ -14,6 +14,8 @@ export class AnalyticsService {
 
   // ── Landing ──────────────────────────────────────────────────────────────────
   landingView(): void              { this.send('landing_view'); }
+  sitePromotionClick(placement: string, action: string): void { this.send('site_promotion_click', { placement, action }); }
+  supportWhatsAppClick(placement: string): void { this.send('support_whatsapp_click', { placement }); }
 
   // ── Comece (landing page de ads) ────────────────────────────────────────────
   comeceView(): void                 { this.send('comece_view'); }

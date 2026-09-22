@@ -6,6 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { SitePromotionComponent } from '../../components/site-promotion/site-promotion.component';
 import { EventType, eventDefinition, eventNames, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
 
 type Step = 'intro' | 'fraldas' | 'mimos';
@@ -28,7 +29,7 @@ interface SavedResponse {
   templateUrl: 'cha.page.html',
   styleUrls: ['cha.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast],
+  imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast, SitePromotionComponent],
 })
 export class ChaPage implements OnInit {
   // Tipo do evento (lido da URL: ?t=bebe&s=menino&a=...&d=...)

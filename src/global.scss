@@ -11,6 +11,9 @@
 
 // ── Global helpers ────────────────────────────────────────────────────────────
 
+ion-content.with-whatsapp-support { --padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+.public-site-promotion { display: block; max-width: 660px; margin: 24px auto; padding: 0 20px; }
+
 .playfair {
   font-family: var(--font-display) !important;
   font-weight: 700 !important;

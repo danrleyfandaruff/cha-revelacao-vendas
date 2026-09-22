@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 import { take } from 'rxjs/operators';
+import { SitePromotionComponent } from '../../components/site-promotion/site-promotion.component';
 
 export type Tema = 'rosa' | 'azul' | 'neutro' | 'safari';
 export type TipoEvento = 'bebe' | 'fraldas' | 'revelacao';
@@ -82,7 +83,7 @@ function randShape(): PShape {
 @Component({
   selector: 'app-convite',
   standalone: true,
-  imports: [IonContent, FormsModule],
+  imports: [IonContent, FormsModule, SitePromotionComponent],
   templateUrl: './convite.page.html',
   styleUrls: ['./convite.page.scss']
 })

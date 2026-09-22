@@ -26,6 +26,7 @@
         <section class="cfg-card lifecycle-card">
           <h2 class="playfair">Sua lista foi encerrada</h2>
           <p>O prazo de reservas terminou. Você pode consultar as respostas e criar uma lista para a próxima comemoração.</p>
+          <p>Com o Listas para celebrar, você organiza chá revelação, chá de bebê, casamento, chá de panela, casa nova e aniversário.</p>
           <p>A lista anterior fica no histórico. Cada novo evento tem sua própria ativação de R$19,90, válida por 60 dias.</p>
           <ion-button [disabled]="creatingNew()" (click)="startNewEvent()">{{ creatingNew() ? 'Preparando...' : 'Criar outro evento' }}</ion-button>
           <ion-button fill="outline" (click)="goResultados()">Ver respostas anteriores</ion-button>

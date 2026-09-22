@@ -1,0 +1,23 @@
+<section class="site-promotion" [class.compact]="compact" aria-label="Conheça o Listas para celebrar">
+  <span class="promotion-brand">Listas para celebrar</span>
+  @if (compact) {
+    <p>Uma lista de presentes para cada comemoração. Escolha os itens, compartilhe o link e acompanhe as reservas.</p>
+    <a routerLink="/landing" target="_blank" rel="noopener noreferrer" (click)="track('learn')">
+      Conheça e crie sua lista <span aria-hidden="true">↗</span>
+      <span class="visually-hidden"> (abre em outra aba)</span>
+    </a>
+  } @else {
+    <h2>Sua próxima comemoração também merece uma lista.</h2>
+    <p>Escolha os presentes e as quantidades, compartilhe um link e acompanhe as reservas. Seus convidados não precisam criar conta.</p>
+    <ul class="occasion-list" aria-label="Tipos de lista disponíveis">
+      @for (occasion of occasions; track occasion.id) {
+        <li>{{ occasion.label }}</li>
+      }
+    </ul>
+    <div class="promotion-actions">
+      <a class="primary-action" routerLink="/login" [queryParams]="{ mode: 'cadastrar', next: '/configurar' }" (click)="track('create')">Criar minha lista</a>
+      <a routerLink="/landing" (click)="track('learn')">Conhecer o site <span aria-hidden="true">→</span></a>
+    </div>
+    <small>Você monta a lista e confere o resultado antes da ativação paga.</small>
+  }
+</section>

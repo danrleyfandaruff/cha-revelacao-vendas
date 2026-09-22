@@ -46,6 +46,10 @@ playwright-report/
 # Arquivos gerados
 *.log
 
+# Midias e exportacoes geradas para marketing
+/marketing/tiktok/assets/
+/marketing/tiktok/exports/
+
 # MacOS
 .DS_Store
 

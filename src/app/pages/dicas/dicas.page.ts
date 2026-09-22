@@ -2,6 +2,8 @@ import { Component, signal, computed, inject, OnInit, AfterViewInit, OnDestroy, 
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 import { AnalyticsService } from '../../services/analytics.service';
+import { SitePromotionComponent } from '../../components/site-promotion/site-promotion.component';
+import { SUPPORT_WHATSAPP_NUMBER } from '../../models/site-contact';
 
 const PROMO_KEY     = 'promo_expiry';
 const PROMO_MINUTES = 20;
@@ -532,7 +534,7 @@ A maioria dos convidados PREFERE ter uma lista — remove a pressão de adivinha
   templateUrl: 'dicas.page.html',
   styleUrls: ['dicas.page.scss'],
   standalone: true,
-  imports: [IonContent],
+  imports: [IonContent, SitePromotionComponent],
 })
 export class DicasPage implements OnInit, AfterViewInit, OnDestroy {
   private router    = inject(Router);
@@ -540,7 +542,7 @@ export class DicasPage implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(IonContent) ionContent!: IonContent;
 
-  readonly WA_NUMBER  = '5548991593331';
+  readonly WA_NUMBER  = SUPPORT_WHATSAPP_NUMBER;
   readonly WA_MESSAGE = 'Quero entrar no grupo das mamães! 🤰';
 
   /* ── Promoção ────────────────────────────────────────── */

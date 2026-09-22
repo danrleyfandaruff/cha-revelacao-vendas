@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Listas para celebrar · TikTok</title>
+<style>
+@font-face{font-family:Celebrar;src:url('../../src/assets/fonts/LibreBaskerville-Regular.ttf')}
+*{box-sizing:border-box}body{margin:0;background:#f7f2e9;color:#252f35;font-family:'Avenir Next',sans-serif;width:1080px;height:1920px;overflow:hidden}
+:root{--coral:#ff5d3e;--ink:#252f35;--cream:#f7f2e9;--green:#166950}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:radial-gradient(ellipse at 90% 85%,#f5c9af 0,transparent 48%),radial-gradient(ellipse at 0% 10%,#fffdf5 0,transparent 45%),var(--cream)}
+.grid{position:absolute;inset:0;opacity:.22;background-image:linear-gradient(#d4cabf 1px,transparent 1px),linear-gradient(90deg,#d4cabf 1px,transparent 1px);background-size:90px 90px;mask-image:linear-gradient(transparent,#000)}
+.orb{position:absolute;width:700px;height:700px;border:1px solid #d8b7a2;border-radius:50%;right:-410px;top:560px;box-shadow:0 0 0 65px #efcfb52b,0 0 0 135px #efcfb524}
+.brand{position:absolute;left:86px;top:147px;font-size:34px;font-weight:700;letter-spacing:-1px;display:flex;align-items:center;gap:15px}.brand svg{width:39px;height:39px;stroke:var(--coral)}
+.progress{position:absolute;left:86px;top:116px;height:5px;width:792px;background:#dfd7cc;border-radius:9px;overflow:hidden}.progress i{display:block;height:100%;background:var(--coral);width:0}
+.kicker{position:absolute;left:88px;top:224px;font-size:25px;letter-spacing:3px;font-weight:800;color:var(--green);text-transform:uppercase}
+h1{position:absolute;left:82px;top:273px;width:820px;font-size:79px;line-height:1.07;letter-spacing:-4px;font-weight:700;margin:0}h1 em{font-family:Celebrar;font-size:.89em;color:var(--coral);font-weight:400;letter-spacing:-4px}
+.scene{position:absolute;inset:0;display:none}.scene.active{display:block}.body{position:absolute;inset:0}
+.phone{position:absolute;top:485px;left:209px;width:548px;height:918px;background:white;border:10px solid #303b3c;border-radius:47px;overflow:hidden;box-shadow:0 38px 90px #3d332c30;transform-origin:50% 65%}
+.phone img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:top;inset:0;border-radius:35px}
+.demo{position:absolute;top:1414px;left:88px;width:790px;text-align:center;font-size:20px;letter-spacing:1.8px;color:#736d65;text-transform:uppercase}
+.caption{position:absolute;left:74px;top:1471px;width:820px;text-align:center;font-size:42px;line-height:1.22;letter-spacing:-.9px;font-weight:650;z-index:30}.caption span{background:var(--ink);color:white;padding:8px 19px;box-decoration-break:clone;-webkit-box-decoration-break:clone;border-radius:10px}
+.tap{position:absolute;width:78px;height:78px;border:6px solid var(--coral);border-radius:50%;background:#ff5d3e32;box-shadow:0 0 0 13px #ff5d3e1c;pointer-events:none}
+.hook-title{font-size:102px;top:284px;letter-spacing:-5px}.hook-title em{display:block;margin-top:12px}
+.chat{position:absolute;padding:30px 36px;border-radius:28px;background:white;box-shadow:0 18px 55px #604d3220;font-size:38px;line-height:1.25;width:635px;left:112px}.chat small{display:block;font-size:22px;color:#8e8a83;margin-bottom:14px}.chat-a{top:663px;transform:rotate(-4deg)}.chat-b{top:865px;left:220px;background:#e1efe8;transform:rotate(4deg)}
+.solution{position:absolute;top:1120px;left:90px;width:790px;padding:42px;background:var(--green);color:#fff;border-radius:32px;font-size:49px;font-weight:700;letter-spacing:-1.7px;box-shadow:0 20px 70px #16695025}.solution b{color:#ffe2a0}.solution svg{width:48px;height:48px;vertical-align:middle;margin-right:15px}
+.occasion-grid{position:absolute;top:524px;left:86px;width:795px;display:grid;grid-template-columns:1fr 1fr;gap:20px}.occasion{height:255px;background:#fffcf5;border:2px solid #e7ded2;border-radius:29px;padding:27px;box-shadow:0 12px 40px #6552420b;position:relative}.occasion svg{width:75px;height:75px;stroke:var(--green);margin-bottom:24px}.occasion strong{display:block;font-size:39px;line-height:1.12;letter-spacing:-1px;max-width:290px}.occasion.hot{background:#ffe2cf;border-color:var(--coral)}.occasion.hot svg{stroke:var(--coral)}.occasion .num{position:absolute;right:22px;top:22px;font-size:22px;color:#938b81}
+.offer{position:absolute;left:86px;top:530px;width:795px;background:#fffcf7;border:2px solid #e8d6c6;border-radius:36px;padding:49px 47px;box-shadow:0 25px 70px #6b482715}.offer-label{font-size:29px;letter-spacing:2px;color:var(--green);font-weight:700}.price{font-size:165px;font-weight:750;letter-spacing:-11px;line-height:1.2;color:var(--coral);margin-top:25px}.price small{font-size:62px;letter-spacing:-3px;margin-right:12px}.per-event{font-size:36px;margin:0 0 42px}.offer-rule{height:2px;background:#e4ddd4;margin-bottom:38px}.days{font-size:65px;letter-spacing:-3px;font-weight:700}.after{font-size:33px;margin:4px 0 33px}.offer-pill{display:inline-block;padding:17px 24px;background:#e3eee7;color:var(--green);border-radius:100px;font-size:30px;font-weight:700}.offer-note{position:absolute;left:98px;top:1320px;font-size:28px;width:770px;text-align:center;line-height:1.35;color:#676b65}
+.end-title{font-size:90px;top:306px;line-height:1.13}.end-list{position:absolute;left:91px;top:635px;width:782px}.benefit{font-size:39px;letter-spacing:-.7px;padding:28px 0;border-bottom:2px solid #dfd3c5;display:flex;align-items:center;gap:22px}.benefit i{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--green);color:white;font-style:normal;font-size:30px}.cta{position:absolute;left:87px;top:1120px;width:790px;background:var(--coral);color:white;padding:33px 26px;text-align:center;border-radius:25px;font-size:47px;font-weight:750;box-shadow:0 20px 55px #ff5d3e32}.cta-price{position:absolute;top:1270px;left:88px;width:790px;text-align:center;font-size:30px;color:#615e57;line-height:1.4}.disclosure{position:absolute;top:1670px;left:86px;font-size:22px;letter-spacing:.3px;color:#81786d}.step-badge{position:absolute;left:92px;top:515px;background:var(--green);color:white;border-radius:16px;padding:15px 20px;z-index:3;font-size:27px;font-weight:750;box-shadow:0 5px 18px #1336271c}
+</style></head><body><div id="stage"><div class="grid"></div><div class="orb"></div><div class="progress"><i></i></div><div class="brand"><svg viewBox="0 0 48 48" fill="none" stroke-width="3"><path d="M8 22h32v20H8zM5 14h38v8H5zM24 14v28"/><path d="M24 14C8 15 9 0 18 5c4 2 6 9 6 9Zm0 0C40 15 39 0 30 5c-4 2-6 9-6 9Z"/></svg>Listas para celebrar</div><div id="scenes"></div><div class="caption"><span id="caption"></span></div><div class="disclosure">Narração gerada por IA · Telas reais do produto</div></div>
+<script>
+const svg=(type)=>`<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${({
+revelacao:'<path d="M13 34c-14-23 11-38 19-18 8-20 33-5 19 18L32 53Z"/><path d="M32 16v37"/>',
+bebe:'<path d="M24 10h16v9l7 8v27H17V27l7-8Z"/><path d="M25 10V5h14v5M17 31h30M32 38h8M32 46h8"/>',
+casamento:'<circle cx="24" cy="36" r="15"/><circle cx="42" cy="36" r="15"/><path d="m16 16 8-10 8 10-8 5ZM34 16l8-10 8 10-8 5Z"/>',
+panela:'<path d="M13 29h38v13c0 11-38 11-38 0ZM9 24h46M26 19h12M6 33h7M51 33h7M24 13V7M40 13V7"/>',
+casa_nova:'<path d="m6 30 26-23 26 23M13 24v32h38V24M26 56V36h12v20"/>',
+aniversario:'<path d="M10 34h44v22H10ZM10 42q6 9 12 0 6 9 12 0 6 9 12 0 4 6 8 0M24 34V22M40 34V22M22 14l2-7 3 7M38 14l2-7 3 7"/>'
+})[type]}</svg>`;
+const defs=[
+{key:'00-abertura',label:'PRESENTES ORGANIZADOS EM UM LINK',title:'Presente<br>repetido?<em>Resolva na lista.</em>',kind:'hook'},
+{key:'01-tipos',label:'PARA CADA COMEMORAÇÃO',title:'6 ocasiões.<br><em>Um só lugar.</em>',kind:'types'},
+{key:'02-acesso',label:'PASSO 01 · ACESSE',title:'Entre com Google<br><em>ou e-mail.</em>',images:['login']},
+{key:'03-evento',label:'PASSO 02 · PERSONALIZE',title:'Tipo, nome,<br><em>local e data.</em>',images:['tipos','nomes','local','data']},
+{key:'04-presentes',label:'PASSO 03 · MONTE E SALVE',title:'Sua lista.<br><em>Do seu jeito.</em>',images:['presentes','quantidades','salvar','fraldas']},
+{key:'05-ativacao',label:'PASSO 04 · ATIVE',title:'Pagamento único.<br><em>Sem mensalidade.</em>',kind:'offer'},
+{key:'06-compartilhar',label:'PASSO 05 · COMPARTILHE',title:'Pronta para<br><em>o WhatsApp.</em>',images:['compartilhar']},
+{key:'07-convidado',label:'PARA QUEM VAI PRESENTEAR',title:'Abriu. Escolheu.<br><em>Reservou.</em>',images:['convidado-lista','convidado-nome','reserva']},
+{key:'08-painel',label:'TUDO NO SEU PAINEL',title:'Veja quem<br><em>reservou o quê.</em>',images:['painel']},
+{key:'09-final',label:'SUA PRÓXIMA COMEMORAÇÃO',title:'Menos mensagens.<br><em>Mais celebração.</em>',kind:'end'},
+];
+const names=[['revelacao','Chá revelação'],['bebe','Chá de bebê'],['casamento','Casamento'],['panela','Chá de panela'],['casa_nova','Casa nova'],['aniversario','Aniversário']];
+for(const d of defs){
+ const el=document.createElement('section');el.className='scene';el.dataset.key=d.key;
+ let body='';
+ if(d.images)body=`<div class="phone">${d.images.map((s,i)=>`<img src="assets/screens/${s}.png" data-shot="${i}" style="opacity:${i?0:1}">`).join('')}<div class="tap"></div></div><div class="demo">Demonstração com dados fictícios</div>`;
+ if(d.kind==='hook')body='<div class="chat chat-a"><small>Na conversa do grupo...</small>Quem vai levar o quê?</div><div class="chat chat-b"><small>E agora?</small>Já escolheram esse presente?</div><div class="solution">Sua lista.<br><b>Um link para organizar.</b></div>';
+ if(d.kind==='types')body=`<div class="occasion-grid">${names.map(([id,name],i)=>`<div class="occasion"><span class="num">0${i+1}</span>${svg(id)}<strong>${name}</strong></div>`).join('')}</div>`;
+ if(d.kind==='offer')body='<div class="offer"><div class="offer-label">ATIVE SUA LISTA</div><div class="price"><small>R$</small>19,90</div><p class="per-event">por evento · pagamento único</p><div class="offer-rule"></div><div class="days">60 dias de acesso</div><p class="after">a partir da ativação</p><span class="offer-pill">Sem mensalidade</span></div><div class="offer-note">A ativação libera o compartilhamento<br>e as reservas dos convidados.</div>';
+ if(d.kind==='end')body='<div class="end-list"><div class="benefit"><i>✓</i>Presentes e quantidades organizados</div><div class="benefit"><i>✓</i>Convidados sem criar conta</div><div class="benefit"><i>✓</i>Reservas e confirmações no painel</div></div><div class="cta">Crie sua lista no site ↗</div><div class="cta-price">R$ 19,90 por evento · sem mensalidade<br>60 dias após ativar</div>';
+ el.innerHTML=`<div class="kicker">${d.label}</div><h1 class="${d.kind==='hook'?'hook-title':d.kind==='end'?'end-title':''}">${d.title}</h1><div class="body">${body}</div>`;document.querySelector('#scenes').append(el);
+}
+window.ready=Promise.all([...document.images].map(i=>i.decode())).then(()=>document.fonts.ready);
+window.configurePriceAtEnd=async()=>{
+ document.querySelector('.cta-price').style.display='none';
+ document.querySelector('[data-key="05-ativacao"] .kicker').textContent='PARA ATIVAR SUA LISTA';
+ document.querySelector('[data-key="05-ativacao"] .offer-note').innerHTML='Crie sua lista no site.<br>A ativação libera o compartilhamento e as reservas.';
+ document.querySelector('[data-key="06-compartilhar"] .kicker').textContent='PASSO 04 · COMPARTILHE APÓS ATIVAR';
+ // The save-confirmation screenshot also quotes the price. Keep the actual
+ // list/save button visible instead, so pricing appears only in the last scene.
+ defs.find(d=>d.key==='04-presentes').images[2]='quantidades';
+ const screen=document.querySelector('[data-key="04-presentes"] img[data-shot="2"]');
+ screen.src='assets/screens/quantidades.png';
+ await screen.decode();
+};
+const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3);
+window.renderFrame=(key,t,duration,globalProgress,caption)=>{
+ const idx=defs.findIndex(d=>d.key===key),def=defs[idx];
+ document.querySelectorAll('.scene').forEach((el,i)=>el.classList.toggle('active',i===idx));
+ const el=document.querySelector('.scene.active');
+ const enter=ease(t/.45);el.querySelector('h1').style.transform=`translateY(${(1-enter)*25}px)`;el.querySelector('h1').style.opacity=enter;
+ document.querySelector('.progress i').style.width=`${globalProgress*100}%`;
+ document.querySelector('#caption').textContent=caption;
+ document.querySelector('.caption').style.opacity=caption?1:0;
+ if(def.images){
+  const shot=Math.min(def.images.length-1,Math.floor(t/duration*def.images.length));
+  el.querySelectorAll('img').forEach((im,i)=>{im.style.opacity=i===shot?1:0});
+  const phone=el.querySelector('.phone');phone.style.transform=`translateY(${(1-enter)*24}px) rotate(${Math.sin(t*.6)*.35}deg) scale(${.98+.02*enter})`;
+  const tap=el.querySelector('.tap');
+  const points={login:[.49,.59],tipos:[.48,.49],nomes:[.49,.48],local:[.49,.48],data:[.49,.51],presentes:[.4,.56],quantidades:[.4,.56],salvar:[.48,.65],fraldas:[.42,.62],compartilhar:[.37,.4],'convidado-lista':[.48,.57],'convidado-nome':[.48,.58],reserva:[.5,.5],painel:[.5,.4]};
+  const p=points[def.images[shot]],phase=(t+.25)%1.9;tap.style.left=`${p[0]*528-39}px`;tap.style.top=`${p[1]*898-39}px`;tap.style.opacity=phase<.65?.6*(1-phase/.65):0;tap.style.transform=`scale(${.6+phase})`;
+ }
+ if(def.kind==='types')el.querySelectorAll('.occasion').forEach((card,i)=>{const e=ease((t-i*.13)/.4);card.style.opacity=e;card.style.transform=`translateY(${(1-e)*30}px)`;card.classList.toggle('hot',i===Math.min(5,Math.floor(t/(duration*.83)*6)));});
+ if(def.kind==='hook'){
+  ['.chat-a','.chat-b','.solution'].forEach((selector,i)=>{const e=ease((t-i*.7)/.6);const target=el.querySelector(selector);target.style.opacity=e;target.style.translate=`0 ${(1-e)*50}px`;});
+ }
+ if(def.kind==='end')el.querySelector('.cta').style.transform=`scale(${1+.012*Math.sin(t*3)})`;
+};
+</script></body></html>
