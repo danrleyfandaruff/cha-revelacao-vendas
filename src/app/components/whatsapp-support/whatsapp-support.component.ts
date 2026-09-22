@@ -18,7 +18,7 @@ import { AnalyticsService } from '../../services/analytics.service';
     </a>
   `,
   styles: [`
-    :host { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 20; }
+    :host { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: calc(var(--whatsapp-bottom, 18px) + env(safe-area-inset-bottom)); z-index: 20; }
     a { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 56px; min-height: 56px; padding: 12px 18px; border-radius: 999px; background: #13784b; color: #fff; text-decoration: none; box-shadow: 0 6px 22px #123b3430; font-weight: 700; font-size: .88rem; border: 2px solid #fff; }
     ion-icon { font-size: 28px; flex: none; }
     a:hover { background: #0b623c; }

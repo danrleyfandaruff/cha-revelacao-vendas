@@ -13,6 +13,7 @@ import {ToastController} from "@ionic/angular";
 import { EventType, BabySex, EVENT_TYPES, eventDefinition, eventNames, giftSuggestions, isBabyEvent, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
 import { formatPhone, phoneDigits } from '../../models/auth-flow';
 import { AuthFlowService } from '../../services/auth-flow.service';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 
 // ── Suggestions data ──────────────────────────────────────────────────────────
 const SUGESTOES: Record<string, Array<{ name: string; emoji: string; qty: number }>> = {
@@ -55,6 +56,7 @@ export interface DraftItem {
   styleUrls: ['configurar.page.scss'],
   standalone: true,
   imports: [
+    WhatsAppSupportComponent,
     FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
     IonButtons,
@@ -236,6 +238,9 @@ export class ConfigurarPage implements OnInit {
   highlightLink = signal(false);
   highlightPreview = signal(false);
   showQrModal = signal(false);
+  supportVisible = computed(() => !this.wizardActive() && this.tutorialStep() === 0
+    && !this.showActivationSheet() && !this.showSuccessModal() && !this.showPostSaveSheet()
+    && !this.showQrModal() && !this.showPhoneCaptureSheet() && !this.confirmDeleteItem());
 
   // ── Captura de telefone (login via Google, que não fornece telefone) ──────────
   showPhoneCaptureSheet = signal(false);

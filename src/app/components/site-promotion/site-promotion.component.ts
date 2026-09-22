@@ -12,12 +12,13 @@ import { AnalyticsService } from '../../services/analytics.service';
 })
 export class SitePromotionComponent {
   @Input() compact = false;
+  @Input() eventEnded = false;
   @Input() placement = 'public_page';
   readonly occasions = EVENT_TYPES;
 
   constructor(private analytics: AnalyticsService) {}
 
-  track(action: 'learn' | 'create') {
+  track(action: 'learn' | 'create' | 'manage') {
     this.analytics.sitePromotionClick(this.placement, action);
   }
 }

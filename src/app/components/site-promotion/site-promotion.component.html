@@ -7,7 +7,10 @@
       <span class="visually-hidden"> (abre em outra aba)</span>
     </a>
   } @else {
-    <h2>Sua próxima comemoração também merece uma lista.</h2>
+    <h2>{{ eventEnded ? 'Crie uma lista para o seu próximo evento' : 'Sua próxima comemoração também merece uma lista.' }}</h2>
+    @if (eventEnded) {
+      <a class="primary-action" routerLink="/login" [queryParams]="{ mode: 'cadastrar', next: '/configurar' }" (click)="track('create')">Criar meu evento</a>
+    }
     <p>Escolha os presentes e as quantidades, compartilhe um link e acompanhe as reservas. Seus convidados não precisam criar conta.</p>
     <ul class="occasion-list" aria-label="Tipos de lista disponíveis">
       @for (occasion of occasions; track occasion.id) {
@@ -15,7 +18,11 @@
       }
     </ul>
     <div class="promotion-actions">
-      <a class="primary-action" routerLink="/login" [queryParams]="{ mode: 'cadastrar', next: '/configurar' }" (click)="track('create')">Criar minha lista</a>
+      @if (!eventEnded) {
+        <a class="primary-action" routerLink="/login" [queryParams]="{ mode: 'cadastrar', next: '/configurar' }" (click)="track('create')">Criar minha lista</a>
+      } @else {
+        <a routerLink="/configurar" (click)="track('manage')">Já tenho conta: acessar meus eventos</a>
+      }
       <a routerLink="/landing" (click)="track('learn')">Conhecer o site <span aria-hidden="true">→</span></a>
     </div>
     <small>Você monta a lista e confere o resultado antes da ativação paga.</small>

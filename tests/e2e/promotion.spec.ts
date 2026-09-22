@@ -9,9 +9,10 @@ test('expired guest event presents all occasions and opens signup', async ({ pag
   await page.goto('/cha?e=fixture-list');
   await expect(page.getByRole('heading', { name: 'Evento encerrado' })).toBeVisible();
   const promotion = page.getByRole('region', { name: 'Conheça o Listas para celebrar' });
+  await expect(promotion.getByRole('link', { name: 'Criar meu evento', exact: true })).toBeInViewport();
   for (const name of occasions) await expect(promotion.getByText(name, { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('expired-promotion.png') });
-  await page.getByRole('link', { name: 'Criar minha lista', exact: true }).click();
+  await page.getByRole('link', { name: 'Criar meu evento', exact: true }).click();
   await expect(page).toHaveURL(/\/login\?mode=cadastrar&next=%2Fconfigurar$/);
   expect(state.reservations).toHaveLength(0);
 });
@@ -136,7 +137,7 @@ for (const route of ['/convite', '/dicas', '/pre-natal']) {
   });
 }
 
-test('Ionic navigation does not leave a home contact floating over the private dashboard', async ({ page, context }) => {
+test('Ionic navigation replaces the home contact with a single dashboard contact', async ({ page, context }) => {
   await mockSite(context);
   await page.goto('/landing');
   await page.getByRole('button', { name: 'Já tenho conta', exact: true }).click();
@@ -145,5 +146,56 @@ test('Ionic navigation does not leave a home contact floating over the private d
   await page.locator('input[autocomplete="current-password"]').fill('fixture-password');
   await page.locator('ion-button').filter({ hasText: /^\s*Entrar\s*$/ }).click();
   await expect(page).toHaveURL(/\/configurar$/);
-  await expect(page.locator('app-whatsapp-support:visible')).toHaveCount(0);
+  await expect(page.locator('app-whatsapp-support:visible')).toHaveCount(1);
+  await expect(page.locator('app-configurar app-whatsapp-support')).toBeVisible();
+});
+
+for (const route of ['/configurar', '/pagar', '/resultados']) {
+  test(`private support on ${route} opens the correct contact without leaving the event`, async ({ page, context }) => {
+    await mockSite(context, { loggedIn: true, events: [{ ...event, paid: false, expires_at: null }] });
+    await page.goto(route);
+    const link = page.getByRole('link', { name: supportName });
+    await expect(link).toBeInViewport();
+    await expect(link).toHaveAttribute('href', /^https:\/\/wa\.me\/5514982325360\?text=/);
+    const popupPromise = page.waitForEvent('popup');
+    await link.click();
+    const popup = await popupPromise;
+    await popup.waitForURL(/^https:\/\/wa\.me\/5514982325360\?/);
+    await expect(page).toHaveURL(new RegExp(`${route}$`));
+    await popup.close();
+  });
+}
+
+test('dashboard support clears the save bar and hides behind the QR dialog', async ({ page, context }, testInfo) => {
+  await mockSite(context, { loggedIn: true });
+  await page.goto('/configurar');
+  const link = page.getByRole('link', { name: supportName });
+  const saveBar = page.locator('.save-bar');
+  await expect(saveBar).toBeVisible();
+  await expect(link).toBeInViewport();
+  const contactBox = await link.boundingBox();
+  const barBox = await saveBar.boundingBox();
+  expect(contactBox!.y + contactBox!.height).toBeLessThan(barBox!.y);
+  await page.screenshot({ path: testInfo.outputPath('configurar-whatsapp.png') });
+  await page.getByRole('button', { name: /Ver QR Code/ }).click();
+  await expect(page.locator('.qr-modal')).toBeVisible();
+  await expect(link).toHaveCount(0);
+  await page.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(link).toBeVisible();
+});
+
+test('expired public link lets its owner enter the dashboard and create a separate event', async ({ page, context }) => {
+  const state = await mockSite(context, { loggedIn: true, events: [{ ...event, expires_at: new Date(Date.now() - 86400000).toISOString() }] });
+  await page.goto('/cha?e=fixture-list');
+  await expect(page.getByRole('link', { name: supportName })).toBeVisible();
+  await page.getByRole('link', { name: 'Já tenho conta: acessar meus eventos' }).click();
+  await expect(page).toHaveURL(/\/configurar$/);
+  await expect(page.getByRole('heading', { name: 'Sua lista foi encerrada' })).toBeVisible();
+  await expect(page.locator('app-cha')).toBeHidden();
+  await expect(page.locator('app-whatsapp-support:visible')).toHaveCount(1);
+  await expect(page.getByRole('link', { name: supportName })).toBeInViewport();
+  await page.getByRole('button', { name: 'Criar outro evento', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Vamos criar sua lista!' })).toBeVisible();
+  expect(state.events).toHaveLength(1);
+  expect(state.events[0].archived_at).not.toBeNull();
 });

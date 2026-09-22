@@ -7,6 +7,7 @@ import {
 import { SupabaseService, ChaEvent, EventItem } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SitePromotionComponent } from '../../components/site-promotion/site-promotion.component';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 import { EventType, eventDefinition, eventNames, isEventExpired, isEventType, resolveEventType } from '../../models/event-types';
 
 type Step = 'intro' | 'fraldas' | 'mimos';
@@ -29,9 +30,10 @@ interface SavedResponse {
   templateUrl: 'cha.page.html',
   styleUrls: ['cha.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast, SitePromotionComponent],
+  imports: [FormsModule, IonContent, IonButton, IonSpinner, IonToast, SitePromotionComponent, WhatsAppSupportComponent],
 })
 export class ChaPage implements OnInit {
+  showSupport = computed(() => !this.isPreview() && ['expired', 'notfound', 'done', 'error'].includes(this.state()));
   // Tipo do evento (lido da URL: ?t=bebe&s=menino&a=...&d=...)
   eventType     = signal<EventType>('revelacao');
   definition = computed(() => eventDefinition(this.eventType()));

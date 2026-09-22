@@ -9,6 +9,7 @@ import { arrowBackOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { SupabaseService } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { isEventExpired } from '../../models/event-types';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 
 @Component({
   selector: 'app-pagar',
@@ -16,6 +17,7 @@ import { isEventExpired } from '../../models/event-types';
   styleUrls: ['pagar.page.scss'],
   standalone: true,
   imports: [
+    WhatsAppSupportComponent,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
     IonButtons, IonIcon,
   ],

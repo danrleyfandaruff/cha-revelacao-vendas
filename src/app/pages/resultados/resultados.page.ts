@@ -10,6 +10,7 @@ import { addIcons } from 'ionicons';
 import { refreshOutline, arrowBackOutline, copyOutline } from 'ionicons/icons';
 import { SupabaseService, ChaEvent, EventItem, EventReservation, EventConfirmation } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
 
 export interface PersonSummary {
   name: string;
@@ -30,6 +31,7 @@ export interface ItemProgress {
   styleUrls: ['resultados.page.scss'],
   standalone: true,
   imports: [
+    WhatsAppSupportComponent,
     DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
     IonButtons, IonSpinner, IonToast, IonIcon,

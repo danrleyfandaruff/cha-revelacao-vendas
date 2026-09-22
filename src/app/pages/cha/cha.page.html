@@ -1,4 +1,7 @@
-<ion-content>
+<ion-content [class.with-whatsapp-support]="showSupport()">
+  @if (showSupport()) {
+    <app-whatsapp-support slot="fixed" [placement]="'guest_' + state()" />
+  }
 
   <!-- BANNER DE PREVIEW -->
   @if (isPreview()) {
@@ -60,7 +63,7 @@
 
   <!-- READY -->
   @if (!isPreview() && (state() === 'expired' || state() === 'notfound' || state() === 'done' || state() === 'error')) {
-    <app-site-promotion class="public-site-promotion" [placement]="'guest_' + state()" />
+    <app-site-promotion class="public-site-promotion" [eventEnded]="state() === 'expired'" [placement]="'guest_' + state()" />
   }
 
   @if (state() === 'ready') {

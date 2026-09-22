@@ -9,7 +9,11 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="with-whatsapp-support" [class.with-save-bar]="!expired() && !loading() && !loadError()">
+  @if (supportVisible()) {
+    <app-whatsapp-support slot="fixed" placement="configurar"
+      [style.--whatsapp-bottom]="!expired() && !loading() && !loadError() ? '104px' : '18px'" />
+  }
   @if (loading()) {
     <div class="loading-state">
       <ion-spinner color="primary"></ion-spinner>

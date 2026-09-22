@@ -14,7 +14,8 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="with-whatsapp-support">
+  <app-whatsapp-support slot="fixed" placement="resultados" />
   @if (loadError()) {
     <div class="res-sub" role="alert">
       Não foi possível carregar as respostas.
