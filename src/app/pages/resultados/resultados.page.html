@@ -171,24 +171,6 @@
         }
       </div>
 
-      @if (!expired() && allItems().length) {
-        <details class="res-section item-management" open>
-          <summary>Remover presentes da lista</summary>
-          <p class="section-help">Use apenas para retirar um presente por completo. Para liberar uma unidade, cancele a reserva na seção acima.</p>
-          @for (item of allItems(); track item.id) {
-            <div class="res-row">
-              <div class="res-row-info">
-                <div class="res-item-name">{{ item.emoji }} {{ item.name }}</div>
-                <ion-button class="delete-entry" fill="clear" color="danger" size="small" [disabled]="loading()"
-                  [attr.aria-label]="'Remover da lista: ' + item.name" (click)="askDeleteItem(item)">
-                  <ion-icon name="trash-outline" slot="start"></ion-icon>Remover presente da lista
-                </ion-button>
-              </div>
-            </div>
-          }
-        </details>
-      }
-
     </div>
 
     @if (updatedAt) {
@@ -210,32 +192,20 @@
   <ng-template>
     @if (deletion(); as target) {
       <div class="delete-dialog">
-        <h2 id="delete-title">{{ target.kind === 'item' ? 'Remover o presente inteiro?' : 'Cancelar somente esta reserva?' }}</h2>
+        <h2 id="delete-title">Cancelar somente esta reserva?</h2>
         <div id="delete-description">
           <p><strong>{{ target.name }}</strong></p>
-          @if (target.kind === 'reservation') {
-            <p>A reserva de <strong>{{ target.guest }}</strong> será cancelada e uma unidade ficará disponível para outro convidado.</p>
-            <p><strong>O presente {{ target.name }} continuará na lista. Apenas esta reserva será cancelada.</strong></p>
-          } @else {
-            <p>O presente deixará de aparecer para todos os convidados, junto com <strong>{{ target.count }} reserva(s)</strong> vinculada(s) a ele.</p>
-            <p>Se você quer apenas liberar uma unidade, volte e escolha “Cancelar somente a reserva”.</p>
-          }
+          <p>A reserva de <strong>{{ target.guest }}</strong> será cancelada e uma unidade ficará disponível para outro convidado.</p>
+          <p><strong>O presente {{ target.name }} continuará na lista. Apenas esta reserva será cancelada.</strong></p>
           <p>As confirmações de presença serão mantidas. Os convidados não serão avisados automaticamente.</p>
           <p class="delete-warning">Esta ação não pode ser desfeita.</p>
         </div>
-        @if (target.kind === 'item') {
-          <label class="item-removal-acknowledgement">
-            <input type="checkbox" [checked]="acknowledgeItemRemoval()" [disabled]="deleting()"
-              (change)="acknowledgeItemRemoval.set($any($event.target).checked)">
-            <span>Entendi: quero remover o presente da lista, não apenas cancelar uma reserva.</span>
-          </label>
-        }
         @if (deleteError()) { <p class="delete-warning" role="alert">{{ deleteError() }}</p> }
         <div class="delete-actions">
           <ion-button fill="outline" [disabled]="deleting()" (click)="cancelDeletion()">Voltar sem alterar</ion-button>
-          <ion-button color="danger" [disabled]="deleting() || (target.kind === 'item' && !acknowledgeItemRemoval())" (click)="confirmDeletion()">
+          <ion-button color="danger" [disabled]="deleting()" (click)="confirmDeletion()">
             @if (deleting()) { <ion-spinner name="crescent" slot="start"></ion-spinner> }
-            {{ deleting() ? 'Aguarde...' : target.kind === 'item' ? 'Remover presente inteiro' : 'Sim, cancelar somente a reserva' }}
+            {{ deleting() ? 'Aguarde...' : 'Sim, cancelar somente a reserva' }}
           </ion-button>
         </div>
       </div>

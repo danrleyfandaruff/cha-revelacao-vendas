@@ -20,15 +20,6 @@ ion-content {
 .delete-warning { color: #a82a32; font-weight: 600; }
 .delete-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .section-help { margin: 12px 16px; color: var(--brand-brown-light); font-size: 0.85rem; line-height: 1.5; }
-.item-management summary { padding: 16px; cursor: pointer; color: var(--brand-brown); font-weight: 600; }
-.item-removal-acknowledgement {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 0;
-  line-height: 1.5;
-  input { flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px; }
-}
 
 .res-sub {
   text-align: center;

@@ -47,9 +47,8 @@ export class ResultadosPage implements OnDestroy {
   allRes           = signal<EventReservation[]>([]);
   allConfirmations = signal<EventConfirmation[]>([]);
   loading          = signal(true);
-  deletion = signal<{ kind: 'reservation' | 'item'; id: string; name: string; guest?: string; count: number } | null>(null);
+  deletion = signal<{ id: string; name: string; guest: string } | null>(null);
   deleting = signal(false);
-  acknowledgeItemRemoval = signal(false);
   deleteError = signal('');
   canDismissDeletion = () => !this.deleting();
 
@@ -214,18 +213,10 @@ export class ResultadosPage implements OnDestroy {
     return item ? `${item.emoji} ${item.name}`.trim() : 'Presente';
   }
 
-  askDeleteItem(item: EventItem) {
-    if (this.expired() || this.loading() || this.deleting()) return;
-    this.deleteError.set('');
-    this.acknowledgeItemRemoval.set(false);
-    this.deletion.set({ kind: 'item', id: item.id, name: item.name,
-      count: this.allRes().filter(res => res.item_id === item.id).length });
-  }
-
   askDeleteReservation(res: EventReservation) {
     if (this.expired() || this.loading() || this.deleting()) return;
     this.deleteError.set('');
-    this.deletion.set({ kind: 'reservation', id: res.id, name: this.itemName(res.item_id), guest: res.guest_name, count: 1 });
+    this.deletion.set({ id: res.id, name: this.itemName(res.item_id), guest: res.guest_name });
   }
 
   cancelDeletion() {
@@ -236,15 +227,14 @@ export class ResultadosPage implements OnDestroy {
     const target = this.deletion();
     const event = this.event();
     if (!target || !event || this.deleting()) return;
-    if (target.kind === 'item' && !this.acknowledgeItemRemoval()) return;
     this.deleting.set(true);
     this.deleteError.set('');
     try {
-      await this.supa.deleteEventEntry(event.id, target.id, target.kind, target.count);
+      await this.supa.cancelEventReservation(event.id, target.id);
       this.deleting.set(false);
       this.deletion.set(null);
       await this.loadAll();
-      this.showToast(target.kind === 'item' ? 'Presente removido da lista junto com suas reservas.' : 'Reserva cancelada. O presente continua na lista com uma unidade disponível.');
+      this.showToast('Reserva cancelada. O presente continua na lista com uma unidade disponível.');
     } catch (error: any) {
       const message = String(error?.message ?? '');
       this.deleteError.set(message.startsWith('As reservas') || message.startsWith('Registro nao') || message.startsWith('Evento encerrado')

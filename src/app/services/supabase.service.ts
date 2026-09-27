@@ -271,10 +271,10 @@ export class SupabaseService {
 
   // ── Reservations ──────────────────────────────────────────────────────────
 
-  async deleteEventEntry(eventId: string, entryId: string, kind: 'reservation' | 'item', expectedReservations?: number): Promise<void> {
+  async cancelEventReservation(eventId: string, reservationId: string): Promise<void> {
     const { error } = await this.supabase.rpc('delete_event_entry', {
-      p_event_id: eventId, p_entry_id: entryId, p_kind: kind,
-      p_expected_reservations: expectedReservations ?? null,
+      p_event_id: eventId, p_entry_id: reservationId, p_kind: 'reservation',
+      p_expected_reservations: 1,
     });
     if (error) throw error;
   }

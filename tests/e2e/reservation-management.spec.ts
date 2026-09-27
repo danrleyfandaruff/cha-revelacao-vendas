@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { event, eventId, mockSite } from './fixtures';
 
 async function seed(context: Parameters<typeof mockSite>[0]) {
@@ -8,17 +8,6 @@ async function seed(context: Parameters<typeof mockSite>[0]) {
     guest_name: 'Maria', created_at: '2026-09-20T12:00:00Z' })));
   state.confirmations.push({ id: 'attendance', event_id: eventId, guest_name: 'Maria', confirmed_at: '2026-09-20T12:00:00Z' });
   return state;
-}
-
-async function openItemRemoval(page: Page) {
-  const management = page.locator('.item-management');
-  if ((await management.getAttribute('open')) === null) await management.locator('summary').click();
-  await page.getByRole('button', { name: 'Remover da lista: Jogo de jantar', exact: true }).click();
-}
-
-async function confirmItemRemoval(page: Page) {
-  await page.getByRole('checkbox', { name: /Entendi: quero remover/ }).check();
-  await page.getByRole('button', { name: 'Remover presente inteiro', exact: true }).click();
 }
 
 test('reservation deletion requires confirmation and releases only the selected unit', async ({ page, context }) => {
@@ -40,23 +29,14 @@ test('reservation deletion requires confirmation and releases only the selected 
   expect(state.confirmations).toHaveLength(1);
 });
 
-test('item deletion warns about its reservations and cannot reappear in the cached dashboard', async ({ page, context }) => {
+test('results only offer reservation cancellation, not whole-item removal', async ({ page, context }) => {
   const state = await seed(context);
-  await page.goto('/configurar');
-  await page.getByText('Acompanhar respostas', { exact: true }).click();
-  await openItemRemoval(page);
-  await expect(page.locator('ion-modal')).toContainText('2 reserva(s)');
-  await expect(page.getByRole('button', { name: 'Remover presente inteiro', exact: true })).toBeDisabled();
-  await confirmItemRemoval(page);
-  await expect(page.getByText('Nenhum item cadastrado.', { exact: true })).toBeVisible();
-  expect(state.items).toHaveLength(0);
-  expect(state.reservationRows).toHaveLength(0);
-  expect(state.confirmations).toHaveLength(1);
-  await page.getByRole('button', { name: 'Voltar ao evento' }).click();
-  await expect(page.locator('.item-name-input')).toHaveCount(0);
-  await page.reload();
-  await expect(page.getByText('Evento ativo e pronto para compartilhar', { exact: true })).toBeVisible();
-  await expect(page.locator('.item-name-input')).toHaveCount(0);
+  await page.goto('/resultados');
+  await expect(page.getByRole('button', { name: /Cancelar somente a reserva de Maria/ })).toHaveCount(2);
+  await expect(page.getByText('Remover presentes da lista', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Remover da lista|Remover presente/ })).toHaveCount(0);
+  expect(state.items).toHaveLength(1);
+  expect(state.requests.filter(r => r.resource === 'delete_event_entry')).toHaveLength(0);
 });
 
 test('returning from management preserves other draft edits but drops deleted items', async ({ page, context }) => {
@@ -65,9 +45,10 @@ test('returning from management preserves other draft edits but drops deleted it
   await page.goto('/configurar');
   await page.locator('.item-name-input').nth(1).fill('Toalhas editadas');
   await page.getByText('Acompanhar respostas', { exact: true }).click();
-  await openItemRemoval(page);
-  await confirmItemRemoval(page);
-  await expect(page.getByRole('button', { name: 'Remover da lista: Jogo de jantar', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Cancelar somente a reserva de Maria/ })).toHaveCount(2);
+  // Simulate an item removed elsewhere while this cached dashboard is open.
+  state.items.shift();
+  state.reservationRows = [];
   await page.getByRole('button', { name: 'Voltar ao evento' }).click();
   await expect(page.locator('.item-name-input')).toHaveCount(1);
   await expect(page.locator('.item-name-input')).toHaveValue('Toalhas editadas');
@@ -89,23 +70,6 @@ test('deletion failure keeps the warning open and supports retry', async ({ page
   await expect(page.getByRole('button', { name: /Cancelar somente a reserva de Maria/ })).toHaveCount(1);
 });
 
-test('new reservations require a fresh item deletion confirmation', async ({ page, context }) => {
-  const state = await seed(context);
-  await page.goto('/resultados');
-  await openItemRemoval(page);
-  state.reservationRows.pop();
-  await confirmItemRemoval(page);
-  await expect(page.locator('ion-modal [role="alert"]')).toContainText('As reservas deste item mudaram');
-  expect(state.items).toHaveLength(1);
-  await page.getByRole('button', { name: 'Voltar sem alterar', exact: true }).click();
-  await page.getByRole('button', { name: 'Atualizar respostas' }).click();
-  await expect(page.getByRole('button', { name: /Cancelar somente a reserva de Maria/ })).toHaveCount(1);
-  await openItemRemoval(page);
-  await expect(page.locator('ion-modal')).toContainText('1 reserva(s)');
-  await confirmItemRemoval(page);
-  await expect(page.getByText('Nenhum item cadastrado.', { exact: true })).toBeVisible();
-});
-
 test('expired history offers no destructive actions', async ({ page, context }) => {
   await mockSite(context, { loggedIn: true, events: [{ ...event, expires_at: '2020-01-01T00:00:00Z' }] });
   await page.goto('/resultados');
@@ -122,8 +86,8 @@ test('cancelling the last TALHERES reservation keeps it in the dashboard and gue
   const originalId = state.items[0].id;
   await page.goto('/configurar');
   await page.getByText('Acompanhar respostas', { exact: true }).click();
-  await expect(page.locator('.item-management')).toHaveAttribute('open', '');
-  await expect(page.getByRole('button', { name: 'Remover da lista: TALHERES', exact: true })).toBeVisible();
+  await expect(page.locator('.item-management')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Remover da lista: TALHERES', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Cancelar somente a reserva de Maria: TALHERES', exact: true }).click();
   await expect(page.locator('ion-modal')).toContainText('O presente TALHERES continuará na lista');
   await page.getByRole('button', { name: 'Sim, cancelar somente a reserva', exact: true }).click();
@@ -142,18 +106,4 @@ test('cancelling the last TALHERES reservation keeps it in the dashboard and gue
   await page.getByRole('button', { name: /Ver a lista de presentes/ }).click();
   await expect(page.getByText('TALHERES', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Quero presentear!', exact: true })).toBeEnabled();
-});
-
-test('whole-item confirmation is reset after dismissing the warning', async ({ page, context }) => {
-  const state = await seed(context);
-  await page.goto('/resultados');
-  await openItemRemoval(page);
-  await page.getByRole('checkbox', { name: /Entendi: quero remover/ }).check();
-  await page.getByRole('button', { name: 'Voltar sem alterar', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Remover o presente inteiro?' })).toBeHidden();
-  await openItemRemoval(page);
-  await expect(page.getByRole('checkbox', { name: /Entendi: quero remover/ })).not.toBeChecked();
-  await expect(page.getByRole('button', { name: 'Remover presente inteiro', exact: true })).toBeDisabled();
-  expect(state.requests.filter(r => r.resource === 'delete_event_entry')).toHaveLength(0);
-  expect(state.items).toHaveLength(1);
 });

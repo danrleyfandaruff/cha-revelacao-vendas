@@ -515,7 +515,7 @@ export class ConfigurarPage implements OnInit {
 
   askRemoveItem(item: DraftItem) {
     if ((item.reserved ?? 0) > 0) {
-      this.showToast('Esse item tem reservas. Abra "Acompanhar respostas" para excluir o item ou cancelar uma reserva com confirmação.');
+      this.showToast('Esse item tem reservas. Abra "Acompanhar respostas" para cancelar as reservas antes de removê-lo.');
       return;
     }
     this.confirmDeleteItem.set(item);
