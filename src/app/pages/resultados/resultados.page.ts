@@ -49,6 +49,7 @@ export class ResultadosPage implements OnDestroy {
   loading          = signal(true);
   deletion = signal<{ kind: 'reservation' | 'item'; id: string; name: string; guest?: string; count: number } | null>(null);
   deleting = signal(false);
+  acknowledgeItemRemoval = signal(false);
   deleteError = signal('');
   canDismissDeletion = () => !this.deleting();
 
@@ -216,6 +217,7 @@ export class ResultadosPage implements OnDestroy {
   askDeleteItem(item: EventItem) {
     if (this.expired() || this.loading() || this.deleting()) return;
     this.deleteError.set('');
+    this.acknowledgeItemRemoval.set(false);
     this.deletion.set({ kind: 'item', id: item.id, name: item.name,
       count: this.allRes().filter(res => res.item_id === item.id).length });
   }
@@ -234,6 +236,7 @@ export class ResultadosPage implements OnDestroy {
     const target = this.deletion();
     const event = this.event();
     if (!target || !event || this.deleting()) return;
+    if (target.kind === 'item' && !this.acknowledgeItemRemoval()) return;
     this.deleting.set(true);
     this.deleteError.set('');
     try {
@@ -241,7 +244,7 @@ export class ResultadosPage implements OnDestroy {
       this.deleting.set(false);
       this.deletion.set(null);
       await this.loadAll();
-      this.showToast(target.kind === 'item' ? 'Item e suas reservas excluídos.' : 'Reserva excluída. Uma unidade voltou à lista.');
+      this.showToast(target.kind === 'item' ? 'Presente removido da lista junto com suas reservas.' : 'Reserva cancelada. O presente continua na lista com uma unidade disponível.');
     } catch (error: any) {
       const message = String(error?.message ?? '');
       this.deleteError.set(message.startsWith('As reservas') || message.startsWith('Registro nao') || message.startsWith('Evento encerrado')

@@ -56,6 +56,17 @@ test('owner deletion is atomic, scoped and restores availability exactly once', 
     assert.equal(await inventory(), 1);
     assert.equal((await db.query('select * from event_reservations')).rows.length, 1);
 
+    // Cancelling the last reservation must keep the same item, fully available.
+    await call(owner, second, 'reservation');
+    assert.equal(await inventory(), 2);
+    assert.equal((await db.query('select * from event_items where id=$1', [item])).rows.length, 1);
+    assert.equal((await db.query('select * from event_reservations')).rows.length, 0);
+    assert.equal((await db.query('select * from event_confirmations')).rows.length, 1);
+    await assert.rejects(call(owner, second, 'reservation'), /nao encontrado/);
+    assert.equal(await inventory(), 2);
+    await db.query('insert into event_reservations values ($1, $2, $3)', [second, item, 'Maria']);
+    await db.query('update event_items set quantity_available=1 where id=$1', [item]);
+
     await db.exec(`update events set expires_at=now() - interval '1 second'`);
     await assert.rejects(call(owner, second, 'reservation'), /encerrado/);
     await assert.rejects(call(owner, item, 'item', 1), /encerrado/);
