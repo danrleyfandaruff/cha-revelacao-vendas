@@ -7,7 +7,7 @@
     </ion-buttons>
     <ion-title>📊 Resultados</ion-title>
     <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="loadAll()">
+      <ion-button fill="clear" (click)="loadAll()" [disabled]="loading() || !!deletion()" aria-label="Atualizar respostas">
         <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -15,7 +15,7 @@
 </ion-header>
 
 <ion-content class="with-whatsapp-support">
-  <app-whatsapp-support slot="fixed" placement="resultados" />
+  @if (!deletion()) { <app-whatsapp-support slot="fixed" placement="resultados" /> }
   @if (loadError()) {
     <div class="res-sub" role="alert">
       Não foi possível carregar as respostas.
@@ -86,6 +86,12 @@
               <div class="res-row-info">
                 <div class="res-item-name">{{ prog.item.emoji }} {{ prog.item.name }}</div>
                 <div class="res-guests">{{ prog.guests }}</div>
+                @if (!expired()) {
+                  <ion-button class="delete-entry" fill="clear" color="danger" size="small" [disabled]="loading()"
+                    [attr.aria-label]="'Excluir item ' + prog.item.name" (click)="askDeleteItem(prog.item)">
+                    <ion-icon name="trash-outline" slot="start"></ion-icon>Excluir item
+                  </ion-button>
+                }
               </div>
               <div class="prog-wrap" style="min-width:100px">
                 <div class="prog-bar">
@@ -111,6 +117,12 @@
               <div class="res-row-info">
                 <div class="res-item-name">{{ prog.item.emoji }} {{ prog.item.name }}</div>
                 <div class="res-guests">{{ prog.guests }}</div>
+                @if (!expired()) {
+                  <ion-button class="delete-entry" fill="clear" color="danger" size="small" [disabled]="loading()"
+                    [attr.aria-label]="'Excluir item ' + prog.item.name" (click)="askDeleteItem(prog.item)">
+                    <ion-icon name="trash-outline" slot="start"></ion-icon>Excluir item
+                  </ion-button>
+                }
               </div>
               <div class="prog-wrap" style="min-width:100px">
                 <div class="prog-bar">
@@ -151,13 +163,20 @@
         @if (peopleWithItems().length === 0) {
           <div class="empty-state">Ninguém escolheu presente ainda. 🎀</div>
         } @else {
-          @for (person of peopleWithItems(); track person.name) {
+          @for (reservation of allRes(); track reservation.id) {
             <div class="res-row person-row">
               <div class="res-row-info">
-                <div class="res-item-name">{{ person.name }}</div>
-                <div class="res-guests">{{ person.items.join(' · ') }}</div>
+                <div class="res-item-name">{{ reservation.guest_name }}</div>
+                <div class="res-guests">{{ itemName(reservation.item_id) }}</div>
+                @if (!expired()) {
+                  <ion-button class="delete-entry" fill="clear" color="danger" size="small" [disabled]="loading()"
+                    [attr.aria-label]="'Excluir reserva de ' + reservation.guest_name + ': ' + itemName(reservation.item_id)"
+                    (click)="askDeleteReservation(reservation)">
+                    <ion-icon name="trash-outline" slot="start"></ion-icon>Excluir reserva
+                  </ion-button>
+                }
               </div>
-              <div class="res-date">{{ person.lastDate }}</div>
+              <div class="res-date">{{ reservation.created_at | date:'dd/MM HH:mm' }}</div>
             </div>
           }
         }
@@ -178,3 +197,32 @@
     (didDismiss)="toastOpen.set(false)"
   ></ion-toast>
 </ion-content>
+
+<ion-modal class="delete-modal" [isOpen]="!!deletion()" [canDismiss]="canDismissDeletion"
+  (didDismiss)="cancelDeletion()" aria-labelledby="delete-title" aria-describedby="delete-description">
+  <ng-template>
+    @if (deletion(); as target) {
+      <div class="delete-dialog">
+        <h2 id="delete-title">{{ target.kind === 'item' ? 'Excluir item da lista?' : 'Excluir esta reserva?' }}</h2>
+        <div id="delete-description">
+          <p><strong>{{ target.name }}</strong></p>
+          @if (target.kind === 'reservation') {
+            <p>A reserva de <strong>{{ target.guest }}</strong> será apagada e uma unidade ficará disponível para outro convidado.</p>
+          } @else {
+            <p>O item será removido da lista, junto com <strong>{{ target.count }} reserva(s)</strong> vinculada(s) a ele.</p>
+          }
+          <p>As confirmações de presença serão mantidas. Os convidados não serão avisados automaticamente.</p>
+          <p class="delete-warning">Esta ação não pode ser desfeita.</p>
+        </div>
+        @if (deleteError()) { <p class="delete-warning" role="alert">{{ deleteError() }}</p> }
+        <div class="delete-actions">
+          <ion-button fill="outline" [disabled]="deleting()" (click)="cancelDeletion()">Cancelar</ion-button>
+          <ion-button color="danger" [disabled]="deleting()" (click)="confirmDeletion()">
+            @if (deleting()) { <ion-spinner name="crescent" slot="start"></ion-spinner> }
+            {{ deleting() ? 'Excluindo...' : 'Sim, excluir' }}
+          </ion-button>
+        </div>
+      </div>
+    }
+  </ng-template>
+</ion-modal>

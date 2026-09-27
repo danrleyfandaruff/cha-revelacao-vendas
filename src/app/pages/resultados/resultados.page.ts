@@ -4,10 +4,10 @@ import { eventNames, isBabyEvent, resolveEventType, isEventExpired } from '../..
 import { DatePipe } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-  IonButtons, IonSpinner, IonToast, IonIcon,
+  IonButtons, IonSpinner, IonToast, IonIcon, IonModal,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { refreshOutline, arrowBackOutline, copyOutline } from 'ionicons/icons';
+import { refreshOutline, arrowBackOutline, copyOutline, trashOutline } from 'ionicons/icons';
 import { SupabaseService, ChaEvent, EventItem, EventReservation, EventConfirmation } from '../../services/supabase.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { WhatsAppSupportComponent } from '../../components/whatsapp-support/whatsapp-support.component';
@@ -34,7 +34,7 @@ export interface ItemProgress {
     WhatsAppSupportComponent,
     DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-    IonButtons, IonSpinner, IonToast, IonIcon,
+    IonButtons, IonSpinner, IonToast, IonIcon, IonModal,
   ],
 })
 export class ResultadosPage implements OnDestroy {
@@ -47,6 +47,10 @@ export class ResultadosPage implements OnDestroy {
   allRes           = signal<EventReservation[]>([]);
   allConfirmations = signal<EventConfirmation[]>([]);
   loading          = signal(true);
+  deletion = signal<{ kind: 'reservation' | 'item'; id: string; name: string; guest?: string; count: number } | null>(null);
+  deleting = signal(false);
+  deleteError = signal('');
+  canDismissDeletion = () => !this.deleting();
 
   statConfirmados = computed(() => this.allConfirmations().length);
   toastMsg    = signal('');
@@ -142,7 +146,7 @@ export class ResultadosPage implements OnDestroy {
   });
 
   constructor(private supa: SupabaseService, private router: Router, private analytics: AnalyticsService, private route: ActivatedRoute) {
-    addIcons({ refreshOutline, arrowBackOutline, copyOutline });
+    addIcons({ refreshOutline, arrowBackOutline, copyOutline, trashOutline });
   }
 
   async ionViewWillEnter() {
@@ -161,7 +165,9 @@ export class ResultadosPage implements OnDestroy {
     this.event.set(ev);
 
     await this.loadAll();
-    if (!isEventExpired(ev)) this.refreshInterval = setInterval(() => this.loadAll(), 60000);
+    if (!isEventExpired(ev)) this.refreshInterval = setInterval(() => {
+      if (!this.deletion() && !this.loading()) void this.loadAll();
+    }, 60000);
     } catch {
       this.loadError.set(true);
       this.loading.set(false);
@@ -200,6 +206,49 @@ export class ResultadosPage implements OnDestroy {
 
   pct(prog: ItemProgress): number {
     return Math.round((prog.reserved / prog.item.quantity_total) * 100);
+  }
+
+  itemName(id: string): string {
+    const item = this.allItems().find(item => item.id === id);
+    return item ? `${item.emoji} ${item.name}`.trim() : 'Presente';
+  }
+
+  askDeleteItem(item: EventItem) {
+    if (this.expired() || this.loading() || this.deleting()) return;
+    this.deleteError.set('');
+    this.deletion.set({ kind: 'item', id: item.id, name: item.name,
+      count: this.allRes().filter(res => res.item_id === item.id).length });
+  }
+
+  askDeleteReservation(res: EventReservation) {
+    if (this.expired() || this.loading() || this.deleting()) return;
+    this.deleteError.set('');
+    this.deletion.set({ kind: 'reservation', id: res.id, name: this.itemName(res.item_id), guest: res.guest_name, count: 1 });
+  }
+
+  cancelDeletion() {
+    if (!this.deleting()) this.deletion.set(null);
+  }
+
+  async confirmDeletion() {
+    const target = this.deletion();
+    const event = this.event();
+    if (!target || !event || this.deleting()) return;
+    this.deleting.set(true);
+    this.deleteError.set('');
+    try {
+      await this.supa.deleteEventEntry(event.id, target.id, target.kind, target.count);
+      this.deleting.set(false);
+      this.deletion.set(null);
+      await this.loadAll();
+      this.showToast(target.kind === 'item' ? 'Item e suas reservas excluídos.' : 'Reserva excluída. Uma unidade voltou à lista.');
+    } catch (error: any) {
+      const message = String(error?.message ?? '');
+      this.deleteError.set(message.startsWith('As reservas') || message.startsWith('Registro nao') || message.startsWith('Evento encerrado')
+        ? message : 'Não foi possível excluir. Tente novamente. Se persistir, atualize as respostas.');
+    } finally {
+      this.deleting.set(false);
+    }
   }
 
   copyLink() {

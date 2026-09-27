@@ -253,9 +253,8 @@ export class SupabaseService {
     return data ?? [];
   }
 
-  // Sincroniza os itens do evento preservando o id de quem já existia — evita
-  // que o CASCADE de event_reservations.item_id apague reservas de convidados
-  // sempre que o dono só edita quantidade/nome de um item já existente.
+  // Preserva os IDs e as reservas ao editar quantidade/nome. A FK RESTRICT
+  // impede remover itens reservados por este fluxo de edição da lista.
   // `deletableIds` é decidido pelo chamador (só itens sem reserva) — o service
   // nunca apaga nada por conta própria além do que foi explicitamente permitido.
   async syncItems(items: EventItem[], deletableIds: string[]): Promise<void> {
@@ -271,6 +270,14 @@ export class SupabaseService {
   }
 
   // ── Reservations ──────────────────────────────────────────────────────────
+
+  async deleteEventEntry(eventId: string, entryId: string, kind: 'reservation' | 'item', expectedReservations?: number): Promise<void> {
+    const { error } = await this.supabase.rpc('delete_event_entry', {
+      p_event_id: eventId, p_entry_id: entryId, p_kind: kind,
+      p_expected_reservations: expectedReservations ?? null,
+    });
+    if (error) throw error;
+  }
 
   async getReservationsByEvent(eventId: string): Promise<EventReservation[]> {
     const { data, error } = await this.supabase

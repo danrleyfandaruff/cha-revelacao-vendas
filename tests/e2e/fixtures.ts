@@ -35,7 +35,7 @@ export async function mockSite(context: BrowserContext, options: {
     profile: { id: userId, email: user.email, phone: options.noProfilePhone ? null : '+5555999999999',
       auth_provider: 'google', phone_source: 'manual' },
     requests: [] as { resource: string; method: string; body: any; url: string }[],
-    reservations: [] as any[], confirmations: [] as any[],
+    reservations: [] as any[], reservationRows: [] as any[], confirmations: [] as any[],
     failResources: new Set(options.failResources ?? []),
   };
   await context.addInitScript(({ initialSession, storageKey, userId }) => {
@@ -112,11 +112,25 @@ export async function mockSite(context: BrowserContext, options: {
       return rows(state.items.filter(e => e.event_id === url.searchParams.get('event_id')?.slice(3)));
     }
     if (resource === 'reserve_event_item') { state.reservations.push(body); return reply({ success: true }); }
+    if (resource === 'delete_event_entry') {
+      if (body.p_kind === 'reservation') {
+        const reservation = state.reservationRows.find(row => row.id === body.p_entry_id);
+        const item = state.items.find(item => item.id === reservation?.item_id);
+        if (item) item.quantity_available++;
+        state.reservationRows = state.reservationRows.filter(row => row.id !== body.p_entry_id);
+      } else {
+        const count = state.reservationRows.filter(row => row.item_id === body.p_entry_id).length;
+        if (count !== body.p_expected_reservations) return reply({ message: 'As reservas deste item mudaram. Atualize as respostas e confirme novamente.' }, 400);
+        state.reservationRows = state.reservationRows.filter(row => row.item_id !== body.p_entry_id);
+        state.items = state.items.filter(item => item.id !== body.p_entry_id);
+      }
+      return reply(null);
+    }
     if (resource === 'event_confirmations') {
       if (method === 'POST') { state.confirmations.push(body); return reply(null); }
       return rows(state.confirmations);
     }
-    if (resource === 'event_reservations') return rows([]);
+    if (resource === 'event_reservations') return rows(state.reservationRows);
     return reply({ message: `Unexpected mocked request: ${resource}` }, 500);
   });
   return state;

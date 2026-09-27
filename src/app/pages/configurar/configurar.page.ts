@@ -366,7 +366,8 @@ export class ConfigurarPage implements OnInit {
       this.activeTab.set(this.babyEvent() ? 'fraldas' : 'presentes');
       // Load existing items
       const items = await this.supa.getItems(ev.id);
-      if (items.length) {
+      this.persistedItemIds = new Set(items.map(item => item.id));
+      if (items.length || ev.paid) {
         this.fraldas.set(items.filter(i => i.category === 'fraldas').map(i => ({
           id: i.id, name: i.name, emoji: i.emoji, qty: i.quantity_total,
           category: 'fraldas', checked: true,
@@ -427,6 +428,7 @@ export class ConfigurarPage implements OnInit {
       if (current && this.event()) this.event.update(event => event ? {
         ...event, paid: current.paid, expires_at: current.expires_at, archived_at: current.archived_at,
       } : event);
+      if (current) this.refreshDraftItems(await this.supa.getItems(current.id));
     } catch { this.showToast('Não foi possível atualizar o status do evento. Tente novamente.'); }
   }
 
@@ -513,7 +515,7 @@ export class ConfigurarPage implements OnInit {
 
   askRemoveItem(item: DraftItem) {
     if ((item.reserved ?? 0) > 0) {
-      this.showToast(`Esse item já foi reservado por ${item.reserved} convidado(s) e não pode ser removido.`);
+      this.showToast('Esse item tem reservas. Abra "Acompanhar respostas" para excluir o item ou cancelar uma reserva com confirmação.');
       return;
     }
     this.confirmDeleteItem.set(item);
@@ -597,6 +599,31 @@ export class ConfigurarPage implements OnInit {
 
   // ── Alterações não salvas ────────────────────────────────────────────────────
   private savedSnapshot = '';
+  private persistedItemIds = new Set<string>();
+
+  private refreshDraftItems(items: EventItem[]) {
+    const dirty = this.needsSave();
+    const byId = new Map(items.map(item => [item.id, item]));
+    const toDraft = (item: EventItem): DraftItem => ({
+      id: item.id, name: item.name, emoji: item.emoji, qty: item.quantity_total,
+      category: item.category, checked: true, reserved: item.quantity_total - item.quantity_available,
+    });
+    const merge = (drafts: DraftItem[], category: 'fraldas' | 'presentes') => {
+      if (!dirty) return items.filter(item => item.category === category).map(toDraft);
+      // Preserve local edits, but never resurrect a persisted item deleted in Results.
+      const kept = drafts.filter(item => !item.id || !this.persistedItemIds.has(item.id) || byId.has(item.id))
+        .map(item => {
+          const current = item.id ? byId.get(item.id) : undefined;
+          return current ? { ...item, reserved: current.quantity_total - current.quantity_available } : item;
+        });
+      return [...kept, ...items.filter(item => item.category === category && !this.persistedItemIds.has(item.id)
+        && !kept.some(draft => draft.id === item.id)).map(toDraft)];
+    };
+    this.fraldas.set(merge(this.fraldas(), 'fraldas'));
+    this.presentes.set(merge(this.presentes(), 'presentes'));
+    this.persistedItemIds = new Set(items.map(item => item.id));
+    if (!dirty) this.savedSnapshot = this.buildSnapshot();
+  }
 
   private buildSnapshot(): string {
     return JSON.stringify({
@@ -671,6 +698,11 @@ export class ConfigurarPage implements OnInit {
       // por convidados nos itens que continuam na lista.
       const existingItems = await this.supa.getItems(ev.id);
       const existingById = new Map(existingItems.map(i => [i.id, i]));
+      if (checked.some(item => item.id && this.persistedItemIds.has(item.id) && !existingById.has(item.id))) {
+        this.refreshDraftItems(existingItems);
+        this.showToast('Um item foi excluído em outra tela. Revise a lista antes de salvar novamente.');
+        return;
+      }
 
       const keepIds = new Set<string>();
       const itemsPayload = checked.map((i, idx) => {
@@ -701,6 +733,7 @@ export class ConfigurarPage implements OnInit {
 
       try {
         await this.supa.syncItems(itemsPayload, deletableIds);
+        this.persistedItemIds = new Set([...itemsPayload, ...protectedItems].map(item => item.id));
       } catch {
         // O banco também tem essa trava (FK com ON DELETE RESTRICT) — se cair aqui,
         // foi uma reserva feita bem no instante do save. Nada foi perdido.

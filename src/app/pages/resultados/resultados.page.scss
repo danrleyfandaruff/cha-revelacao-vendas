@@ -2,6 +2,24 @@ ion-content {
   --background: var(--brand-cream);
 }
 
+.delete-entry { margin: 6px 0 0; --padding-start: 0; min-height: 36px; }
+.delete-modal {
+  --width: min(480px, calc(100% - 28px));
+  --height: auto;
+  --border-radius: 20px;
+}
+.delete-dialog {
+  padding: 24px;
+  max-height: 85dvh;
+  overflow-y: auto;
+  color: var(--brand-brown);
+  background: var(--brand-cream);
+  h2 { margin-top: 0; font-family: var(--font-display); }
+  p { line-height: 1.5; overflow-wrap: anywhere; }
+}
+.delete-warning { color: #a82a32; font-weight: 600; }
+.delete-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
 .res-sub {
   text-align: center;
   padding: 10px 20px 0;
