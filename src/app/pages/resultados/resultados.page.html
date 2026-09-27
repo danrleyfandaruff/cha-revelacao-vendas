@@ -172,7 +172,7 @@
       </div>
 
       @if (!expired() && allItems().length) {
-        <details class="res-section item-management">
+        <details class="res-section item-management" open>
           <summary>Remover presentes da lista</summary>
           <p class="section-help">Use apenas para retirar um presente por completo. Para liberar uma unidade, cancele a reserva na seção acima.</p>
           @for (item of allItems(); track item.id) {

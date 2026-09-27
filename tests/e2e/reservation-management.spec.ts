@@ -122,7 +122,8 @@ test('cancelling the last TALHERES reservation keeps it in the dashboard and gue
   const originalId = state.items[0].id;
   await page.goto('/configurar');
   await page.getByText('Acompanhar respostas', { exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Remover da lista: TALHERES', exact: true })).toBeHidden();
+  await expect(page.locator('.item-management')).toHaveAttribute('open', '');
+  await expect(page.getByRole('button', { name: 'Remover da lista: TALHERES', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar somente a reserva de Maria: TALHERES', exact: true }).click();
   await expect(page.locator('ion-modal')).toContainText('O presente TALHERES continuará na lista');
   await page.getByRole('button', { name: 'Sim, cancelar somente a reserva', exact: true }).click();
